@@ -1,0 +1,38 @@
+<div class="container-fluid">
+  <div class="mb-3">
+    <button class="btn btn-success me-2" [routerLink]="['/department-add']">Add New</button>
+    <button class="btn btn-primary me-2" (click)="onEditRow()">Edit</button>
+    <button class="btn btn-danger me-2" (click)="onDeleteRow()">Delete</button>
+    <button class="btn btn-info" (click)="onBtExport()">Export to Excel</button>
+  </div>
+
+  <div class="mb-3">
+    <input type="text" class="form-control" placeholder="Search..." [(ngModel)]="searchText" (input)="onSearch()">
+  </div>
+
+  <ag-grid-angular
+    style="width: 100%; height: 500px;"
+    class="ag-theme-alpine"
+    [columnDefs]="columnDefs"
+    [rowData]="rowData"
+    [gridOptions]="gridOptions"
+    (gridReady)="onGridReady($event)"
+    [pagination]="pagination"
+    [paginationPageSize]="paginationPageSize"
+    [paginationPageSizeSelector]="paginationPageSizeSelector"
+    [defaultColDef]="defaultColDef"
+    [rowSelection]="rowSelection"
+  ></ag-grid-angular>
+
+  <ng-template #loadListDepartment>
+    <div class="modal-header">
+      <h4 class="modal-title pull-left">Loading Departments</h4>
+    </div>
+    <div class="modal-body">
+      <p>Loading department data...</p>
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </ng-template>
+</div>

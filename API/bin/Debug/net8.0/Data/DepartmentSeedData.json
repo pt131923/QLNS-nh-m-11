@@ -1,0 +1,38 @@
+[
+    {
+      "Name": "Phòng Nhân sự",
+      "SlNhanVien": 5,
+      "Description": "Quản lý nhân sự toàn công ty",
+      "Addresses": "Tầng 3, Tòa nhà chính",
+      "Notes": "Phòng quan trọng"
+    },
+    {
+      "Name": "Phòng Kế toán",
+      "SlNhanVien": 3,
+      "Description": "Quản lý tài chính và kế toán",
+      "Addresses": "Tầng 2, Tòa nhà chính",
+      "Notes": "Yêu cầu chứng chỉ hành nghề"
+    },
+    {
+      "Name": "Phòng Công nghệ",
+      "SlNhanVien": 8,
+      "Description": "Phát triển và bảo trì hệ thống CNTT",
+      "Addresses": "Tầng 5, Tòa nhà phụ",
+      "Notes": "Làm việc 24/7"
+    },
+    {
+      "Name": "Phòng Marketing",
+      "SlNhanVien": 4,
+      "Description": "Quản lý chiến lược tiếp thị",
+      "Addresses": "Tầng 1, Tòa nhà chính",
+      "Notes": "Cần kỹ năng giao tiếp tốt"
+    },
+    {
+      "Name": "Phòng Bán hàng",
+      "SlNhanVien": 6,
+      "Description": "Quản lý hoạt động bán hàng",
+      "Addresses": "Tầng 2, Tòa nhà phụ",
+      "Notes": "Yêu cầu kinh nghiệm bán hàng"
+    }
+  ]
+  

@@ -1,0 +1,86 @@
+<div class="col-8">
+    <form #addSalaryForm="ngForm" id="addSalaryForm" (ngSubmit)="AddSalary()">
+        <div class="form-group mt-2">
+            <label for="employeeSelect">Employee:</label>
+            <select class="form-control"
+                    id="employeeSelect"
+                    [(ngModel)]="salary.EmployeeId"
+                    name="employeeId"
+                    required>
+                <option value="" disabled selected>Select employee</option>
+                <option *ngFor="let emp of employees" [value]="emp.EmployeeId">
+                    {{ emp.EmployeeName }}
+                </option>
+            </select>
+            <div *ngIf="addSalaryForm.controls['employeeId']?.invalid && (addSalaryForm.controls['employeeId']?.dirty || addSalaryForm.controls['employeeId']?.touched)" class="text-danger">
+                Employee is required.
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="salaryDate">Date:</label>
+            <input type="date" class="form-control"
+                   id="salaryDate"
+                   [(ngModel)]="salary.Date"
+                   name="date"
+                   required>
+            <div *ngIf="addSalaryForm.controls['date']?.invalid && (addSalaryForm.controls['date']?.dirty || addSalaryForm.controls['date']?.touched)" class="text-danger">
+                Date is required.
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="monthlySalary">Monthly Salary:</label>
+            <input type="number" class="form-control"
+                   id="monthlySalary"
+                   [(ngModel)]="salary.MonthlySalary"
+                   name="monthlySalary"
+                   (input)="updateTotalSalary()"
+                   required>
+            <div *ngIf="addSalaryForm.controls['monthlySalary']?.invalid && (addSalaryForm.controls['monthlySalary']?.dirty || addSalaryForm.controls['monthlySalary']?.touched)" class="text-danger">
+                Monthly Salary is required and must be a number.
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="bonus">Bonus:</label>
+            <input type="number" class="form-control"
+                   id="bonus"
+                   [(ngModel)]="salary.Bonus"
+                   name="bonus"
+                   (input)="updateTotalSalary()">
+            </div>
+
+        <div class="form-group mt-3">
+            <label for="totalSalary">Total Salary:</label>
+            <input type="number" class="form-control"
+                   id="totalSalary"
+                   [ngModel]="salary.TotalSalary"
+                   name="totalSalary"
+                   disabled>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="salaryNotes">Notes:</label>
+            <textarea class="form-control"
+                      id="salaryNotes"
+                      [(ngModel)]="salary.SalaryNotes"
+                      name="notes"
+                      rows="3">
+            </textarea>
+        </div>
+    </form>
+
+    <div class="card-footer mt-2">
+        <button type="submit"
+                form="addSalaryForm"
+                class="btn btn-success col-4"
+                [disabled]="!addSalaryForm.valid"> Save changes
+        </button>
+        <button type="button"
+                class="btn btn-secondary col-4 ms-5"
+                (click)="onCancel()">
+            Cancel
+        </button>
+    </div>
+</div>

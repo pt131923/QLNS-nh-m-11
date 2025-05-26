@@ -1,0 +1,1361 @@
+{
+  "Version": 1,
+  "Hash": "BdW+DGmaIsR3iVIOb+P/QDZsPQ3V6DS56zGO/zfJRDo=",
+  "Source": "API",
+  "BasePath": "_content/API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "API\\wwwroot",
+      "Source": "API",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\3rdpartylicenses.txt",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "3rdpartylicenses#[.{fingerprint}]?.txt",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "9s6wxxx43c",
+      "Integrity": "Wd+wFh35f1Bhv5DgPVV+WRFXYDnl1se7giWo0DoBPOQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\3rdpartylicenses.txt"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\assets\\user.png",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "assets/user#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "5ihs5al52n",
+      "Integrity": "nWSw9JmPgIoXUUXDI/UBkdEhj2zsqD4RI15kcuogM1A=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\assets\\user.png"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\favicon.ico",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "favicon#[.{fingerprint}]?.ico",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "nf69tc4d23",
+      "Integrity": "LQpPWnfHiLCEkZsbjK1XE9nfwziO8plpxMtmwoCS5oM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.2b13baa7dd4f54c9.eot",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "fontawesome-webfont.2b13baa7dd4f54c9#[.{fingerprint}]?.eot",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "pz0qgnv39v",
+      "Integrity": "e/yrbbmdXPvxcFygU23ceFhUMsxfpBu9etDwCQM7KXk=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\fontawesome-webfont.2b13baa7dd4f54c9.eot"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.8a7cb27d142e3e19.ttf",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "fontawesome-webfont.8a7cb27d142e3e19#[.{fingerprint}]?.ttf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "yex6mt8az7",
+      "Integrity": "qljzPyOaD7AvXHpsRcBD16msmgkzNYBmlOzW1O3A1qg=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\fontawesome-webfont.8a7cb27d142e3e19.ttf"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.cf011583fb81df9f.woff",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "fontawesome-webfont.cf011583fb81df9f#[.{fingerprint}]?.woff",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "eyrbpue749",
+      "Integrity": "ugxZ3rVFD1y0Gz+TYJ7i0NmVQVh33foiPoqKdTNHTwc=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\fontawesome-webfont.cf011583fb81df9f.woff"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.da909aa098b0ee2d.svg",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "fontawesome-webfont.da909aa098b0ee2d#[.{fingerprint}]?.svg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "dosqy3kf6t",
+      "Integrity": "rWFXkmwWIrpOHQPUePFUE2hSS/xG9R5C/g2UX37zI+Q=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\fontawesome-webfont.da909aa098b0ee2d.svg"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.e9955780856cf8aa.woff2",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "fontawesome-webfont.e9955780856cf8aa#[.{fingerprint}]?.woff2",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "2hr3gl3r5x",
+      "Integrity": "Kt78vAQefRj88tQXh53FoJmXqmTWdbejxLbOM9oT8/4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\fontawesome-webfont.e9955780856cf8aa.woff2"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\index.html",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "index#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "s172ygaie0",
+      "Integrity": "0K2ng5ChbyKVRmBr1Fxu7you4IVfRvIC8KOtP94f5oc=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\index.html"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\main.d397ef672ffafd06.js",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "main.d397ef672ffafd06#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "lgahkdzaed",
+      "Integrity": "yxgJhyDzfw+kwllGTDLHabXfSsPnBF+Q7XmE6zZ8bxo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\main.d397ef672ffafd06.js"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\polyfills.7f98574c8bab9a70.js",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "polyfills.7f98574c8bab9a70#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "6smohrbbwk",
+      "Integrity": "qgn5U2CXVAngMGeeAPFX8QTScfB+adR8i5ISRQ7HFUE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\polyfills.7f98574c8bab9a70.js"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\runtime.7ae29a296d479790.js",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "runtime.7ae29a296d479790#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "0uqhe5gkgh",
+      "Integrity": "GKSa5rc8OPMpHRZYXl8WX6SZpnqvOLVGUkoDjoA/NI4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\runtime.7ae29a296d479790.js"
+    },
+    {
+      "Identity": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\styles.45b7decdcfaba4f2.css",
+      "SourceId": "API",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\",
+      "BasePath": "_content/API",
+      "RelativePath": "styles.45b7decdcfaba4f2#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "l0tvnou971",
+      "Integrity": "W2Q9tR5hA2u9Mi4eNcN6PN5/lRroKG7IFt9VdjQlZW8=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\styles.45b7decdcfaba4f2.css"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "3rdpartylicenses.9s6wxxx43c.txt",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\3rdpartylicenses.txt",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "19559"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/plain"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Wd+wFh35f1Bhv5DgPVV+WRFXYDnl1se7giWo0DoBPOQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "9s6wxxx43c"
+        },
+        {
+          "Name": "label",
+          "Value": "3rdpartylicenses.txt"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-Wd+wFh35f1Bhv5DgPVV+WRFXYDnl1se7giWo0DoBPOQ="
+        }
+      ]
+    },
+    {
+      "Route": "3rdpartylicenses.txt",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\3rdpartylicenses.txt",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "19559"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/plain"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Wd+wFh35f1Bhv5DgPVV+WRFXYDnl1se7giWo0DoBPOQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-Wd+wFh35f1Bhv5DgPVV+WRFXYDnl1se7giWo0DoBPOQ="
+        }
+      ]
+    },
+    {
+      "Route": "assets/user.5ihs5al52n.png",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\assets\\user.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2662"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"nWSw9JmPgIoXUUXDI/UBkdEhj2zsqD4RI15kcuogM1A=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "5ihs5al52n"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/user.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-nWSw9JmPgIoXUUXDI/UBkdEhj2zsqD4RI15kcuogM1A="
+        }
+      ]
+    },
+    {
+      "Route": "assets/user.png",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\assets\\user.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2662"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"nWSw9JmPgIoXUUXDI/UBkdEhj2zsqD4RI15kcuogM1A=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-nWSw9JmPgIoXUUXDI/UBkdEhj2zsqD4RI15kcuogM1A="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.ico",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\favicon.ico",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "948"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/x-icon"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LQpPWnfHiLCEkZsbjK1XE9nfwziO8plpxMtmwoCS5oM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LQpPWnfHiLCEkZsbjK1XE9nfwziO8plpxMtmwoCS5oM="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.nf69tc4d23.ico",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\favicon.ico",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "948"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/x-icon"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LQpPWnfHiLCEkZsbjK1XE9nfwziO8plpxMtmwoCS5oM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "nf69tc4d23"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.ico"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LQpPWnfHiLCEkZsbjK1XE9nfwziO8plpxMtmwoCS5oM="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.2b13baa7dd4f54c9.eot",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.2b13baa7dd4f54c9.eot",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "165742"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.ms-fontobject"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"e/yrbbmdXPvxcFygU23ceFhUMsxfpBu9etDwCQM7KXk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-e/yrbbmdXPvxcFygU23ceFhUMsxfpBu9etDwCQM7KXk="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.2b13baa7dd4f54c9.pz0qgnv39v.eot",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.2b13baa7dd4f54c9.eot",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "165742"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.ms-fontobject"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"e/yrbbmdXPvxcFygU23ceFhUMsxfpBu9etDwCQM7KXk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "pz0qgnv39v"
+        },
+        {
+          "Name": "label",
+          "Value": "fontawesome-webfont.2b13baa7dd4f54c9.eot"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-e/yrbbmdXPvxcFygU23ceFhUMsxfpBu9etDwCQM7KXk="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.8a7cb27d142e3e19.ttf",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.8a7cb27d142e3e19.ttf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "165548"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/x-font-ttf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qljzPyOaD7AvXHpsRcBD16msmgkzNYBmlOzW1O3A1qg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-qljzPyOaD7AvXHpsRcBD16msmgkzNYBmlOzW1O3A1qg="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.8a7cb27d142e3e19.yex6mt8az7.ttf",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.8a7cb27d142e3e19.ttf",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "165548"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/x-font-ttf"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qljzPyOaD7AvXHpsRcBD16msmgkzNYBmlOzW1O3A1qg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "yex6mt8az7"
+        },
+        {
+          "Name": "label",
+          "Value": "fontawesome-webfont.8a7cb27d142e3e19.ttf"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-qljzPyOaD7AvXHpsRcBD16msmgkzNYBmlOzW1O3A1qg="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.cf011583fb81df9f.eyrbpue749.woff",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.cf011583fb81df9f.woff",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "98024"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/font-woff"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ugxZ3rVFD1y0Gz+TYJ7i0NmVQVh33foiPoqKdTNHTwc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "eyrbpue749"
+        },
+        {
+          "Name": "label",
+          "Value": "fontawesome-webfont.cf011583fb81df9f.woff"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ugxZ3rVFD1y0Gz+TYJ7i0NmVQVh33foiPoqKdTNHTwc="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.cf011583fb81df9f.woff",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.cf011583fb81df9f.woff",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "98024"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/font-woff"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ugxZ3rVFD1y0Gz+TYJ7i0NmVQVh33foiPoqKdTNHTwc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ugxZ3rVFD1y0Gz+TYJ7i0NmVQVh33foiPoqKdTNHTwc="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.da909aa098b0ee2d.dosqy3kf6t.svg",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.da909aa098b0ee2d.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "444379"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"rWFXkmwWIrpOHQPUePFUE2hSS/xG9R5C/g2UX37zI+Q=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "dosqy3kf6t"
+        },
+        {
+          "Name": "label",
+          "Value": "fontawesome-webfont.da909aa098b0ee2d.svg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-rWFXkmwWIrpOHQPUePFUE2hSS/xG9R5C/g2UX37zI+Q="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.da909aa098b0ee2d.svg",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.da909aa098b0ee2d.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "444379"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"rWFXkmwWIrpOHQPUePFUE2hSS/xG9R5C/g2UX37zI+Q=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-rWFXkmwWIrpOHQPUePFUE2hSS/xG9R5C/g2UX37zI+Q="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.e9955780856cf8aa.2hr3gl3r5x.woff2",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.e9955780856cf8aa.woff2",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "77160"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "font/woff2"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Kt78vAQefRj88tQXh53FoJmXqmTWdbejxLbOM9oT8/4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "2hr3gl3r5x"
+        },
+        {
+          "Name": "label",
+          "Value": "fontawesome-webfont.e9955780856cf8aa.woff2"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-Kt78vAQefRj88tQXh53FoJmXqmTWdbejxLbOM9oT8/4="
+        }
+      ]
+    },
+    {
+      "Route": "fontawesome-webfont.e9955780856cf8aa.woff2",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\fontawesome-webfont.e9955780856cf8aa.woff2",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "77160"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "font/woff2"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Kt78vAQefRj88tQXh53FoJmXqmTWdbejxLbOM9oT8/4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-Kt78vAQefRj88tQXh53FoJmXqmTWdbejxLbOM9oT8/4="
+        }
+      ]
+    },
+    {
+      "Route": "index.html",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "9302"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"0K2ng5ChbyKVRmBr1Fxu7you4IVfRvIC8KOtP94f5oc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-0K2ng5ChbyKVRmBr1Fxu7you4IVfRvIC8KOtP94f5oc="
+        }
+      ]
+    },
+    {
+      "Route": "index.s172ygaie0.html",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "9302"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"0K2ng5ChbyKVRmBr1Fxu7you4IVfRvIC8KOtP94f5oc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "s172ygaie0"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-0K2ng5ChbyKVRmBr1Fxu7you4IVfRvIC8KOtP94f5oc="
+        }
+      ]
+    },
+    {
+      "Route": "main.d397ef672ffafd06.js",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\main.d397ef672ffafd06.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "864190"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"yxgJhyDzfw+kwllGTDLHabXfSsPnBF+Q7XmE6zZ8bxo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-yxgJhyDzfw+kwllGTDLHabXfSsPnBF+Q7XmE6zZ8bxo="
+        }
+      ]
+    },
+    {
+      "Route": "main.d397ef672ffafd06.lgahkdzaed.js",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\main.d397ef672ffafd06.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "864190"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"yxgJhyDzfw+kwllGTDLHabXfSsPnBF+Q7XmE6zZ8bxo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "lgahkdzaed"
+        },
+        {
+          "Name": "label",
+          "Value": "main.d397ef672ffafd06.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-yxgJhyDzfw+kwllGTDLHabXfSsPnBF+Q7XmE6zZ8bxo="
+        }
+      ]
+    },
+    {
+      "Route": "polyfills.7f98574c8bab9a70.6smohrbbwk.js",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\polyfills.7f98574c8bab9a70.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "33801"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qgn5U2CXVAngMGeeAPFX8QTScfB+adR8i5ISRQ7HFUE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6smohrbbwk"
+        },
+        {
+          "Name": "label",
+          "Value": "polyfills.7f98574c8bab9a70.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-qgn5U2CXVAngMGeeAPFX8QTScfB+adR8i5ISRQ7HFUE="
+        }
+      ]
+    },
+    {
+      "Route": "polyfills.7f98574c8bab9a70.js",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\polyfills.7f98574c8bab9a70.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "33801"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"qgn5U2CXVAngMGeeAPFX8QTScfB+adR8i5ISRQ7HFUE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-qgn5U2CXVAngMGeeAPFX8QTScfB+adR8i5ISRQ7HFUE="
+        }
+      ]
+    },
+    {
+      "Route": "runtime.7ae29a296d479790.0uqhe5gkgh.js",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\runtime.7ae29a296d479790.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "890"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"GKSa5rc8OPMpHRZYXl8WX6SZpnqvOLVGUkoDjoA/NI4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "0uqhe5gkgh"
+        },
+        {
+          "Name": "label",
+          "Value": "runtime.7ae29a296d479790.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-GKSa5rc8OPMpHRZYXl8WX6SZpnqvOLVGUkoDjoA/NI4="
+        }
+      ]
+    },
+    {
+      "Route": "runtime.7ae29a296d479790.js",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\runtime.7ae29a296d479790.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "890"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"GKSa5rc8OPMpHRZYXl8WX6SZpnqvOLVGUkoDjoA/NI4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Wed, 12 Jun 2024 14:33:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-GKSa5rc8OPMpHRZYXl8WX6SZpnqvOLVGUkoDjoA/NI4="
+        }
+      ]
+    },
+    {
+      "Route": "styles.45b7decdcfaba4f2.css",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\styles.45b7decdcfaba4f2.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "445046"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"W2Q9tR5hA2u9Mi4eNcN6PN5/lRroKG7IFt9VdjQlZW8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 20 Aug 2024 07:23:28 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-W2Q9tR5hA2u9Mi4eNcN6PN5/lRroKG7IFt9VdjQlZW8="
+        }
+      ]
+    },
+    {
+      "Route": "styles.45b7decdcfaba4f2.l0tvnou971.css",
+      "AssetFile": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\styles.45b7decdcfaba4f2.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "445046"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"W2Q9tR5hA2u9Mi4eNcN6PN5/lRroKG7IFt9VdjQlZW8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 20 Aug 2024 07:23:28 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "l0tvnou971"
+        },
+        {
+          "Name": "label",
+          "Value": "styles.45b7decdcfaba4f2.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-W2Q9tR5hA2u9Mi4eNcN6PN5/lRroKG7IFt9VdjQlZW8="
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+<div class="col-8">
+  <form #editSalaryForm="ngForm" id="editSalaryForm" (ngSubmit)="UpdateSalary()">
+    <h4 class="mt-2">Employee ID:</h4>
+    <input type="number" class="form-control" [(ngModel)]="salary.EmployeeId" name="EmployeeId" required />
+
+    <h4 class="mt-2">Employee Name:</h4>
+    <input type="text" class="form-control" [(ngModel)]="salary.EmployeeName" name="EmployeeName" required />
+
+    <h4 class="mt-2">Date:</h4>
+    <input type="date" class="form-control" [(ngModel)]="salary.Date" name="Date" required />
+
+    <h4 class="mt-2">Monthly Salary:</h4>
+    <input type="number" class="form-control" [(ngModel)]="salary.MonthlySalary" name="MonthlySalary" (input)="updateTotalSalary()" required />
+
+    <h4 class="mt-2">Bonus:</h4>
+    <input type="number" class="form-control" [(ngModel)]="salary.Bonus" name="Bonus" (input)="updateTotalSalary()" required />
+
+    <h4 class="mt-2">Total Salary:</h4>
+    <input type="number" class="form-control" [(ngModel)]="salary.TotalSalary" name="TotalSalary" readonly />
+
+    <h4 class="mt-2">Notes:</h4>
+    <textarea class="form-control" [(ngModel)]="salary.SalaryNotes" name="SalaryNotes" rows="3"></textarea>
+
+    <div class="card-footer mt-2">
+      <button type="submit" form="editSalaryForm" class="btn btn-success col-4">Save changes</button>
+      <button type="button" class="btn btn-secondary col-4 ms-5" (click)="cancel()">Cancel</button>
+    </div>
+  </form>
+</div>

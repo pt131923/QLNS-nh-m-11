@@ -1,0 +1,50 @@
+[
+  {
+    "EmployeeId": 1,
+    "MonthlySalary": 15000000,
+    "Bonus": 2000000,
+    "TotalSalary": 17000000,
+    "SalaryNotes": "Thưởng Tết",
+    "Date": "2023-01-31"
+  },
+  {
+    "EmployeeId": 2,
+    "MonthlySalary": 12000000,
+    "Bonus": 1000000,
+    "TotalSalary": 13000000,
+    "SalaryNotes": "Thưởng chuyên cần",
+    "Date": "2023-01-31"
+  },
+  {
+    "EmployeeId": 3,
+    "MonthlySalary": 18000000,
+    "Bonus": 2500000,
+    "TotalSalary": 20500000,
+    "SalaryNotes": "Thưởng dự án A",
+    "Date": "2023-01-31"
+  },
+  {
+    "EmployeeId": 4,
+    "MonthlySalary": 10000000,
+    "Bonus": 500000,
+    "TotalSalary": 10500000,
+    "SalaryNotes": "Hỗ trợ đi lại",
+    "Date": "2023-01-31"
+  },
+  {
+    "EmployeeId": 5,
+    "MonthlySalary": 20000000,
+    "Bonus": 3000000,
+    "TotalSalary": 23000000,
+    "SalaryNotes": "Thưởng vượt KPI",
+    "Date": "2023-01-31"
+  },
+  {
+    "EmployeeId": 6,
+    "MonthlySalary": 13000000,
+    "Bonus": 1500000,
+    "TotalSalary": 14500000,
+    "SalaryNotes": "Thưởng lễ 30/4",
+    "Date": "2023-01-31"
+  }
+]

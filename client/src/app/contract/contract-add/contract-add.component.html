@@ -1,0 +1,44 @@
+<div class="col-8">
+    <form #addForm2="ngForm" id="addForm2" (ngSubmit)="AddContract()">
+        <h4 class="mt-2">Contract Name:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="contract.ContractName"
+            name="ContractName"
+            required>
+
+        <h4 class="mt-3">EmployeeId:</h4>
+        <input type="number" class="form-control"
+            [(ngModel)]="contract.EmployeeId"
+            name="EmployeeId"
+            required>
+
+        <h4 class="mt-3">Contract Type:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="contract.ContractType"
+            name="ContractType"
+            required>
+
+        <h4 class="mt-3">Start Date:</h4>
+        <input type="date" class="form-control"
+            [(ngModel)]="contract.StartDate"
+            name="StartDate"
+            required>
+
+        <h4 class="mt-3">End Date:</h4>
+        <input type="date" class="form-control"
+            [(ngModel)]="contract.EndDate"
+            name="EndDate"
+            required>
+    </form>
+
+    <div class="card-footer mt-2">
+        <button type="submit"
+            form="addForm2"
+            class="btn btn-success col-4">Save changes
+        </button>
+        <button type="button"
+            class="btn btn-secondary col-4 ms-5"
+            (click)="onCancel()">Cancel
+        </button>
+    </div>
+</div>

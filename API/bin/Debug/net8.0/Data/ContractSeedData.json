@@ -1,0 +1,45 @@
+[
+    {
+      "ContractName": "HĐLĐ001",
+      "Id": 1,
+      "ContractType": "Chính thức",
+      "StartDate": "2023-01-01",
+      "EndDate": "2023-12-31"
+    },
+    {
+      "ContractName": "HĐLĐ002",
+      "Id": 2,
+      "ContractType": "Thử việc",
+      "StartDate": "2023-02-01",
+      "EndDate": "2023-08-01"
+    },
+    {
+      "ContractName": "HĐLĐ003",
+      "Id": 3,
+      "ContractType": "Chính thức",
+      "StartDate": "2022-06-01",
+      "EndDate": "2024-05-31"
+    },
+    {
+      "ContractName": "HĐLĐ004",
+      "Id": 4,
+      "ContractType": "Cộng tác viên",
+      "StartDate": "2023-03-15",
+      "EndDate": "2023-09-15"
+    },
+    {
+      "ContractName": "HĐLĐ005",
+      "Id": 5,
+      "ContractType": "Chính thức",
+      "StartDate": "2021-01-01",
+      "EndDate": "2025-12-31"
+    },
+    {
+      "ContractName": "HĐLĐ006",
+      "Id": 6,
+      "ContractType": "Thử việc",
+      "StartDate": "2023-05-01",
+      "EndDate": "2023-11-01"
+    }
+  ]
+  

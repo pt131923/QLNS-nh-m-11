@@ -1,0 +1,57 @@
+{
+  "extends": [
+    "development"
+  ],
+  "hints": {
+    "no-inline-styles": "off",
+    "typescript-config/consistent-casing": "off",
+    "axe/language": [
+      "default",
+      {
+        "html-has-lang": "off"
+      }
+    ],
+    "meta-viewport": "off",
+    "axe/parsing": [
+      "default",
+      {
+        "duplicate-id-active": "off"
+      }
+    ],
+    "meta-charset-utf-8": "off",
+    "button-type": "off",
+    "axe/forms": [
+      "default",
+      {
+        "label": "off",
+        "select-name": "off"
+      }
+    ],
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "-webkit-text-size-adjust",
+          "-webkit-tap-highlight-color",
+          "text-align: -webkit-match-parent",
+          "-ms-filter",
+          "-webkit-overflow-scrolling",
+          "text-underline-offset",
+          "overflow-anchor",
+          "text-decoration-skip-ink",
+          "user-select",
+          "-moz-appearance",
+          "scrollbar-width",
+          "overflow-anchor: none",
+          "user-select: all",
+          "background-color: color-mix(in srgb,transparent,var(--ag-background-color) 30%)",
+          "color: color-mix(in srgb,transparent,var(--ag-foreground-color) 95%)",
+          "background-color: color-mix(in srgb,rgba(24,39,50,.3),var(--ag-background-color) 30%)",
+          "background-color: color-mix(in srgb,transparent,var(--ag-foreground-color) 5%)",
+          "speak",
+          "scrollbar-width: none"
+        ]
+      }
+    ]
+  }
+}

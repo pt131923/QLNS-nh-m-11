@@ -1,0 +1,24 @@
+<div class="col-8">
+    <form #editForm="ngForm" id="editForm" (ngSubmit)="UpdateEmployee()">
+        <h4 class="mt-2">Employee Name:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="employee!.EmployeeName"
+            name="employeeName"
+            required />
+
+        <h4 class="mt-2">Department Id:</h4>
+        <select class="form-control"
+            [(ngModel)]="selectedDepartmentId"
+            name="DepartmentId"
+            required>
+            <option *ngFor="let department of departments" [value]="department.DepartmentId">
+                {{ department.Name }}
+            </option>
+        </select>
+
+        <div class="card-footer mt-2">
+            <button type="submit" form="editForm" class="btn btn-success col-4">Save changes</button>
+            <button type="button" class="btn btn-secondary col-4 ms-5">Cancel</button>
+        </div>
+    </form>
+</div>

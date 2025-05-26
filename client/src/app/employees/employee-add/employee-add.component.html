@@ -1,0 +1,27 @@
+<div class="col-8">
+    <form #addForm="ngForm" id="addForm" (ngSubmit)="AddEmployee()">
+        <h4 class="mt-2">EmployeeName:</h4>
+        <textarea class="form-control"
+            [(ngModel)]="employee.EmployeeName"
+            name="EmployeeName"
+            rows="1"
+        ></textarea>
+
+        <h4 class="mt-2">departmentId:</h4>
+        <input type="number" class="form-control"
+            [(ngModel)]="employee.DepartmentId"
+            name="DepartmentId"
+            required
+        />
+    </form>
+
+    <div class="card-footer mt-2">
+        <button type="submit"
+            form="addForm"
+            class="btn btn-success col-4">Save changes
+        </button>
+        <button type="button"
+            class="btn btn-secondary col-4 ms-5">Cancel
+        </button>
+    </div>
+</div>
