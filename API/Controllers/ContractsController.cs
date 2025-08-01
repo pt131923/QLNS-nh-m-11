@@ -60,7 +60,7 @@ namespace API.Controllers
             if (await ContractExists(contractDto.ContractName))
                 return BadRequest("Contract name already exists");
 
-            var employeeExists = await _context.Employee.AnyAsync(e => e.EmployeeId == contractDto.EmployeeId);
+            var employeeExists = await _context.Employee.AnyAsync(e => e.EmployeeName == contractDto.EmployeeName);
             if (!employeeExists)
                 return BadRequest("Employee does not exist");
 
@@ -68,9 +68,17 @@ namespace API.Controllers
             {
                 ContractName = contractDto.ContractName.ToLower(),
                 ContractType = contractDto.ContractType,
-                EmployeeId = contractDto.EmployeeId,
+                EmployeeName = contractDto.EmployeeName,
                 StartDate = contractDto.StartDate,
-                EndDate = contractDto.EndDate
+                EndDate = contractDto.EndDate,
+                BasicSalary = contractDto.BasicSalary,
+                Allowance = contractDto.Allowance,
+                CreateAt = contractDto.CreateAt,
+                UpdateAt = contractDto.UpdateAt,
+                JobDescription = contractDto.JobDescription,
+                ContractTerm = contractDto.ContractTerm,
+                WorkLocation = contractDto.WorkLocation,
+                Leaveofabsence = contractDto.Leaveofabsence
             };
 
             _context.Contract.Add(contract);
@@ -80,9 +88,18 @@ namespace API.Controllers
             {
                 ContractId = contract.ContractId,
                 ContractName = contract.ContractName,
-                EmployeeId = contract.EmployeeId,
+                EmployeeName = contract.EmployeeName,
                 StartDate = contract.StartDate,
-                EndDate = contract.EndDate
+                EndDate = (DateTime)contract.EndDate,
+                ContractType = contract.ContractType,
+                BasicSalary = contract.BasicSalary,
+                Allowance = contract.Allowance,
+                CreateAt = contract.CreateAt,
+                UpdateAt = contract.UpdateAt,
+                JobDescription = contract.JobDescription,
+                ContractTerm = contract.ContractTerm,
+                WorkLocation = contract.WorkLocation,
+                Leaveofabsence = contract.Leaveofabsence
             };
         }
 
@@ -114,7 +131,18 @@ namespace API.Controllers
                 {
                     ContractId = c.ContractId,
                     ContractName = c.ContractName,
-                    EmployeeId = c.Employee.EmployeeId
+                    EmployeeName = c.Employee.EmployeeName,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    ContractType = c.ContractType,
+                    BasicSalary = c.BasicSalary,
+                    Allowance = c.Allowance,
+                    CreateAt = c.CreateAt,
+                    UpdateAt = c.UpdateAt,
+                    JobDescription = c.JobDescription,
+                    ContractTerm = c.ContractTerm,
+                    WorkLocation = c.WorkLocation,
+                    Leaveofabsence = c.Leaveofabsence
                 })
                 .ToListAsync();
 

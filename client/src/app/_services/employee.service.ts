@@ -36,11 +36,11 @@ export class EmployeeService {
     return this.http.post<Employee>(`${this.baseUrl}/add-employee`, employee);
   }
 
-  updateEmployee(id: number, employee: Employee): Observable<void> {
+  UpdateEmployee(id: number, employee: Employee): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${id}`, employee);
   }
 
-  deleteEmployee(id: number): Observable<void> {
+  DeleteEmployee(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/delete-employee/${id}`);
   }
 }

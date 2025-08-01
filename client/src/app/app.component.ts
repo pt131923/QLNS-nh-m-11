@@ -8,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AppComponent{
   [x: string]: any;
-  title = 'QLNS';
+  title = 'HR Management System';
 
 }
 

@@ -9,14 +9,33 @@ namespace API.Entities
     {
         [Key]
         public int ContractId { get; set; }
+
+        [Required]
+        [MaxLength(100)]
         public string ContractName { get; set; }
 
         [ForeignKey("Employee")]
         public int EmployeeId { get; set; }
+        public string EmployeeName { get; set; }
+
         [JsonIgnore]
         public Employee Employee { get; set; }
-        public string ContractType { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string ContractType { get; set; } // Ví dụ: Có thời hạn, Không thời hạn...
+
+        public int BasicSalary { get; set; }
+        public int Allowance { get; set; }
+
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
+        public string JobDescription { get; set; }
+        public DateTime ContractTerm { get; set; }
+        [Required]
         public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+        public string WorkLocation { get; set; }
+        public string Leaveofabsence { get; set; }
     }
 }

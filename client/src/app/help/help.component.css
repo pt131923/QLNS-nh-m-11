@@ -1,0 +1,12 @@
+.faq-answer-wrapper {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+}
+.faq-answer-wrapper.expanded {
+  max-height: 500px; /* Adjust as needed */
+  padding: 10px;
+}cls
+.toggle-icon {
+  font-weight: bold;
+}

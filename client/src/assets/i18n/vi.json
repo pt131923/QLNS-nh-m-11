@@ -1,0 +1,11 @@
+{
+  "employee": {
+    "title": "Quản lý nhân viên",
+    "add": "Thêm nhân viên",
+    "name": "Tên"
+  },
+  "settings": {
+    "language": "Ngôn ngữ",
+    "save": "Lưu cài đặt"
+  }
+}

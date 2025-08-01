@@ -1,0 +1,11 @@
+{
+  "employee": {
+    "title": "Employee Management",
+    "add": "Add Employee",
+    "name": "Name"
+  },
+  "settings": {
+    "language": "Language",
+    "save": "Save Settings"
+  }
+}

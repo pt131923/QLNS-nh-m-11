@@ -1,4 +1,5 @@
 export interface Department {
+  DepartmentImage: any;
   DepartmentId: number;
   Name: string;
   Description: string;

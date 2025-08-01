@@ -1,0 +1,43 @@
+<div *ngIf="!employee">
+  <p>Loading employee details...</p>
+</div>
+
+<div *ngIf="employee" class="mt-3">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/employee']">Back to Employee List</button>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Employee Details</h3>
+    </div>
+    <div class="card-footer">
+      <img *ngIf="employee.EmployeeImage" [src]="employee.EmployeeImage" alt="Employee Image" class="img-fluid" />
+      <p *ngIf="!employee.EmployeeImage">No image available</p>
+    </div>
+    <div class="card-body">
+    <h5 class="card-title">{{ employee.EmployeeName }}</h5>
+    <p><strong>Email:</strong> {{ employee.EmployeeEmail }}</p>
+    <p><strong>Phone:</strong> {{ employee.EmployeePhone }}</p>
+    <p><strong>Address:</strong> {{ employee.EmployeeAddress }}</p>
+
+    <h5 class="mt-4 mb-3">Information</h5>
+    <ul class="list-group">
+        <li class="list-group-item"><strong>Birth Date:</strong> {{ employee.BirthDate | date: 'dd/MM/yyyy' }}</li>
+        <li class="list-group-item"><strong>Place of Birth:</strong> {{ employee.PlaceOfBirth }}</li>
+        <li class="list-group-item"><strong>Gender:</strong> {{ employee.Gender }}</li>
+        <li class="list-group-item"><strong>Marital Status:</strong> {{ employee.MaritalStatus }}</li>
+        <li class="list-group-item"><strong>Identity Number:</strong> {{ employee.IdentityNumber }}</li>
+        <li class="list-group-item"><strong>Identity Issued Date:</strong> {{ employee.IdentityIssuedDate | date: 'dd/MM/yyyy' }}</li>
+        <li class="list-group-item"><strong>Identity Issued Place:</strong> {{ employee.IdentityIssuedPlace }}</li>
+        <li class="list-group-item"><strong>Religion:</strong> {{ employee.Religion }}</li>
+        <li class="list-group-item"><strong>Ethnicity:</strong> {{ employee.Ethnicity }}</li>
+        <li class="list-group-item"><strong>Nationality:</strong> {{ employee.Nationality }}</li>
+        <li class="list-group-item"><strong>Education Level:</strong> {{ employee.EducationLevel }}</li>
+        <li class="list-group-item"><strong>Specialization:</strong> {{ employee.Specialization }}</li>
+        <li class="list-group-item"><strong>Department:</strong> {{ departmentName }}</li>
+    </ul>
+</div>
+  </div>
+</div>
+

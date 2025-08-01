@@ -13,6 +13,101 @@
             name="DepartmentId"
             required
         />
+
+        <h4 class="mt-2">EmployeeEmail:</h4>
+        <input type="email" class="form-control"
+            [(ngModel)]="employee.EmployeeEmail"
+            name="EmployeeEmail"
+            required
+        />
+        <h4 class="mt-2">EmployeePhone:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="employee.EmployeePhone"
+            name="EmployeePhone"
+            required
+            />
+        <h4 class="mt-2">EmployeeAddress:</h4>
+        <textarea class="form-control"
+            [(ngModel)]="employee.EmployeeAddress"
+            name="EmployeeAddress"
+            rows="3"
+            required
+        ></textarea>
+
+        <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Date of Birth</label>
+      <input type="date" class="form-control" [(ngModel)]="employee.BirthDate" name="DateofBirth">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Place ofBirth</label>
+      <input type="text" class="form-control" [(ngModel)]="employee.PlaceOfBirth" name="PlaceOfBirth">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Gender</label>
+      <select class="form-select" [(ngModel)]="employee.Gender" name="Gender">
+        <option value="">-- Select --</option>
+        <option value="Nam">Nam</option>
+        <option value="Nữ">Nữ</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Marital Status</label>
+      <input type="text" class="form-control" [(ngModel)]="employee.MaritalStatus" name="MaritalStatus">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Identity Number</label>
+      <input type="text" class="form-control" [(ngModel)]="employee.IdentityNumber" name="IdentityNumber">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Identity Issued Date</label>
+      <input type="date" class="form-control" [(ngModel)]="employee.IdentityIssuedDate" name="IdentityIssuedDate">
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Identity Issued Place</label>
+    <input type="text" class="form-control" [(ngModel)]="employee.IdentityIssuedPlace" name="IdentityIssuedPlace">
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label class="form-label">Religion</label>
+      <input type="text" class="form-control" [(ngModel)]="employee.Religion" name="Religion">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Ethnicity</label>
+      <input type="text" class="form-control" [(ngModel)]="employee.Ethnicity" name="Ethnicity">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Nationality</label>
+      <input type="text" class="form-control" [(ngModel)]="employee.Nationality" name="Nationality">
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Education Level</label>
+      <select class="form-select" [(ngModel)]="employee.EducationLevel" name="EducationLevel">
+        <option value="">-- Select --</option>
+        <option value="Trung cấp">Trung cấp</option>
+        <option value="Cao đẳng">Cao đẳng</option>
+        <option value="Đại học">Đại học</option>
+        <option value="Sau đại học">Sau đại học</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Specialization</label>
+      <input type="text" class="form-control" [(ngModel)]="employee.Specialization" name="Specialization">
+    </div>
+  </div>
+
     </form>
 
     <div class="card-footer mt-2">

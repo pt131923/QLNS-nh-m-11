@@ -14,12 +14,21 @@ export class ContractAddComponent implements OnInit {
   @ViewChild('addForm2') addForm2!: NgForm;
 
   contract: Contract = {
+    ContractImage: undefined,
     ContractId: 0,
     ContractName: '',
     ContractType: '',
-    EmployeeId: 0,
+    EmployeeName:'',
     StartDate: '',
-    EndDate: ''
+    EndDate: '',
+    BasicSalary: 0,
+      Allowance: 0,
+      CreateAt: '',
+      UpdateAt: '',
+      JobDescription: '',
+      ContractTerm: '',
+      WorkLocation: '',
+      Leaveofabsence: ''
   };
 
   contracts: Contract[] = [];
@@ -43,7 +52,7 @@ export class ContractAddComponent implements OnInit {
     let Contract: Contract = { ...this.contract };
 
     // Validation
-    if (!Contract.ContractName || !Contract.StartDate || !Contract.EndDate) {
+    if (!Contract.ContractName || !Contract.StartDate || !Contract.EndDate|| !Contract.CreateAt|| !Contract.UpdateAt || !Contract.ContractType || !Contract.EmployeeName|| !Contract.BasicSalary || !Contract.Allowance|| !Contract.JobDescription || !Contract.ContractTerm || !Contract.WorkLocation || !Contract.Leaveofabsence) {
       this.toastr.error('Please fill in all required fields');
       return;
     }
@@ -52,9 +61,8 @@ export class ContractAddComponent implements OnInit {
       this.toastr.error('Contract Type is required');
       return;
     }
-
-    if (Contract.EmployeeId === 0) {
-      this.toastr.error('Please select an employee');
+    if (Contract.EmployeeName.trim() === '') {
+      this.toastr.error('Employee Name is required');
       return;
     }
 
@@ -62,6 +70,46 @@ export class ContractAddComponent implements OnInit {
       this.toastr.error('Start date must be before end date');
       return;
     }
+
+    if (new Date(Contract.EndDate) < new Date()) {
+      this.toastr.error('End date cannot be in the past');
+      return;
+    }
+    if (Contract.BasicSalary < 0) {
+      this.toastr.error('Basic Salary cannot be negative');
+      return;
+    }
+    if (Contract.Allowance < 0) {
+      this.toastr.error('Allowance cannot be negative');
+      return;
+    }
+
+    if(!Contract.JobDescription || !Contract.ContractTerm || !Contract.WorkLocation || !Contract.Leaveofabsence) {
+      this.toastr.error('Job Description, Contract Term, Work Location, and Leave of Absence are required');
+      return;
+    }
+
+    if (Contract.ContractTerm.trim() === '') {
+      this.toastr.error('Contract Term is required');
+      return;
+    }
+    if (Contract.WorkLocation.trim() === '') {
+      this.toastr.error('Work Location is required');
+      return;
+    }
+    if (Contract.Leaveofabsence.trim() === '') {
+      this.toastr.error('Leave of Absence is required');
+      return;
+    }
+
+    Contract.BasicSalary = Contract.BasicSalary || 0;
+    Contract.Allowance = Contract.Allowance || 0;
+    Contract.CreateAt = Contract.CreateAt || new Date().toISOString();
+    Contract.UpdateAt = new Date().toISOString();
+    Contract.JobDescription = Contract.JobDescription?.trim() || '';
+    Contract.ContractTerm = Contract.ContractTerm?.trim() || '';
+    Contract.WorkLocation = Contract.WorkLocation?.trim() || '';
+    Contract.Leaveofabsence = Contract.Leaveofabsence?.trim() || '';
 
     // Call the service
     this.contractService.AddContract(Contract).subscribe({
@@ -77,6 +125,15 @@ export class ContractAddComponent implements OnInit {
     });
   }
 
+  onSubmit(): void {
+    if (this.addForm2.invalid) {
+      this.toastr.error('Please fill in all required fields');
+      return;
+    }
+
+    this.AddContract();
+  }
+
   onCancel(): void {
     this.resetForm();
     this.router.navigate(['/contracts']);
@@ -84,12 +141,21 @@ export class ContractAddComponent implements OnInit {
 
   private resetForm(): void {
     this.contract = {
+      ContractImage:'',
       ContractId: 0,
       ContractName: '',
       ContractType: '',
-      EmployeeId: 0,
+      EmployeeName: '',
       StartDate: '',
-      EndDate: ''
+      EndDate: '',
+      BasicSalary: 0,
+      Allowance: 0,
+      CreateAt: '',
+      UpdateAt: '',
+      JobDescription: '',
+      ContractTerm: '',
+      WorkLocation: '',
+      Leaveofabsence: ''
     };
     this.addForm2.resetForm();
   }

@@ -1,45 +1,92 @@
 [
-    {
-      "ContractName": "HĐLĐ001",
-      "Id": 1,
-      "ContractType": "Chính thức",
-      "StartDate": "2023-01-01",
-      "EndDate": "2023-12-31"
-    },
-    {
-      "ContractName": "HĐLĐ002",
-      "Id": 2,
-      "ContractType": "Thử việc",
-      "StartDate": "2023-02-01",
-      "EndDate": "2023-08-01"
-    },
-    {
-      "ContractName": "HĐLĐ003",
-      "Id": 3,
-      "ContractType": "Chính thức",
-      "StartDate": "2022-06-01",
-      "EndDate": "2024-05-31"
-    },
-    {
-      "ContractName": "HĐLĐ004",
-      "Id": 4,
-      "ContractType": "Cộng tác viên",
-      "StartDate": "2023-03-15",
-      "EndDate": "2023-09-15"
-    },
-    {
-      "ContractName": "HĐLĐ005",
-      "Id": 5,
-      "ContractType": "Chính thức",
-      "StartDate": "2021-01-01",
-      "EndDate": "2025-12-31"
-    },
-    {
-      "ContractName": "HĐLĐ006",
-      "Id": 6,
-      "ContractType": "Thử việc",
-      "StartDate": "2023-05-01",
-      "EndDate": "2023-11-01"
-    }
-  ]
-  
+  {
+    "ContractName": "HĐLĐ001",
+    "EmployeeName": "Nguyễn Văn Anh",
+    "ContractType": "Chính thức",
+    "BasicSalary": 10000000,
+    "Allowance": 2000000,
+    "CreateAt": "2023-01-01T08:00:00",
+    "UpdateAt": "2023-01-01T08:00:00",
+    "JobDescription": "Làm việc toàn thời gian tại văn phòng",
+    "ContractTerm": "2023-12-31T00:00:00",
+    "StartDate": "2023-01-01T00:00:00",
+    "EndDate": "2023-12-31T00:00:00",
+    "WorkLocation": "Hà Nội, Việt Nam",
+    "Leaveofabsence": "Không có"
+  },
+  {
+    "ContractName": "HĐLĐ002",
+    "EmployeeName": "Trần Thị Bình",
+    "ContractType": "Thử việc",
+    "BasicSalary": 5000000,
+    "Allowance": 1000000,
+    "CreateAt": "2023-02-01T08:00:00",
+    "UpdateAt": "2023-02-01T08:00:00",
+    "JobDescription": "Thử việc trong vòng 6 tháng",
+    "ContractTerm": "2023-08-01T00:00:00",
+    "StartDate": "2023-02-01T00:00:00",
+    "EndDate": "2023-08-01T00:00:00",
+    "WorkLocation": "TP.HCM, Việt Nam",
+    "Leaveofabsence": "Có thể nghỉ 2 ngày"
+  },
+  {
+    "ContractName": "HĐLĐ003",
+    "EmployeeName": "Lê Văn Chiến",
+    "ContractType": "Chính thức",
+    "BasicSalary": 12000000,
+    "Allowance": 2500000,
+    "CreateAt": "2022-06-01T08:00:00",
+    "UpdateAt": "2022-06-01T08:00:00",
+    "JobDescription": "Phụ trách kỹ thuật dự án A",
+    "ContractTerm": "2024-05-31T00:00:00",
+    "StartDate": "2022-06-01T00:00:00",
+    "EndDate": "2024-05-31T00:00:00",
+    "WorkLocation": "Đà Nẵng, Việt Nam",
+    "Leaveofabsence": "Theo quy định nhà nước"
+  },
+  {
+    "ContractName": "HĐLĐ004",
+    "EmployeeName": "Phạm Thị Dung",
+    "ContractType": "Cộng tác viên",
+    "BasicSalary": 3000000,
+    "Allowance": 500000,
+    "CreateAt": "2023-03-15T08:00:00",
+    "UpdateAt": "2023-03-15T08:00:00",
+    "JobDescription": "Hỗ trợ nội dung truyền thông",
+    "ContractTerm": "2023-09-15T00:00:00",
+    "StartDate": "2023-03-15T00:00:00",
+    "EndDate": "2023-09-15T00:00:00",
+    "WorkLocation": "Cần Thơ, Việt Nam",
+    "Leaveofabsence": "Nghỉ không lương"
+  },
+  {
+    "ContractName": "HĐLĐ005",
+    "EmployeeName": "Ngô Văn Hùng ",
+    "ContractType": "Chính thức",
+    "BasicSalary": 15000000,
+    "Allowance": 3000000,
+    "CreateAt": "2021-01-01T08:00:00",
+    "UpdateAt": "2021-01-01T08:00:00",
+    "JobDescription": "Trưởng phòng kỹ thuật",
+    "ContractTerm": "2025-12-31T00:00:00",
+    "StartDate": "2021-01-01T00:00:00",
+    "EndDate": "2025-12-31T00:00:00",
+    "WorkLocation": "Hà Nam, Việt Nam",
+    "Leaveofabsence": "Nghỉ phép theo chế độ"
+  },
+  {
+    "ContractName": "HĐLĐ006",
+    "EmployeeName": "Đỗ Thị Mai",
+    "ContractType": "Thử việc",
+    "BasicSalary": 6000000,
+    "Allowance": 1000000,
+    "CreateAt": "2023-05-01T08:00:00",
+    "UpdateAt": "2023-05-01T08:00:00",
+    "JobDescription": "Thử việc vị trí kế toán",
+    "ContractTerm": "2023-11-01T00:00:00",
+    "StartDate": "2023-05-01T00:00:00",
+    "EndDate": "2023-11-01T00:00:00",
+    "WorkLocation": "Hải Phòng, Việt Nam",
+    "Leaveofabsence": "1 ngày nghỉ không lương"
+  }
+]

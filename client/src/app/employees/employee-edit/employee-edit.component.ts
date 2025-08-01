@@ -17,7 +17,23 @@ export class EmployeeEditComponent {
   employee: Employee = {
     EmployeeId: 0,
     EmployeeName: '',
-    DepartmentId: 0
+    EmployeeEmail: '',
+    EmployeePhone: '',
+    EmployeeAddress: '',
+    EmployeeInformation: '',
+    DepartmentId: 0,
+    BirthDate: undefined,
+    PlaceOfBirth: '',
+    Gender: '',
+    MaritalStatus: '',
+    IdentityNumber: '',
+    IdentityIssuedDate: undefined,
+    IdentityIssuedPlace: '',
+    Religion: '',
+    Ethnicity: '',
+    Nationality: '',
+    EducationLevel: '',
+    Specialization: ''
   };
 
   departments: Department[] = [];
@@ -77,10 +93,10 @@ export class EmployeeEditComponent {
     const updatedEmployee: Employee = {
       ...this.employee,
       ...updatedEmployeeData,
-      departmentId: +this.selectedDepartmentId // Chuyển đổi departmentId sang number
+      departmentId: +this.selectedDepartmentId
     };
 
-    this.empService.updateEmployee(updatedEmployee.EmployeeId, updatedEmployee).subscribe({
+    this.empService.UpdateEmployee(updatedEmployee.EmployeeId, updatedEmployee).subscribe({
       next: () => {
         this.toastr.success('Employee updated successfully');
         this.editForm?.reset(this.employee); // Reset form về trạng thái ban đầu
@@ -91,5 +107,15 @@ export class EmployeeEditComponent {
         this.toastr.error('Failed to update employee');
       }
     });
+  }
+
+  Cancel() {
+    this.router.navigate(['/employees']);
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.toastr.clear();
+    }, 500);
   }
 }

@@ -37,6 +37,10 @@ export class DepartmentService {
     return this.http.get<Department>(this.baseUrl1 + id);
   }
 
+  getDepartmentById(id: number): Observable<Department> {
+    return this.http.get<Department>(`${this.baseUrl1}/${id}`);
+  }
+
   AddDepartment(department: Department): Observable<Department> {
       // ✅ Gọi đúng endpoint add-department
       return this.http.post<Department>(`${this.baseUrl1}/add-department`, department);

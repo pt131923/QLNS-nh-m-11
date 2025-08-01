@@ -19,7 +19,8 @@ export class DepartmentAddComponent implements OnInit {
     SlNhanVien: 0,
     Description: '',
     Addresses: '',
-    Notes: ''
+    Notes: '',
+    DepartmentImage: null
   };
 
   departments: Department[] = [];
@@ -47,7 +48,8 @@ export class DepartmentAddComponent implements OnInit {
       SlNhanVien: this.department.SlNhanVien || 0, // Đảm bảo luôn có giá trị số
       Description: this.department.Description || '',
       Addresses: this.department.Addresses || '',
-      Notes: this.department.Notes || ''
+      Notes: this.department.Notes || '',
+      DepartmentImage: this.department.DepartmentImage || null
     };
 
     this.departmentService.AddDepartment(newDepartment).subscribe({
@@ -75,7 +77,8 @@ export class DepartmentAddComponent implements OnInit {
       SlNhanVien: 0,
       Description: '',
       Addresses: '',
-      Notes: ''
+      Notes: '',
+      DepartmentImage: null
     };
     this.addForm2.resetForm();
   }

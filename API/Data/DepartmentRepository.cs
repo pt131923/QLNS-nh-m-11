@@ -43,7 +43,6 @@ namespace API.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
-
         public void Add(AppDepartment depart)
         {
             _context.Department.Add(depart);

@@ -1,0 +1,43 @@
+<!-- Hiển thị khi chưa load xong -->
+<div *ngIf="!contract">
+  <p>Loading contract details...</p>
+</div>
+
+<div *ngIf="contract" class="mt-3">
+  <!-- Nút quay lại -->
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/contracts']">Back to Contract List</button>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Contract Details</h3>
+    </div>
+
+    <div class="card-footer text-center">
+      <img *ngIf="contract.ContractImage" [src]="contract.ContractImage" alt="Department Image" class="img-fluid" style="max-height: 200px;" />
+      <p *ngIf="!contract.ContractImage">No image available</p>
+    </div>
+
+    <div class="card-body">
+      <h5 class="card-title">{{ contract.ContractName }}</h5>
+      <p><strong>ContractType:</strong> {{ contract.ContractType }}</p>
+      <p><strong>Employee Name:</strong> {{ contract.EmployeeName }}</p>
+      <p *ngIf="contract.StartDate"><strong>StartDate:</strong> {{ contract.StartDate }}</p>
+      <p *ngIf="contract.EndDate"><strong>EndDate:</strong> {{ contract.EndDate }}</p>
+      <p><strong>Contract Term:</strong> {{ contract.ContractTerm | date:'mediumDate' }}</p>
+
+      <p><strong>Basic Salary:</strong> {{ contract.BasicSalary | currency:'VND':'symbol':'1.0-0' }}</p>
+      <p><strong>Allowance:</strong> {{ contract.Allowance | currency:'VND':'symbol':'1.0-0' }}</p>
+
+      <p><strong>Job Description:</strong> {{ contract.JobDescription }}</p>
+      <p><strong>Work location:</strong> {{ contract.WorkLocation }}</p>
+      <p><strong>Leave of Absence:</strong> {{ contract.Leaveofabsence }}</p>
+
+      <p><strong>Created At:</strong> {{ contract.CreateAt | date:'medium' }}</p>
+      <p><strong>Updated At:</strong> {{ contract.UpdateAt | date:'medium' }}</p>
+    </div>
+  </div>
+</div>
+
+

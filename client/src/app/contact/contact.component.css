@@ -1,0 +1,11 @@
+.invalid-feedback {
+  display: block;
+}
+
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.spinner-border {
+  margin-right: 5px;
+}

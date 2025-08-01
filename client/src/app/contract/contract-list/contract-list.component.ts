@@ -19,14 +19,31 @@ export class ContractListComponent implements OnInit {
   contract: Contract | null = null;
   searchText: string = '';
   rowData: Contract[] = [];
+  selectedContractId: number | null = null;
 
   public columnDefs: ColDef<Contract>[] = [
+    {
+    headerName: '',
+    checkboxSelection: true,
+    width: 40,
+    headerCheckboxSelection: true, // chọn tất cả
+    headerCheckboxSelectionFilteredOnly: true,
+    pinned: 'left'
+  },
     { field: 'ContractId', headerName: 'ContractID' },
     { field: 'ContractName', headerName: 'ContractName' },
-    { field: 'EmployeeId', headerName: 'EmployeeId' },
+    { field: 'EmployeeName', headerName: 'EmployeeName' },
     { field: 'ContractType', headerName: 'ContractType' },
     { field: 'StartDate', headerName: 'StartDate' },
     { field: 'EndDate', headerName: 'EndDate' },
+    { field: 'BasicSalary', headerName:'BasicSalary'},
+      { field: 'Allowance', headerName: 'Allowance' },
+  { field: 'CreateAt', headerName: 'Created At' },
+  { field: 'UpdateAt', headerName: 'Updated At' },
+  { field: 'JobDescription', headerName: 'Job Description' },
+  { field: 'ContractTerm', headerName: 'Contract Term' },
+  { field: 'WorkLocation', headerName: 'Work Location' },
+  { field: 'Leaveofabsence', headerName: 'Leave of Absence' }
   ];
 
   public gridOptions: GridOptions<Contract> = {
@@ -62,7 +79,14 @@ export class ContractListComponent implements OnInit {
   }
 
   onBtExport() {
-    this.gridApi.exportDataAsCsv();
+    if (this.gridApi) {
+      this.gridApi.exportDataAsCsv({
+        fileName: 'Danh sách hợp đồng.csv',
+        columnKeys: ['ContractId', 'ContractName', 'EmployeeId', 'ContractType', 'StartDate', 'EndDate'],
+      });
+    } else {
+      alert('Grid API is not initialized.');
+    }
   }
 
   loadContracts() {
@@ -129,4 +153,48 @@ export class ContractListComponent implements OnInit {
 
     this.gridApi.setGridOption('rowData', this.rowData);
   }
+
+  onRowClicked(event: any): void {
+  const contract = event.data;
+  if (contract && contract.ContractId) {
+    this.router.navigate(['/contract', contract.ContractId]);
+  } else {
+    console.error('Invalid department data:', contract);
+    this.toastr.error('Unable to redirect due to missing contract information.');
+  }
+}
+  onRowSelected(contractId: number) {
+  this.selectedContractId = contractId;
+}
+
+moveToLeave(): void {
+  const selectedRows = this.gridApi.getSelectedRows();
+
+  if (selectedRows.length === 1) {
+    const selected = selectedRows[0];
+
+    // Gửi sang Leave API trước
+    this.contractService.addLeave(selected).subscribe({
+      next: () => {
+        // Sau khi lưu vào bảng Leave, tiến hành xoá Contract
+        this.contractService.DeleteContract(selected.ContractId).subscribe({
+          next: () => {
+            this.toastr.success('Contract moved to Leave successfully');
+            this.contracts = this.contracts.filter(c => c.ContractId !== selected.ContractId);
+            this.rowData = [...this.contracts];
+
+            // Điều hướng sang trang Leave để xem thông tin đã lưu
+            this.router.navigate(['/leave'], {
+              queryParams: { contractId: selected.ContractId }
+            });
+          },
+          error: () => this.toastr.error('Failed to delete contract')
+        });
+      },
+      error: () => this.toastr.error('Failed to save leave record')
+    });
+  } else {
+    alert('Please select a contract to move to Leave.');
+  }
+}
 }

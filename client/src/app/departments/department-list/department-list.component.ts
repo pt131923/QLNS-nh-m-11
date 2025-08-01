@@ -20,6 +20,14 @@ export class DepartmentListComponent implements OnInit {
   public rowSelection: 'single' | 'multiple' = 'multiple';
 
   public columnDefs: ColDef<Department>[] = [
+    {
+    headerName: '',
+    checkboxSelection: true,
+    width: 40,
+    headerCheckboxSelection: true, // chọn tất cả
+    headerCheckboxSelectionFilteredOnly: true,
+    pinned: 'left'
+  },
     { field: 'DepartmentId', headerName: 'DepartmentId' },
     { field: 'Name', headerName: 'Name', filter: true },
     { field: 'Description', headerName: 'Description' },
@@ -70,7 +78,14 @@ export class DepartmentListComponent implements OnInit {
   }
 
   onBtExport() {
-    this.gridApi.exportDataAsCsv();
+    if (this.gridApi) {
+      this.gridApi.exportDataAsCsv({
+        fileName: 'Danh sách phòng banban.csv',
+        columnKeys: ['DepartmentId', 'Name', 'Description', 'SlNhanVien', 'Addresses', 'Notes']
+      });
+    } else {
+      alert('Grid API is not ready yet.');
+    }
   }
 
   loadDepartments() {
@@ -138,4 +153,14 @@ export class DepartmentListComponent implements OnInit {
     }
     this.gridApi.setGridOption('rowData', this.rowData);
   }
+
+  onRowClicked(event: any): void {
+  const department = event.data;
+  if (department && department.DepartmentId) {
+    this.router.navigate(['/department', department.DepartmentId]);
+  } else {
+    console.error('Invalid department data:', department);
+    this.toastr.error('Unable to redirect due to missing department information.');
+  }
+}
 }

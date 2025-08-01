@@ -1,18 +1,64 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <div class="container">
-        <ul class="navbar-nav me-auto mb-2 mb-md-0">
-            <li class="nav-item">
-                <a class="nav-link" routerLink="/employees" routerLinkActive="active">Employee</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" routerLink="/departments" routerLinkActive="active">Deparment</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" routerLink="/contract" routerLinkActive="active">Contract</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" routerLink="/salaries" routerLinkActive="active">Salary</a>
-            </li>
-        </ul>
+<!-- layout.component.html -->
+<div class="d-flex" style="height: 100vh;">
+  <!-- Sidebar -->
+  <div class="bg-dark text-white p-3" style="width: 250px;">
+    <h4 class="text-center mb-4">HR Dashboard</h4>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/dashboard">🏠 Dashboard</a>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/employees">👨‍💼 Employee</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/departments">🏢 Department</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/contracts">📄 Contract</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/salaries">💰 Salary</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/timekeeping">🕒 Timekeeping</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/recruitments">📋 Recruitment</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/performance">📈 Performance</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/benefits">🎁 Benefits</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/trainings">📚 Training</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/leaves">📝 Leave</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/settings">⚙️ Settings</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/help">❓ Help</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" routerLink="/contact">📞 Contact</a>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-grow-1 d-flex flex-column">
+    <!-- Topbar -->
+    <div class="d-flex justify-content-end bg-secondary text-white p-2">
+      <a class="btn btn-primary me-2" routerLink="/login">Login</a>
+<a class="btn btn-warning text-dark" routerLink="/register">Register</a>
+
     </div>
-</nav>
+
+    <!-- Router View -->
+    <div class="p-4" style="background-color: #f8f9fa; flex-grow: 1;">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

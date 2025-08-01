@@ -14,7 +14,10 @@ export class ContractService {
 
   private contractData!: Contract;
 
+  private contractDataForLeave: Contract | null = null;
+
   constructor(private http: HttpClient) {
+
     this.getContracts().subscribe(data => {
       this.contracts = data;
     });
@@ -32,8 +35,12 @@ export class ContractService {
     return this.http.get<Contract[]>(this.baseUrl3);
   }
 
-  getContract(id: string): Observable<Contract> {
+  getContract(id: number): Observable<Contract> {
     return this.http.get<Contract>(`${this.baseUrl3}${id}`);
+  }
+
+  getContractById(id: number): Observable<Contract> {
+    return this.http.get<Contract>(`${this.baseUrl3}/${id}`);
   }
 
   AddContract(contract: Contract): Observable<Contract> {
@@ -54,4 +61,18 @@ export class ContractService {
       map((response: Contract[]) => response)
     );
   }
+  addLeave(contract: Contract): Observable<any> {
+  return this.http.post(`${this.baseUrl3}/leave`, contract);
+ }
+
+  setContractDataForLeave(contract: Contract): void {
+  this.contractDataForLeave = contract;
+  }
+
+  getContractDataForLeave(): Contract | null {
+  return this.contractDataForLeave;
+  }
+  getLeaveByContractId(contractId: number): Observable<Contract> {
+  return this.http.get<Contract>(`${this.baseUrl3}/leave/${contractId}`);
+}
 }

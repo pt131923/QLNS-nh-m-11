@@ -21,6 +21,29 @@ import { ContractListComponent } from './contract/contract-list/contract-list.co
 import { SalaryAddComponent } from './salary/salary/salary-add/salary-add.component';
 import { SalaryEditComponent } from './salary/salary/salary-edit/salary-edit.component';
 import { SalaryListComponent } from './salary/salary/salary-list/salary-list.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+import { UserModule } from './User/user/user.module';
+import { EmployeeDetailComponent } from './employees/employee-detail/employee-detail.component';
+import { SettingComponent } from './setting/setting.component';
+import { HelpComponent } from './help/help.component';
+import { ContactComponent } from './contact/contact.component';
+import { DepartmentDetailComponent } from './departments/department-detail/department-detail.component';
+import { ContractDetailComponent } from './contract/contract-detail/contract-detail.component';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { HttpClient } from '@angular/common/http';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { BenefitsComponent } from './benefits/benefits.component';
+import { LeaveComponent } from './leave/leave.component';
+import { TrainingComponent } from './training/training.component';
+import { PerformanceComponent } from './performance/performance.component';
+import { TimekeepingComponent } from './timekeeping/timekeeping.component';
+import { RecruitmentComponent } from './recruitment/recruitment.component';
+
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http);
+}
 
 @NgModule({
   declarations: [
@@ -37,9 +60,25 @@ import { SalaryListComponent } from './salary/salary/salary-list/salary-list.com
     ContractListComponent,
     SalaryAddComponent,
     SalaryEditComponent,
-    SalaryListComponent
+    SalaryListComponent,
+    LoginComponent,
+    RegisterComponent,
+    EmployeeDetailComponent,
+    SettingComponent,
+    HelpComponent,
+    ContactComponent,
+    DepartmentDetailComponent,
+    ContractDetailComponent,
+    DashboardComponent,
+    BenefitsComponent,
+    LeaveComponent,
+    TrainingComponent,
+    PerformanceComponent,
+    TimekeepingComponent,
+    RecruitmentComponent,
   ],
   imports: [
+    UserModule,
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
@@ -48,7 +87,14 @@ import { SalaryListComponent } from './salary/salary/salary-list/salary-list.com
     AgGridAngular,
     ReactiveFormsModule,
     SharedModule,
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
+    }),
   ],
   providers: [],
   bootstrap: [AppComponent],

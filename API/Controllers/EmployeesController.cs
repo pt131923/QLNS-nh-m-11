@@ -113,7 +113,23 @@ namespace API.Controllers
                 {
                     EmployeeId = e.EmployeeId,
                     EmployeeName = e.EmployeeName,
-                    Name = e.Department.Name
+                    EmployeeEmail = e.EmployeeEmail,
+                    EmployeePhone = e.EmployeePhone,
+                    EmployeeAddress = e.EmployeeAddress,
+                    DepartmentId = e.Department.DepartmentId,
+                    Department = e.Department.Name,
+                        BirthDate = e.BirthDate,
+                        PlaceOfBirth = e.PlaceOfBirth,
+                        Gender = e.Gender,
+                        MaritalStatus = e.MaritalStatus,
+                        IdentityNumber = e.IdentityNumber,
+                        IdentityIssuedDate = e.IdentityIssuedDate,
+                        IdentityIssuedPlace = e.IdentityIssuedPlace,
+                        Religion = e.Religion,
+                        Ethnicity = e.Ethnicity,
+                        Nationality = e.Nationality,
+                        EducationLevel = e.EducationLevel,
+                        Specialization = e.Specialization
                 })
                 .ToListAsync();
 
@@ -121,16 +137,16 @@ namespace API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(string name = null, int? departmentId = null)
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(string Name = null, int? departmentId = null)
         {
             var query = _context.Employee.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(name))
+            if (!string.IsNullOrWhiteSpace(Name))
             {
-                query = query.Where(e => e.EmployeeName.ToLower().Contains(name.ToLower()));
+                query = query.Where(e => e.EmployeeName.ToLower().Contains(Name.ToLower()));
             }
 
-            if (departmentId.HasValue)
+            if (!string.IsNullOrWhiteSpace(Name))
             {
                 query = query.Where(e => e.DepartmentId == departmentId);
             }

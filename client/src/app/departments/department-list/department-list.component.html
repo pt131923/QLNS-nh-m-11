@@ -18,6 +18,7 @@
     [gridOptions]="gridOptions"
     (gridReady)="onGridReady($event)"
     [pagination]="pagination"
+    (rowClicked)="onRowClicked($event)"
     [paginationPageSize]="paginationPageSize"
     [paginationPageSizeSelector]="paginationPageSizeSelector"
     [defaultColDef]="defaultColDef"

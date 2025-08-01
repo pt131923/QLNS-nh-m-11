@@ -11,6 +11,7 @@ namespace API.Data
         public DbSet<AppDepartment> Department { get; set; }
         public DbSet<Contract> Contract { get; set; }
         public DbSet<Salary> Salary { get; set; }
+        public DbSet<TimeKeeping> TimeKeeping { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -79,6 +80,25 @@ namespace API.Data
                 .HasOne(s => s.Employee)
                 .WithMany(e => e.Salaries)
                 .HasForeignKey(s => s.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // TimeKeeping configuration
+            builder.Entity<TimeKeeping>()
+                .HasKey(t => t.TimeKeepingId)
+                .HasName("TimeKeepingId");
+
+            builder.Entity<TimeKeeping>()
+                .Property(t => t.TimeKeepingId)
+                .ValueGeneratedOnAdd();
+
+            builder.Entity<TimeKeeping>()
+                .Property(t => t.Date)
+                .IsRequired();
+
+            builder.Entity<TimeKeeping>()
+                .HasOne(t => t.Employee)
+                .WithMany(e => e.TimeKeeping)
+                .HasForeignKey(t => t.EmployeeId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

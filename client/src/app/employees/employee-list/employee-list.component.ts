@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild} from '@angular/core';
-import { ColDef, GridApi, GridReadyEvent, GridOptions } from 'ag-grid-community';
+import { ColDef, GridApi, GridReadyEvent, GridOptions, RowClickedEvent } from 'ag-grid-community';
 import { EmployeeService } from 'src/app/_services/employee.service';
 import { ModalDirective } from 'ngx-bootstrap/modal'
 import { Router } from '@angular/router';
 import { Employee } from 'src/app/_model/employee';
 import { ToastrService } from 'ngx-toastr';
+import { Department } from 'src/app/_model/department';
 @Component({
   selector: 'app-employee-list',
   templateUrl: './employee-list.component.html',
@@ -14,16 +15,44 @@ import { ToastrService } from 'ngx-toastr';
 export class EmployeeListComponent implements OnInit{
   @ViewChild('loadListEmployee', {static: true}) modal: ModalDirective | undefined;
 
-  private gridApi!: GridApi<Employee>; // Sử dụng kiểu Employee cho gridApi
-  employees: Employee[] = []; // Sử dụng kiểu Employee[] cho employees
+  private gridApi!: GridApi<Employee>;
+  employees: Employee[] = [];
   employee: Employee | null = null;
   public rowSelection: 'single' | 'multiple' = 'multiple';
-
+  departments: Department[] = [];
   public columnDefs: ColDef<Employee>[] = [
-    { field: 'EmployeeId', headerName: 'EmployeeId' },
-    { field: 'EmployeeName', headerName: 'EmployeeName', filter: true },
-    { field: 'DepartmentId', headerName: 'DepartmentId' }
-  ];
+    {
+    headerName: '',
+    checkboxSelection: true,
+    width: 40,
+    headerCheckboxSelection: true,
+    headerCheckboxSelectionFilteredOnly: true,
+    pinned: 'left'
+  },
+  { field: 'EmployeeId', headerName: 'EmployeeId' },
+  { field: 'EmployeeName', headerName: 'EmployeeName', filter: true },
+  {
+    field: 'DepartmentId',
+    headerName: 'DepartmentId',
+    filter: true
+  },
+  { field: 'EmployeeEmail', headerName: 'EmployeeEmail', filter: true },
+  { field: 'EmployeePhone', headerName: 'EmployeePhone', filter: true },
+  { field: 'EmployeeAddress', headerName: 'EmployeeAddress', filter: true },
+  { field: 'BirthDate', headerName: 'BirthDate', filter: true },
+  { field: 'PlaceOfBirth', headerName: 'PlaceOfBirth', filter: true },
+  { field: 'Gender', headerName: 'Gender', filter: true },
+  { field: 'MaritalStatus', headerName: 'MaritalStatus', filter: true },
+  { field: 'IdentityNumber', headerName: 'IdentityNumber', filter: true },
+  { field: 'IdentityIssuedDate', headerName: 'IdentityIssuedDate', filter: true },
+  { field: 'IdentityIssuedPlace', headerName: 'IdentityIssuedPlace', filter: true },
+  { field: 'Religion', headerName: 'Religion', filter: true },
+  { field: 'Ethnicity', headerName: 'Ethnicity', filter: true },
+  { field: 'Nationality', headerName: 'Nationality', filter: true },
+  { field: 'EducationLevel', headerName: 'EducationLevel', filter: true },
+  { field: 'Specialization', headerName: 'Specialization', filter: true }
+];
+
 
   public gridOptions: GridOptions<Employee> = {
     rowSelection: 'multiple',
@@ -60,13 +89,40 @@ export class EmployeeListComponent implements OnInit{
 
   onGridReady(event: GridReadyEvent<Employee>) {
     this.gridApi = event.api;
-    // Không cần set rowData ở đây nếu bạn đã binding [rowData] trong template
-    // this.gridApi.setGridOption('rowData', this.rowData);
   }
 
-  onBtExport(){
-    this.gridApi.exportDataAsCsv();
-  }
+  onBtExport() {
+  // Đảm bảo map chứa dữ liệu đúng
+  const departmentMap = new Map<number, string>();
+  this.departments.forEach(dep => {
+    // Kiểm tra xem DepartmentId có hợp lệ không
+    if (dep.DepartmentId === undefined || dep.Name === undefined) {
+      console.warn('Invalid department data:', dep);
+      return;
+    }
+    // Thêm vào map với DepartmentId là key và Name là value
+    if (typeof dep.DepartmentId !== 'number' || typeof dep.Name !== 'string') {
+      console.warn('DepartmentId must be a number and Name must be a string:', dep);
+      return;
+    }
+  departmentMap.set(dep.DepartmentId, dep.Name);
+   });
+
+  this.gridApi.exportDataAsCsv({
+    processCellCallback: (params) => {
+      const colId = params.column.getColId();
+
+      if (colId === 'DepartmentId') {
+        console.log('DepartmentId raw:', params.value);
+        const name = departmentMap.get(params.value);
+        return name || 'Không xác định';
+      }
+
+      return params.value;
+    },
+    fileName: 'Danh_sach_nhan_vien.csv'
+  });
+}
 
   loadEmployee() {
     this.empService.getEmployees().subscribe({
@@ -105,7 +161,7 @@ export class EmployeeListComponent implements OnInit{
     if (selectedRows.length === 1) {
       const employeeData = selectedRows[0];
       const id = employeeData.EmployeeId; // Lấy ID từ hàng được chọn
-      this.empService.deleteEmployee(id).subscribe({
+      this.empService.DeleteEmployee(id).subscribe({
         next: _ => {
           this.toastr.success('Employee deleted successfully');
           this.loadEmployee(); // Tải lại danh sách nhân viên để cập nhật
@@ -136,4 +192,14 @@ export class EmployeeListComponent implements OnInit{
     }
     this.gridApi.setGridOption('rowData', this.rowData);
   }
+  onRowClicked(event: any): void {
+  const employee = event.data;
+  if (employee && employee.EmployeeId) {
+    this.router.navigate(['/employee', employee.EmployeeId]);
+  } else {
+    console.error('Invalid employee data:', employee);
+    this.toastr.error('Không thể chuyển hướng vì thiếu thông tin nhân viên.');
+  }
 }
+}
+

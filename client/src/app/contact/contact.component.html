@@ -1,0 +1,89 @@
+<div class="container-fluid p-4">
+  <h2 class="mb-4">📞 Contact</h2>
+
+  <p>If you have any problems or need assistance, please contact:</p>
+
+  <ul class="list-group mb-4">
+    <li class="list-group-item">
+      📧 Email: <a href="mailto:support@yourcompany.com">Công ty TNHH 1 thành viên ĐHXD.com</a>
+    </li>
+    <li class="list-group-item">
+      ☎️ Phone: <b>028-1234-5678</b>
+    </li>
+    <li class="list-group-item">
+      🏢 Office: 55 Giải Phóng, Quận Hai Bà Trưng, Hà Nội
+    </li>
+  </ul>
+
+  <h5>Send request directly:</h5>
+
+  <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" novalidate>
+    <!-- Name Field -->
+    <div class="mb-3">
+      <label class="form-label">Name</label>
+      <input
+        type="text"
+        formControlName="name"
+        class="form-control"
+        [ngClass]="{ 'is-invalid': f['name'].touched && f['name'].errors }"
+      />
+      <div *ngIf="f['name'].touched && f['name'].errors" class="invalid-feedback">
+        <div *ngIf="f['name'].errors?.['required']">Name is required</div>
+        <div *ngIf="f['name'].errors?.['pattern']">Name can only contain letters and spaces</div>
+      </div>
+    </div>
+
+    <!-- Email Field -->
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input
+        type="email"
+        formControlName="email"
+        class="form-control"
+        [ngClass]="{ 'is-invalid': f['email'].touched && f['email'].errors }"
+      />
+      <div *ngIf="f['email'].touched && f['email'].errors" class="invalid-feedback">
+        <div *ngIf="f['email'].errors?.['required']">Email is required</div>
+        <div *ngIf="f['email'].errors?.['email']">Please enter a valid email address</div>
+      </div>
+    </div>
+
+    <!-- Message Field -->
+    <div class="mb-3">
+      <label class="form-label">Message</label>
+      <textarea
+        formControlName="message"
+        class="form-control"
+        rows="4"
+        [ngClass]="{ 'is-invalid': f['message'].touched && f['message'].errors }"
+      ></textarea>
+      <div *ngIf="f['message'].touched && f['message'].errors" class="invalid-feedback">
+        <div *ngIf="f['message'].errors?.['required']">Message is required</div>
+        <div *ngIf="f['message'].errors?.['maxLength']">Message cannot exceed 1000 characters</div>
+      </div>
+      <small class="text-muted">
+        {{ contactForm.get('message')?.value?.length || 0 }}/1000 characters
+      </small>
+    </div>
+
+    <!-- Submit Button -->
+    <button
+      type="submit"
+      class="btn btn-success"
+      [disabled]="isSubmitting"
+    >
+      <span *ngIf="!isSubmitting">Send Contact</span>
+      <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <span *ngIf="isSubmitting"> Sending...</span>
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-secondary ms-2"
+      (click)="viewContactHistory()"
+    >
+      View Contact History
+    </button>
+  </form>
+</div>
+

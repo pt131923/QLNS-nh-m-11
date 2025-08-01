@@ -1,4 +1,5 @@
 using System.Text.Json;
+using API.DTOs;
 using API.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,8 +9,7 @@ namespace API.Data
     {
         public static async Task SeedDepartments(DataContext context)
         {
-            if (await context.Department.AnyAsync())
-                return;
+            if (await context.Department.AnyAsync()) return;
 
             var departmentData = await File.ReadAllTextAsync("Data/DepartmentSeedData.json");
             var departments = JsonSerializer.Deserialize<List<AppDepartment>>(departmentData);
@@ -23,60 +23,86 @@ namespace API.Data
             Console.WriteLine("✅ Seeded Department data.");
         }
 
-        public static async Task SeedDepartmentsWithEmployees(DataContext context)
-        {
-            if (await context.Department.AnyAsync())
-                return;
-
-            var departmentData = await File.ReadAllTextAsync("Data/DepartmentSeedDataWithEmployees.json");
-            var departments = JsonSerializer.Deserialize<List<AppDepartment>>(departmentData);
-
-            if (departments != null)
-            {
-                await context.Department.AddRangeAsync(departments);
-                await context.SaveChangesAsync();
-            }
-
-            Console.WriteLine("✅ Seeded Department data with Employees.");
-        }
-
         public static async Task SeedEmployees(DataContext context)
+{
+    if (await context.Employee.AnyAsync()) return;
+
+    var employeeData = await File.ReadAllTextAsync("Data/EmployeeSeedData.json");
+
+    var options = new JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    var employeeDtos = JsonSerializer.Deserialize<List<EmployeeSeedDto>>(employeeData, options);
+
+    if (employeeDtos == null || !employeeDtos.Any())
+    {
+        Console.WriteLine("⚠ Không có dữ liệu Employee trong file JSON.");
+        return;
+    }
+
+    var departments = await context.Department.ToListAsync();
+    if (departments == null || !departments.Any())
+    {
+        Console.WriteLine("⚠ Không thể seed Employees vì chưa có Department.");
+        return;
+    }
+
+    var employees = new List<Employee>();
+
+    foreach (var dto in employeeDtos)
+    {
+        var departmentDto = dto.Department;
+        if (departmentDto == null)
         {
-            if (await context.Employee.AnyAsync())
-                return;
-
-            // Đảm bảo Department đã có trong DB
-            var departments = await context.Department.ToListAsync();
-            if (departments == null || !departments.Any())
-            {
-                Console.WriteLine("⚠ Cannot seed Employees because Departments are missing.");
-                return;
-            }
-
-            var employeeData = await File.ReadAllTextAsync("Data/EmployeeSeedData.json");
-            var employees = JsonSerializer.Deserialize<List<Employee>>(employeeData);
-
-            if (employees != null)
-            {
-                foreach (var employee in employees)
-                {
-                    // Chọn department ngẫu nhiên sử dụng RandomNumberGenerator
-                    int randomIndex = System.Security.Cryptography.RandomNumberGenerator.GetInt32(departments.Count);
-                    var randomDepartment = departments[randomIndex];
-                    employee.DepartmentId = randomDepartment.DepartmentId;
-                }
-
-                await context.Employee.AddRangeAsync(employees);
-                await context.SaveChangesAsync();
-            }
-
-            Console.WriteLine("✅ Seeded Employee data.");
+            Console.WriteLine("⚠ Dữ liệu Department trong DTO bị null.");
+            continue;
         }
+
+        var department = departments.FirstOrDefault(dep => dep.Name == departmentDto.Name);
+
+        if (department == null)
+        {
+            Console.WriteLine($"⚠ Không tìm thấy phòng ban với tên: {departmentDto}");
+            continue;
+        }
+
+        var employee = new Employee
+        {
+            EmployeeName = dto.EmployeeName,
+            EmployeeEmail = dto.EmployeeEmail,
+            EmployeePhone = dto.EmployeePhone,
+            EmployeeAddress = dto.EmployeeAddress,
+            DepartmentId = department.DepartmentId,
+            BirthDate = dto.BirthDate,
+            PlaceOfBirth = dto.PlaceOfBirth,
+            Gender = dto.Gender,
+            MaritalStatus = dto.MaritalStatus,
+            IdentityNumber = dto.IdentityNumber,
+            IdentityIssuedDate = dto.IdentityIssuedDate,
+            IdentityIssuedPlace = dto.IdentityIssuedPlace,
+            Religion = dto.Religion,
+            Ethnicity = dto.Ethnicity,
+            Nationality = dto.Nationality,
+            EducationLevel = dto.EducationLevel,
+            Specialization = dto.Specialization
+        };
+
+        employees.Add(employee);
+    }
+
+    await context.Employee.AddRangeAsync(employees);
+    await context.SaveChangesAsync();
+
+    Console.WriteLine("✅ Seeded Employee data.");
+}
+
+
 
         public static async Task SeedContracts(DataContext context)
         {
-            if (await context.Contract.AnyAsync())
-                return;
+            if (await context.Contract.AnyAsync()) return;
 
             var employees = await context.Employee.Include(e => e.Contracts).ToListAsync();
             if (employees == null || !employees.Any())
@@ -92,30 +118,40 @@ namespace API.Data
             {
                 foreach (var contract in contracts)
                 {
-                    // Chọn employee ngẫu nhiên sử dụng RandomNumberGenerator
-                    int randomIndex = System.Security.Cryptography.RandomNumberGenerator.GetInt32(employees.Count);
-                    var randomEmployee = employees[randomIndex];
+                    // Gán EmployeeId ngẫu nhiên
+                    var randomEmployee = employees[System.Security.Cryptography.RandomNumberGenerator.GetInt32(employees.Count)];
                     contract.EmployeeId = randomEmployee.EmployeeId;
 
-                    // Thêm contract vào danh sách contracts của employee
-                    if (randomEmployee.Contracts == null)
-                    {
-                        randomEmployee.Contracts = new List<Contract>();
-                    }
+                    // Gán mặc định nếu cần
+                    contract.BasicSalary = contract.BasicSalary == 0 ? 8000000 : contract.BasicSalary;
+                    contract.Allowance = contract.Allowance == 0 ? 1000000 : contract.Allowance;
+                    contract.JobDescription ??= "Chưa cập nhật mô tả công việc";
+                    contract.WorkLocation ??= "Không rõ địa chỉ";
+                    contract.Leaveofabsence ??= "Không có";
+
+                    // Gán thời gian mặc định nếu cần
+                    contract.CreateAt = contract.CreateAt == default ? DateTime.Now : contract.CreateAt;
+                    contract.UpdateAt = contract.UpdateAt == default ? DateTime.Now : contract.UpdateAt;
+                    contract.ContractTerm = contract.ContractTerm == default && contract.EndDate != null
+                        ? contract.EndDate.Value
+                        : contract.ContractTerm;
+
+                    // Ràng buộc hợp đồng cho nhân viên
+                    randomEmployee.Contracts ??= new List<Contract>();
                     randomEmployee.Contracts.Add(contract);
                 }
 
                 await context.Contract.AddRangeAsync(contracts);
                 await context.SaveChangesAsync();
-            }
 
-            Console.WriteLine("✅ Seeded Contract data.");
+                Console.WriteLine("✅ Seeded Contract data.");
+            }
         }
-        
+
+
         public static async Task SeedSalaries(DataContext context)
         {
-            if (await context.Salary.AnyAsync())
-                return;
+            if (await context.Salary.AnyAsync()) return;
 
             var employees = await context.Employee.Include(e => e.Salaries).ToListAsync();
             if (employees == null || !employees.Any())
@@ -131,16 +167,10 @@ namespace API.Data
             {
                 foreach (var salary in salaries)
                 {
-                    // Chọn employee ngẫu nhiên sử dụng RandomNumberGenerator
-                    int randomIndex = System.Security.Cryptography.RandomNumberGenerator.GetInt32(employees.Count);
-                    var randomEmployee = employees[randomIndex];
+                    var randomEmployee = employees[System.Security.Cryptography.RandomNumberGenerator.GetInt32(employees.Count)];
                     salary.EmployeeId = randomEmployee.EmployeeId;
 
-                    // Thêm salary vào danh sách salaries của employee
-                    if (randomEmployee.Salaries == null)
-                    {
-                        randomEmployee.Salaries = new List<Salary>();
-                    }
+                    randomEmployee.Salaries ??= new List<Salary>();
                     randomEmployee.Salaries.Add(salary);
                 }
 

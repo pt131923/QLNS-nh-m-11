@@ -1,0 +1,45 @@
+<div class="container-fluid p-4">
+  <h2 class="mb-4">⚙️ System Settings</h2>
+  <form (ngSubmit)="onSaveSettings()">
+    <div class="mb-3">
+      <label class="form-label">Default shift start time</label>
+      <input type="time" [(ngModel)]="settings.defaultShiftStart" name="defaultShiftStart" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Allowed late minutes</label>
+      <input type="number" [(ngModel)]="settings.allowedLate" name="allowedLate" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">System error notification email</label>
+      <input type="email" [(ngModel)]="settings.adminEmail" name="adminEmail" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Enable overtime tracking</label>
+      <select [(ngModel)]="settings.enableOvertime" name="enableOvertime" class="form-select">
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Enable attendance notifications</label>
+      <select [(ngModel)]="settings.enableNotifications" name="enableNotifications" class="form-select">
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Default language</label>
+      <select [(ngModel)]="settings.defaultLanguage" name="defaultLanguage" class="form-select">
+        <option value="en">English</option>
+        <option value="vi">Tiếng Việt</option>
+        <!-- Add more languages as needed -->
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Settings</button>
+  </form>
+</div>
+

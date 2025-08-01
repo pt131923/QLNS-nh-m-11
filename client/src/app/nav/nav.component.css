@@ -1,0 +1,47 @@
+.dashboard-sidebar {
+  width: 250px;
+  background: #2c3e50;
+  color: white;
+  height: 100vh;
+  padding: 20px 0;
+}
+
+.sidebar-title {
+  text-align: center;
+  padding: 15px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #34495e;
+  font-size: 1.2rem;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.menu-item:hover {
+  background: #34495e;
+}
+
+.menu-item.active {
+  background: #3498db;
+}
+
+.menu-item.completed {
+  color: #2ecc71;
+}
+
+.menu-item i {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}

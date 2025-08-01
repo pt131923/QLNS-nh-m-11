@@ -1,8 +1,17 @@
 export interface Contract {
+  ContractImage: any,
   ContractId: number;
   ContractName: string;
   ContractType: string;
-  EmployeeId: number;
+  EmployeeName: string;
   StartDate: string;
   EndDate: string;
+  BasicSalary: number;
+  Allowance: number;
+  CreateAt: string;
+  UpdateAt: string;
+  JobDescription: string;
+  ContractTerm: string;
+  WorkLocation: string;
+  Leaveofabsence: string
 }

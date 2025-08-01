@@ -1,9 +1,134 @@
 [
-    { "EmployeeName": "Nguyễn Văn Anh", "DepartmentId": 1 },
-    { "EmployeeName": "Trần Thị Bình", "DepartmentId": 2 },
-    { "EmployeeName": "Lê Văn Chiến", "DepartmentId": 3 },
-    { "EmployeeName": "Phạm Thị Phương Mai", "DepartmentId": 4 },
-    { "EmployeeName": "Nguyễn Hồng Phong", "DepartmentId": 5 },
-    { "EmployeeName": "Đinh Quang Khải", "DepartmentId": 6 }
-  ]
-  
+  {
+    "EmployeeName": "Nguyễn Văn Anh",
+    "EmployeeEmail": "nguyenvananh@example.com",
+    "EmployeePhone": "0900000001",
+    "EmployeeAddress": "123 Đường A, Quận 1, TP.HCM",
+      "BirthDate": "1990-05-15",
+      "PlaceOfBirth": "Hà Nội",
+      "Gender": "Nam",
+      "MaritalStatus": "Đã lập gia đình",
+      "IdentityNumber": "012345678",
+      "IdentityIssuedDate": "2010-01-01",
+      "IdentityIssuedPlace": "Công an TP Hà Nội",
+      "Religion": "Không",
+      "Ethnicity": "Kinh",
+      "Nationality": "Việt Nam",
+      "EducationLevel": "12/12",
+      "Specialization": "Kỹ sư CNTT",
+    "Department": {
+      "DepartmentId": 1,
+      "Name": "Phòng Công nghệ"
+    }
+  },
+  {
+    "EmployeeName": "Trần Thị Bình",
+    "EmployeeEmail": "tranthibinh@example.com",
+    "EmployeePhone": "0900000002",
+    "EmployeeAddress": "456 Đường B, Quận 2, TP.HCM",
+      "BirthDate": "1992-08-22",
+      "PlaceOfBirth": "TP Hồ Chí Minh",
+      "Gender": "Nữ",
+      "MaritalStatus": "Chưa lập gia đình",
+      "IdentityNumber": "091234567",
+      "IdentityIssuedDate": "2012-03-15",
+      "IdentityIssuedPlace": "Công an TP Hồ Chí Minh",
+      "Religion": "Phật giáo",
+      "Ethnicity": "Kinh",
+      "Nationality": "Việt Nam",
+      "EducationLevel": "12/12",
+      "Specialization": "Cử nhân Quản trị Nhân sự",
+    "Department": {
+      "DepartmentId": 2,
+      "Name": "Phòng Nhân sự"
+    }
+  },
+  {
+    "EmployeeName": "Lê Văn Cường",
+    "EmployeeEmail": "levancuong@example.com",
+    "EmployeePhone": "0900000003",
+    "EmployeeAddress": "789 Đường C, Quận 3, TP.HCM",
+      "BirthDate": "1988-10-10",
+      "PlaceOfBirth": "Nghệ An",
+      "Gender": "Nam",
+      "MaritalStatus": "Đã lập gia đình",
+      "IdentityNumber": "093456789",
+      "IdentityIssuedDate": "2008-10-10",
+      "IdentityIssuedPlace": "Công an Nghệ An",
+      "Religion": "Không",
+      "Ethnicity": "Kinh",
+      "Nationality": "Việt Nam",
+      "EducationLevel": "12/12",
+      "Specialization": "Kỹ sư Kỹ thuật Phần mềm",
+    "Department": {
+      "DepartmentId": 3,
+      "Name": "Phòng Công nghệ"
+    }
+  },
+  {
+    "EmployeeName": "Phạm Thị Dung",
+    "EmployeeEmail": "phamthidung@example.com",
+    "EmployeePhone": "0900000004",
+    "EmployeeAddress": "101 Đường D, Quận 4, TP.HCM",
+      "BirthDate": "1995-12-05",
+      "PlaceOfBirth": "TP Đà Nẵng",
+      "Gender": "Nữ",
+      "MaritalStatus": "Chưa lập gia đình",
+      "IdentityNumber": "094567890",
+      "IdentityIssuedDate": "2013-05-20",
+      "IdentityIssuedPlace": "Công an TP Đà Nẵng",
+      "Religion": "Thiên Chúa giáo",
+      "Ethnicity": "Kinh",
+      "Nationality": "Việt Nam",
+      "EducationLevel": "12/12",
+      "Specialization": "Cử nhân Truyền thông đa phương tiện",
+    "Department": {
+      "DepartmentId": 4,
+      "Name": "Phòng Marketing"
+    }
+  },
+  {
+    "EmployeeName": "Ngô Văn Hùng",
+    "EmployeeEmail": "ngovanhung@example.com",
+    "EmployeePhone": "0900000005",
+    "EmployeeAddress": "202 Đường E, Quận 5, TP.HCM",
+      "BirthDate": "1991-07-19",
+      "PlaceOfBirth": "Bình Định",
+      "Gender": "Nam",
+      "MaritalStatus": "Đã lập gia đình",
+      "IdentityNumber": "095678901",
+      "IdentityIssuedDate": "2011-07-19",
+      "IdentityIssuedPlace": "Công an Bình Định",
+      "Religion": "Không",
+      "Ethnicity": "Kinh",
+      "Nationality": "Việt Nam",
+      "EducationLevel": "12/12",
+      "Specialization": "Thạc sĩ Công nghệ Thông tin",
+    "Department": {
+      "DepartmentId": 5,
+      "Name": "Phòng Marketing"
+    }
+  },
+  {
+    "EmployeeName": "Đỗ Thị Mai",
+    "EmployeeEmail": "dothimai@example.com",
+    "EmployeePhone": "0900000006",
+    "EmployeeAddress": "303 Đường F, Quận 6, TP.HCM",
+      "BirthDate": "1993-03-30",
+      "PlaceOfBirth": "TP Cần Thơ",
+      "Gender": "Nữ",
+      "MaritalStatus": "Chưa lập gia đình",
+      "IdentityNumber": "096789012",
+      "IdentityIssuedDate": "2013-04-01",
+      "IdentityIssuedPlace": "Công an TP Cần Thơ",
+      "Religion": "Không",
+      "Ethnicity": "Kinh",
+      "Nationality": "Việt Nam",
+      "EducationLevel": "12/12",
+      "Specialization": "Cử nhân Kinh tế",
+    "Department": {
+      "DepartmentId": 6,
+      "Name": "Phòng Kế toán"
+    }
+  }
+]

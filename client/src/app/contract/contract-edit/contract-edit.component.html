@@ -4,25 +4,57 @@
     <input type="text" class="form-control"
         [(ngModel)]="contract!.ContractId"
         name="contractId"
+        readonly
     >
 
     <h4 class="mt-3">Contract Name:</h4>
-    <textarea class="form-control"
+    <input type="text" class="form-control"
         [(ngModel)]="contract!.ContractName"
         name="contractName"
-        rows="1"
-    ></textarea>
+    >
 
-    <h4 class="mt-3">Id:</h4>
-    <input type="text" class="form-control"
-        [(ngModel)]="contract!.EmployeeId"
-        name="Id"
+    <h4 class="mt-3">Employee ID:</h4>
+    <input type="number" class="form-control"
+        [(ngModel)]="contract!.EmployeeName"
+        name="employeeId"
     >
 
     <h4 class="mt-3">Contract Type:</h4>
-    <textarea class="form-control"
+    <input type="text" class="form-control"
         [(ngModel)]="contract!.ContractType"
         name="contractType"
+    >
+
+    <h4 class="mt-3">Basic Salary:</h4>
+    <input type="number" class="form-control"
+        [(ngModel)]="contract!.BasicSalary"
+        name="basicSalary"
+    >
+
+    <h4 class="mt-3">Allowance:</h4>
+    <input type="number" class="form-control"
+        [(ngModel)]="contract!.Allowance"
+        name="allowance"
+    >
+
+    <h4 class="mt-3">Job Description:</h4>
+    <textarea class="form-control"
+        [(ngModel)]="contract!.JobDescription"
+        name="jobDescription"
+        rows="2"
+    ></textarea>
+
+    <h4 class="mt-3">Work Location:</h4>
+    <textarea class="form-control"
+        [(ngModel)]="contract!.WorkLocation"
+        name="WorkLocation"
+        rows="2"
+    ></textarea>
+
+    <h4 class="mt-3">Leave of Absence:</h4>
+    <textarea class="form-control"
+        [(ngModel)]="contract!.Leaveofabsence"
+        name="leaveofabsence"
         rows="1"
     ></textarea>
 
@@ -38,13 +70,31 @@
         name="endDate"
     >
 
-    <div class="card-footer mt-2">
+    <h4 class="mt-3">Contract Term:</h4>
+    <input type="date" class="form-control"
+        [(ngModel)]="contract!.ContractTerm"
+        name="contractTerm"
+    >
+
+    <h4 class="mt-3">Created At:</h4>
+    <input type="datetime-local" class="form-control"
+        [(ngModel)]="contract!.CreateAt"
+        name="createAt"
+    >
+
+    <h4 class="mt-3">Updated At:</h4>
+    <input type="datetime-local" class="form-control"
+        [(ngModel)]="contract!.UpdateAt"
+        name="updateAt"
+    >
+
+    <div class="card-footer mt-4 d-flex justify-content-between">
       <button type="submit"
           form="editForm"
-          class="btn btn-success col-4">Save changes
+          class="btn btn-success col-5">Save Changes
       </button>
       <button type="button"
-          class="btn btn-secondary col-4 ms-5">Cancel
+          class="btn btn-secondary col-5">Cancel
       </button>
     </div>
   </form>

@@ -19,6 +19,14 @@ export class SalaryListComponent implements OnInit {
   public rowSelection: 'single' | 'multiple' = 'multiple';
 
   public columnDefs: ColDef<Salary>[] = [
+    {
+    headerName: '',
+    checkboxSelection: true,
+    width: 40,
+    headerCheckboxSelection: true, // chọn tất cả
+    headerCheckboxSelectionFilteredOnly: true,
+    pinned: 'left'
+  },
     { field: 'SalaryId', headerName: 'Salary ID' },
     { field: 'EmployeeId', headerName: 'Employee Id' },
     { field: 'EmployeeName', headerName: 'Employee Name', filter: true },
@@ -60,7 +68,14 @@ export class SalaryListComponent implements OnInit {
   }
 
   onBtExport() {
-    this.gridApi.exportDataAsCsv();
+    if (this.gridApi) {
+      this.gridApi.exportDataAsCsv({
+        fileName: 'Bảng lương.csv',
+        columnKeys: ['SalaryId', 'EmployeeId', 'EmployeeName', 'Date', 'MonthlySalary', 'Bonus', 'TotalSalary', 'SalaryNotes']
+      });
+    } else {
+      this.toastr.error('Grid API is not initialized');
+    }
   }
 
   loadSalaries() {

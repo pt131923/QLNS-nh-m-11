@@ -34,7 +34,23 @@ namespace API.Migrations
                 {
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EmployeeEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeePhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeInformation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PlaceOfBirth = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MaritalStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdentityNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdentityIssuedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IdentityIssuedPlace = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Religion = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Ethnicity = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Nationality = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EducationLevel = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Specialization = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -54,11 +70,20 @@ namespace API.Migrations
                 {
                     ContractId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ContractName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContractName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    ContractType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContractType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    BasicSalary = table.Column<int>(type: "int", nullable: false),
+                    Allowance = table.Column<int>(type: "int", nullable: false),
+                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContractTerm = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    WorkLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Leaveofabsence = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

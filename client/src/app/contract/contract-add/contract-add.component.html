@@ -6,10 +6,10 @@
             name="ContractName"
             required>
 
-        <h4 class="mt-3">EmployeeId:</h4>
-        <input type="number" class="form-control"
-            [(ngModel)]="contract.EmployeeId"
-            name="EmployeeId"
+        <h4 class="mt-3">EmployeeName:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="contract.EmployeeName"
+            name="EmployeeName"
             required>
 
         <h4 class="mt-3">Contract Type:</h4>
@@ -28,6 +28,46 @@
         <input type="date" class="form-control"
             [(ngModel)]="contract.EndDate"
             name="EndDate"
+            required>
+            <h4 class="mt-3">BasicSalary:</h4>
+        <input type="number" class="form-control"
+            [(ngModel)]="contract.BasicSalary"
+            name="BasicSalary"
+            required>
+            <h4 class="mt-3">Allowance:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="contract.Allowance"
+            name="Allowance"
+            required>
+            <h4 class="mt-3">CreateAt:</h4>
+        <input type="date" class="form-control"
+            [(ngModel)]="contract.CreateAt"
+            name="CreateAt"
+            required>
+        <h4 class="mt-3">UpdateAt:</h4>
+        <input type="date" class="form-control"
+            [(ngModel)]="contract.UpdateAt"
+            name="UpdateAt"
+            required>
+        <h4 class="mt-3">JobDescription:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="contract.JobDescription"
+            name="JobDescription"
+            required>
+        <h4 class="mt-3">ContractTerm:</h4>
+        <input type="date" class="form-control"
+            [(ngModel)]="contract.ContractTerm"
+            name="ContractTerm"
+            required>
+      <h4 class="mt-3">WorkLocation:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="contract.WorkLocation"
+            name="WorkLocation"
+            required>
+      <h4 class="mt-3">Leaveofabsence:</h4>
+        <input type="text" class="form-control"
+            [(ngModel)]="contract.Leaveofabsence"
+            name="Leaveofabsence"
             required>
     </form>
 
