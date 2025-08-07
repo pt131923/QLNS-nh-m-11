@@ -1,0 +1,27 @@
+.department-detail {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.department-detail h2 {
+  margin-bottom: 16px;
+}
+
+.department-detail p {
+  margin-bottom: 12px;
+}
+
+.department-detail ul {
+  list-style: none;
+  padding: 0;
+}
+
+.department-detail li {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.department-detail li:last-child {
+  border-bottom: none;
+}

@@ -1,0 +1,23 @@
+.department-list {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.department-list h2 {
+  margin-bottom: 16px;
+}
+
+.department-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.department-list li {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.department-list li:last-child {
+  border-bottom: none;
+}

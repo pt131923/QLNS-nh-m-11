@@ -1,0 +1,39 @@
+.employee-add {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.employee-add h2 {
+  margin-bottom: 16px;
+}
+
+.employee-add form {
+  display: flex;
+  flex-direction: column;
+}
+
+.employee-add label {
+  margin-bottom: 8px;
+}
+
+.employee-add input,
+.employee-add textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.employee-add button {
+  padding: 12px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.employee-add button:hover {
+  background-color: #0056b3;
+}

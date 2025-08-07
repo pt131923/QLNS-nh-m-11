@@ -1,0 +1,27 @@
+.employee-detail {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.employee-detail h2 {
+  margin-bottom: 16px;
+}
+
+.employee-detail p {
+  margin-bottom: 12px;
+}
+
+.employee-detail ul {
+  list-style: none;
+  padding: 0;
+}
+
+.employee-detail li {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.employee-detail li:last-child {
+  border-bottom: none;
+}

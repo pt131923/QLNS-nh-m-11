@@ -1,0 +1,37 @@
+.salary-list {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.salary-list h2 {
+  margin-bottom: 16px;
+}
+
+.salary-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.salary-list th,
+.salary-list td {
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+}
+
+.salary-list th {
+  background-color: #f8f9fa;
+}
+
+.salary-list button {
+  padding: 12px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.salary-list button:hover {
+  background-color: #0056b3;
+}

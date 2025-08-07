@@ -1,0 +1,23 @@
+.contract-list {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.contract-list h2 {
+  margin-bottom: 16px;
+}
+
+.contract-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.contract-list li {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.contract-list li:last-child {
+  border-bottom: none;
+}

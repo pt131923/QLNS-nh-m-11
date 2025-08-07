@@ -1,0 +1,39 @@
+.setting {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.setting h2 {
+  margin-bottom: 16px;
+}
+
+.setting form {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting label {
+  margin-bottom: 8px;
+}
+
+.setting input,
+.setting textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.setting button {
+  padding: 12px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.setting button:hover {
+  background-color: #0056b3;
+}

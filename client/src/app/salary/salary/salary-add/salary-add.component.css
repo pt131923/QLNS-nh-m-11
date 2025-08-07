@@ -1,0 +1,39 @@
+.salary-add {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.salary-add h2 {
+  margin-bottom: 16px;
+}
+
+.salary-add form {
+  display: flex;
+  flex-direction: column;
+}
+
+.salary-add label {
+  margin-bottom: 8px;
+}
+
+.salary-add input,
+.salary-add textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.salary-add button {
+  padding: 12px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.salary-add button:hover {
+  background-color: #0056b3;
+}
