@@ -60,6 +60,6 @@ export class ContractDetailComponent implements OnInit{
      }
 
      goToContractDetail(id: number): void {
-     this.router.navigate(['/contract', id]);
+     this.router.navigate(['/contracts', id]);
   }
 }

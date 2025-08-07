@@ -7,14 +7,8 @@ using System.Threading.Tasks;
 
 namespace API.Repositories
 {
-    public class ContractRepository : IContractRepository
+    public class ContractRepository(DataContext _context) : IContractRepository
     {
-        private readonly DataContext _context;
-
-        public ContractRepository(DataContext context)
-        {
-            _context = context;
-        }
 
         public async Task<IEnumerable<Contract>> GetContractAsync()
         {

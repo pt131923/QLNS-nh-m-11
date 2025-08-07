@@ -10,18 +10,8 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SalariesController : BaseApiController
-    {
-        private readonly DataContext _context;
-        private readonly ISalaryRepository _salaryRepository;
-        private readonly AutoMapper.IMapper _mapper;
-
-        public SalariesController(DataContext context, ISalaryRepository salaryRepository, AutoMapper.IMapper mapper)
+    public class SalariesController(DataContext _context, ISalaryRepository _salaryRepository, AutoMapper.IMapper _mapper) : BaseApiController
         {
-            _context = context;
-            _salaryRepository = salaryRepository;
-            _mapper = mapper;
-        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SalaryDto>>> GetSalaries()
@@ -44,7 +34,7 @@ namespace API.Controllers
         {
             var employeeExists = await _context.Employee.AnyAsync(e => e.EmployeeId == salaryDto.EmployeeId);
             if (!employeeExists)
-                return BadRequest($"Employee with ID {salaryDto.EmployeeId} does not exist.");
+                return BadRequest("Employee with SalaryId does not exist.");
 
             var salary = _mapper.Map<Salary>(salaryDto);
 
@@ -77,16 +67,16 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete-salary/{id}")]
-public IActionResult DeleteSalary(int id)
-{
-    var salary = _context.Salary.Find(id);
-    if (salary == null)
-        return NotFound(new { message = "Salary not found." });
+        public IActionResult DeleteSalary(int id)
+        {
+            var salary = _context.Salary.Find(id);
+            if (salary == null)
+                return NotFound(new { message = "Salary not found." });
 
-    _context.Salary.Remove(salary);
-    _context.SaveChanges();
+            _context.Salary.Remove(salary);
+            _context.SaveChanges();
 
-    return Ok(new { message = "Salary deleted successfully." });
-}
+            return Ok(new { message = "Salary deleted successfully." });
+        }
     }
 }

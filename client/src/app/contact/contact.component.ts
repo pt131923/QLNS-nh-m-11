@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ContactService } from '../_services/contact.service';
+import { HttpClient } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-contact',
@@ -11,12 +14,16 @@ export class ContactComponent {
   isSubmitting = false;
   lastSubmissionTime: number | null = null;
   readonly MIN_SUBMISSION_INTERVAL = 3000; // 30 giây
+  contactHistory: any[] = [];
+  router: any;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private contactService: ContactService, private http: HttpClient, private toastr: ToastrService) {
     this.contactForm = this.fb.group({
-      name: ['', [Validators.required, Validators.pattern(/^[a-zA-ZÀ-ỹ\s]+$/)]],
-      email: ['', [Validators.required, Validators.email]],
-      message: ['', [Validators.required, Validators.maxLength(1000)]]
+      Name: ['', [Validators.required, Validators.pattern(/^[a-zA-ZÀ-ỹ\s]+$/)]],
+      Email: ['', [Validators.required, Validators.email]],
+      PhoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10,15}$/)]],
+      Message: ['', [Validators.required, Validators.maxLength(1000)]],
+      CreatedAt: ['', [Validators.required]]
     });
   }
 
@@ -66,11 +73,23 @@ export class ContactComponent {
     }, 50);
   }
   viewContactHistory() {
-    // Giả lập xem lịch sử liên hệ
-    console.log('Viewing contact history...');
-    alert('This feature is not implemented yet.');
-    // Ví dụ: mở một modal hoặc điều hướng đến một trang khác
-    // this.router.navigate(['/contact-history']);
-    // this.modalService.open(ContactHistoryComponent);
+    this.contactService.getContactHistory().subscribe(
+      (data: any[]) => {
+        this.contactHistory = data;
+      },
+      error => {
+        console.error('Error fetching contact history:', error);
+        this.toastr.error('Failed to load contact history.');
+      }
+    );
   }
+
+ sendContact() {
+  const contact = this.contactForm.value;
+
+  this.http.post('http://localhost:5002/api/contact', contact).subscribe({
+    next: () => this.toastr.success('Contact sent successfully!'),
+    error: () => this.toastr.error('Failed to send contact.')
+  });
+}
 }

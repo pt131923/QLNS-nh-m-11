@@ -32,10 +32,14 @@ import { PerformanceComponent } from './performance/performance.component';
 import { RecruitmentComponent } from './recruitment/recruitment.component';
 import { BenefitsComponent } from './benefits/benefits.component';
 import { LeaveComponent } from './leave/leave.component';
+import { ContactHistoryComponent } from './contact-history/contact-history.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+
+  // Contact history route
+  { path: 'contact-history', component: ContactHistoryComponent, canActivate: [AuthGuard] },
 
   // Employee routes
   { path: 'employee', component: EmployeeListComponent, canActivate: [AuthGuard] },

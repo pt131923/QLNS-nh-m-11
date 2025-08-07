@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\admin\\source\\repos\\QLNS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|c:\\users\\admin\\source\\repos\\qlns\\api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|solutionrelative:api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|c:\\users\\admin\\source\\repos\\qlns\\api\\controllers\\contactcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|solutionrelative:api\\controllers\\contactcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|c:\\users\\admin\\source\\repos\\qlns\\api\\controllers\\employeescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -13,6 +13,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|c:\\users\\admin\\source\\repos\\qlns\\api\\entities\\contract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|solutionrelative:api\\entities\\contract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|c:\\users\\admin\\source\\repos\\qlns\\api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|solutionrelative:api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{365CDD63-55D2-4595-902B-93FB0D44BB72}|API\\API.csproj|c:\\users\\admin\\source\\repos\\qlns\\api\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -38,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 21,
+          "SelectedChildIndex": 15,
           "Children": [
             {
               "$type": "Bookmark",
@@ -102,15 +106,29 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ContactController.cs",
+              "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Controllers\\ContactController.cs",
+              "RelativeDocumentMoniker": "API\\Controllers\\ContactController.cs",
+              "ToolTip": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Controllers\\ContactController.cs",
+              "RelativeToolTip": "API\\Controllers\\ContactController.cs",
+              "ViewState": "AQIAABsAAAAAAAAAAAAiwDMAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T15:28:30.903Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
               "Title": "EmployeesController.cs",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Controllers\\EmployeesController.cs",
               "RelativeDocumentMoniker": "API\\Controllers\\EmployeesController.cs",
               "ToolTip": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Controllers\\EmployeesController.cs",
               "RelativeToolTip": "API\\Controllers\\EmployeesController.cs",
-              "ViewState": "AQIAAFQAAAAAAAAAAAAowFoAAAA+AAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-20T15:06:18.528Z"
+              "WhenOpened": "2025-05-20T15:06:18.528Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -122,11 +140,12 @@
               "RelativeToolTip": "API\\Entities\\Contract.cs",
               "ViewState": "AQIAAAwAAAAAAAAAAAAYwBUAAAABAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-28T07:18:23.798Z"
+              "WhenOpened": "2025-04-28T07:18:23.798Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "AppDepartment.cs",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Entities\\AppDepartment.cs",
               "RelativeDocumentMoniker": "API\\Entities\\AppDepartment.cs",
@@ -138,7 +157,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Employee.cs",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Entities\\Employee.cs",
               "RelativeDocumentMoniker": "API\\Entities\\Employee.cs",
@@ -150,7 +169,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\appsettings.json",
               "RelativeDocumentMoniker": "API\\appsettings.json",
@@ -162,7 +181,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "API\\Properties\\launchSettings.json",
@@ -174,13 +193,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Program.cs",
               "RelativeDocumentMoniker": "API\\Program.cs",
               "ToolTip": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Program.cs",
               "RelativeToolTip": "API\\Program.cs",
-              "ViewState": "AQIAAHQAAAAAAAAAAAAjwIEAAAAIAAAA",
+              "ViewState": "AQIAAGkAAAAAAAAAAAAqwHQAAABSAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-21T14:04:43.696Z",
               "EditorCaption": ""

@@ -82,7 +82,7 @@ export class EmployeeAddComponent implements OnInit {
       next: (response) => {
         this.toastr.success('Employee added successfully');
         this.addForm.reset(employeeData); // Reset form về trạng thái ban đầu
-        this.router.navigate(['/employees']);
+        this.router.navigate(['/employee']);
       },
       error: (err) => {
         console.log('Sending data:', this.employee);

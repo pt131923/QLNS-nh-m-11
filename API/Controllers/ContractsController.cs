@@ -9,12 +9,8 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ContractsController(DataContext context, IContractRepository ContractRepository, AutoMapper.IMapper mapper) : BaseApiController
+    public class ContractsController(DataContext _context, IContractRepository _contractRepository, AutoMapper.IMapper _mapper) : BaseApiController
     {
-        private readonly DataContext _context = context;
-        private readonly IContractRepository _contractRepository = ContractRepository;
-        private readonly AutoMapper.IMapper _mapper = mapper;
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ContractDto>>> GetContracts()
         {
@@ -55,7 +51,7 @@ namespace API.Controllers
         }
 
         [HttpPost("add-contract")]
-        public async Task<ActionResult<ContractDto>> AddContract(ContractDto contractDto)
+        public async Task<ActionResult<ContractDto>> AddContract([FromBody] ContractDto contractDto)
         {
             if (await ContractExists(contractDto.ContractName))
                 return BadRequest("Contract name already exists");
@@ -64,43 +60,12 @@ namespace API.Controllers
             if (!employeeExists)
                 return BadRequest("Employee does not exist");
 
-            var contract = new Contract
-            {
-                ContractName = contractDto.ContractName.ToLower(),
-                ContractType = contractDto.ContractType,
-                EmployeeName = contractDto.EmployeeName,
-                StartDate = contractDto.StartDate,
-                EndDate = contractDto.EndDate,
-                BasicSalary = contractDto.BasicSalary,
-                Allowance = contractDto.Allowance,
-                CreateAt = contractDto.CreateAt,
-                UpdateAt = contractDto.UpdateAt,
-                JobDescription = contractDto.JobDescription,
-                ContractTerm = contractDto.ContractTerm,
-                WorkLocation = contractDto.WorkLocation,
-                Leaveofabsence = contractDto.Leaveofabsence
-            };
+            var contract = _mapper.Map<Contract>(contractDto);
 
             _context.Contract.Add(contract);
             await _context.SaveChangesAsync();
 
-            return new ContractDto
-            {
-                ContractId = contract.ContractId,
-                ContractName = contract.ContractName,
-                EmployeeName = contract.EmployeeName,
-                StartDate = contract.StartDate,
-                EndDate = (DateTime)contract.EndDate,
-                ContractType = contract.ContractType,
-                BasicSalary = contract.BasicSalary,
-                Allowance = contract.Allowance,
-                CreateAt = contract.CreateAt,
-                UpdateAt = contract.UpdateAt,
-                JobDescription = contract.JobDescription,
-                ContractTerm = contract.ContractTerm,
-                WorkLocation = contract.WorkLocation,
-                Leaveofabsence = contract.Leaveofabsence
-            };
+            return Ok(contract);
         }
 
         private async Task<bool> ContractExists(string contractName)
@@ -127,26 +92,15 @@ namespace API.Controllers
         {
             var contracts = await _context.Contract
                 .Include(c => c.Employee)
-                .Select(c => new ContractWithEmployeeDto
-                {
-                    ContractId = c.ContractId,
-                    ContractName = c.ContractName,
-                    EmployeeName = c.Employee.EmployeeName,
-                    StartDate = c.StartDate,
-                    EndDate = c.EndDate,
-                    ContractType = c.ContractType,
-                    BasicSalary = c.BasicSalary,
-                    Allowance = c.Allowance,
-                    CreateAt = c.CreateAt,
-                    UpdateAt = c.UpdateAt,
-                    JobDescription = c.JobDescription,
-                    ContractTerm = c.ContractTerm,
-                    WorkLocation = c.WorkLocation,
-                    Leaveofabsence = c.Leaveofabsence
-                })
+                .Select(c => _mapper.Map<ContractWithEmployeeDto>(c))
                 .ToListAsync();
 
             return Ok(contracts);
+        }
+        private async Task<bool> EmployeeExists(string employeeName)
+        {
+            return await _context.Employee
+                .AnyAsync(e => e.EmployeeName == employeeName);
         }
     }
 }

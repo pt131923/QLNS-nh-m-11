@@ -10,7 +10,6 @@ namespace API.Entities
         [Key]
         public int ContractId { get; set; }
 
-        [Required]
         [MaxLength(100)]
         public string ContractName { get; set; }
 
@@ -20,9 +19,9 @@ namespace API.Entities
 
         [JsonIgnore]
         public Employee Employee { get; set; }
-        [Required]
+
         [MaxLength(50)]
-        public string ContractType { get; set; } // Ví dụ: Có thời hạn, Không thời hạn...
+        public string ContractType { get; set; }
 
         public int BasicSalary { get; set; }
         public int Allowance { get; set; }
@@ -31,7 +30,6 @@ namespace API.Entities
         public DateTime UpdateAt { get; set; }
         public string JobDescription { get; set; }
         public DateTime ContractTerm { get; set; }
-        [Required]
         public DateTime StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }

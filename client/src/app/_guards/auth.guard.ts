@@ -18,12 +18,10 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    // Nếu không có token, kiểm tra xem có phải đang truy cập vào trang đăng nhập không
     if (state.url === '/login') {
       return true;
     }
 
-    // Chuyển về login nếu chưa đăng nhập
     return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
   }
 }

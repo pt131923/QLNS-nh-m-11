@@ -40,6 +40,7 @@ import { TrainingComponent } from './training/training.component';
 import { PerformanceComponent } from './performance/performance.component';
 import { TimekeepingComponent } from './timekeeping/timekeeping.component';
 import { RecruitmentComponent } from './recruitment/recruitment.component';
+import { ContactHistoryComponent } from './contact-history/contact-history.component';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http);
@@ -76,6 +77,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     PerformanceComponent,
     TimekeepingComponent,
     RecruitmentComponent,
+    ContactHistoryComponent,
   ],
   imports: [
     UserModule,

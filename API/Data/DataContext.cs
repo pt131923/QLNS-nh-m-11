@@ -3,15 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class DataContext : DbContext
+    public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
     {
-        public DataContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Employee> Employee { get; set; }
         public DbSet<AppDepartment> Department { get; set; }
         public DbSet<Contract> Contract { get; set; }
         public DbSet<Salary> Salary { get; set; }
         public DbSet<TimeKeeping> TimeKeeping { get; set; }
+        public DbSet<Contact> Contact { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

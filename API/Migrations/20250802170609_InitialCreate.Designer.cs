@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250625112202_InitialCreate")]
+    [Migration("20250802170609_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,6 +53,34 @@ namespace API.Migrations
                         .HasName("DepartmentId");
 
                     b.ToTable("Department");
+                });
+
+            modelBuilder.Entity("API.Entities.Contact", b =>
+                {
+                    b.Property<int>("ContactId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContactId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ContactId");
+
+                    b.ToTable("Contact");
                 });
 
             modelBuilder.Entity("API.Entities.Contract", b =>
@@ -188,6 +216,51 @@ namespace API.Migrations
                     b.ToTable("Employee");
                 });
 
+            modelBuilder.Entity("API.Entities.TimeKeeping", b =>
+                {
+                    b.Property<int>("TimeKeepingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TimeKeepingId"));
+
+                    b.Property<TimeSpan>("CheckInTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("CheckOutTime")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TimeKeepingId1")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("TotalHoursWorked")
+                        .HasColumnType("time");
+
+                    b.HasKey("TimeKeepingId")
+                        .HasName("TimeKeepingId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("TimeKeepingId1");
+
+                    b.ToTable("TimeKeeping");
+                });
+
             modelBuilder.Entity("Salary", b =>
                 {
                     b.Property<int>("SalaryId")
@@ -247,6 +320,21 @@ namespace API.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("API.Entities.TimeKeeping", b =>
+                {
+                    b.HasOne("API.Entities.Employee", "Employee")
+                        .WithMany("TimeKeeping")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.TimeKeeping", null)
+                        .WithMany("TimeKeepings")
+                        .HasForeignKey("TimeKeepingId1");
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("Salary", b =>
                 {
                     b.HasOne("API.Entities.Employee", "Employee")
@@ -268,6 +356,13 @@ namespace API.Migrations
                     b.Navigation("Contracts");
 
                     b.Navigation("Salaries");
+
+                    b.Navigation("TimeKeeping");
+                });
+
+            modelBuilder.Entity("API.Entities.TimeKeeping", b =>
+                {
+                    b.Navigation("TimeKeepings");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,18 +9,8 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EmployeesController : BaseApiController
+    public class EmployeesController(DataContext _context, IEmployeeRepository _employeeRepository, AutoMapper.IMapper _mapper) : BaseApiController
     {
-        private readonly DataContext _context;
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly AutoMapper.IMapper _mapper;
-
-        public EmployeesController(DataContext context, IEmployeeRepository employeeRepository, AutoMapper.IMapper mapper)
-        {
-            _context = context;
-            _employeeRepository = employeeRepository;
-            _mapper = mapper;
-        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
@@ -109,28 +99,7 @@ namespace API.Controllers
         {
             var employees = await _context.Employee
                 .Include(e => e.Department)
-                .Select(e => new EmployeeWithDepartmentDto
-                {
-                    EmployeeId = e.EmployeeId,
-                    EmployeeName = e.EmployeeName,
-                    EmployeeEmail = e.EmployeeEmail,
-                    EmployeePhone = e.EmployeePhone,
-                    EmployeeAddress = e.EmployeeAddress,
-                    DepartmentId = e.Department.DepartmentId,
-                    Department = e.Department.Name,
-                        BirthDate = e.BirthDate,
-                        PlaceOfBirth = e.PlaceOfBirth,
-                        Gender = e.Gender,
-                        MaritalStatus = e.MaritalStatus,
-                        IdentityNumber = e.IdentityNumber,
-                        IdentityIssuedDate = e.IdentityIssuedDate,
-                        IdentityIssuedPlace = e.IdentityIssuedPlace,
-                        Religion = e.Religion,
-                        Ethnicity = e.Ethnicity,
-                        Nationality = e.Nationality,
-                        EducationLevel = e.EducationLevel,
-                        Specialization = e.Specialization
-                })
+                .Select(e => _mapper.Map<EmployeeWithDepartmentDto>(e))
                 .ToListAsync();
 
             return Ok(employees);

@@ -157,7 +157,7 @@ export class ContractListComponent implements OnInit {
   onRowClicked(event: any): void {
   const contract = event.data;
   if (contract && contract.ContractId) {
-    this.router.navigate(['/contract', contract.ContractId]);
+    this.router.navigate(['/contracts', contract.ContractId]);
   } else {
     console.error('Invalid department data:', contract);
     this.toastr.error('Unable to redirect due to missing contract information.');

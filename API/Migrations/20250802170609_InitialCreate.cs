@@ -12,6 +12,23 @@ namespace API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Contact",
+                columns: table => new
+                {
+                    ContactId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Contact", x => x.ContactId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Department",
                 columns: table => new
                 {
@@ -121,6 +138,38 @@ namespace API.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "TimeKeeping",
+                columns: table => new
+                {
+                    TimeKeepingId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CheckInTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    CheckOutTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    TotalHoursWorked = table.Column<TimeSpan>(type: "time", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    TimeKeepingId1 = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("TimeKeepingId", x => x.TimeKeepingId);
+                    table.ForeignKey(
+                        name: "FK_TimeKeeping_Employee_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employee",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TimeKeeping_TimeKeeping_TimeKeepingId1",
+                        column: x => x.TimeKeepingId1,
+                        principalTable: "TimeKeeping",
+                        principalColumn: "TimeKeepingId");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Contract_EmployeeId",
                 table: "Contract",
@@ -135,16 +184,32 @@ namespace API.Migrations
                 name: "IX_Salary_EmployeeId",
                 table: "Salary",
                 column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TimeKeeping_EmployeeId",
+                table: "TimeKeeping",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TimeKeeping_TimeKeepingId1",
+                table: "TimeKeeping",
+                column: "TimeKeepingId1");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Contact");
+
+            migrationBuilder.DropTable(
                 name: "Contract");
 
             migrationBuilder.DropTable(
                 name: "Salary");
+
+            migrationBuilder.DropTable(
+                name: "TimeKeeping");
 
             migrationBuilder.DropTable(
                 name: "Employee");

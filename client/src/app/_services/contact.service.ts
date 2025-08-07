@@ -35,6 +35,11 @@ export class ContactService {
   getContactById(id: number): Observable<Contact> {
     return this.http.get<Contact>(`${this.baseUrl}/${id}`);
   }
+
+  getContactHistory(): Observable<any> {
+    return this.http.get<any[]>('/api/contact/history');
+  }
 }
+
 
 

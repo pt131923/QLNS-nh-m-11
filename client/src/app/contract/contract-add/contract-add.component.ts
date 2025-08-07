@@ -102,6 +102,11 @@ export class ContractAddComponent implements OnInit {
       return;
     }
 
+    Contract.ContractName = Contract.ContractName.trim();
+    Contract.ContractType = Contract.ContractType.trim();
+    Contract.EmployeeName = Contract.EmployeeName.trim();
+    Contract.StartDate = new Date(Contract.StartDate).toISOString();
+    Contract.EndDate = new Date(Contract.EndDate).toISOString();
     Contract.BasicSalary = Contract.BasicSalary || 0;
     Contract.Allowance = Contract.Allowance || 0;
     Contract.CreateAt = Contract.CreateAt || new Date().toISOString();
@@ -111,7 +116,6 @@ export class ContractAddComponent implements OnInit {
     Contract.WorkLocation = Contract.WorkLocation?.trim() || '';
     Contract.Leaveofabsence = Contract.Leaveofabsence?.trim() || '';
 
-    // Call the service
     this.contractService.AddContract(Contract).subscribe({
       next: (response) => {
         this.toastr.success('Contract added successfully!');

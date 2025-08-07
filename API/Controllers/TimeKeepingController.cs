@@ -8,27 +8,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    public class TimeKeepingController : ControllerBase
+    public class TimeKeepingController(ITimeKeepingRepository _timekeepingRepository) : ControllerBase
     {
-        private readonly ITimeKeepingRepository _timeKeepingService;
 
-        public TimeKeepingController(ITimeKeepingRepository timeKeepingService)
-        {
-            _timeKeepingService = timeKeepingService;
-        }
-
-        [HttpGet("api/timekeeping/{employeeId}")]
+        [HttpGet("{employeeId}")]
         public async Task<IActionResult> GetTimeEntriesForUser(string employeeId)
         {
-            var timeEntries = await _timeKeepingService.GetTimeEntriesForUser(employeeId);
+            var timeEntries = await _timekeepingRepository.GetTimeEntriesForUser(employeeId);
             return Ok(timeEntries);
         }
 
         [HttpPost("api/timekeeping")]
         public async Task<IActionResult> CreateTimeEntry([FromBody] TimeKeepingDto timeKeepingDto)
         {
-            var createdEntry = await _timeKeepingService.CreateTimeEntry(timeKeepingDto);
+            var createdEntry = await _timekeepingRepository.CreateTimeEntry(timeKeepingDto);
             return CreatedAtAction(nameof(GetTimeEntriesForUser), new { employeeId = timeKeepingDto.EmployeeId }, createdEntry);
         }
     }
