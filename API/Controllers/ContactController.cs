@@ -26,16 +26,16 @@ namespace API.Controllers
         {
             if (contactDto == null)
             {
-              return BadRequest("Contact data is null");
+                return BadRequest("Contact data is null");
             }
 
             var contact = _mapper.Map<Contact>(contactDto);
             _ = await _contactRepository.AddContactAsync(contact);
 
-        if (await _contactRepository.SaveAllAsync())
-            return Ok();
+            if (await _contactRepository.SaveAllAsync())
+                return Ok();
 
-        return BadRequest("Failed to save contact");
+            return BadRequest("Failed to save contact");
         }
 
         // GET api/contact/error

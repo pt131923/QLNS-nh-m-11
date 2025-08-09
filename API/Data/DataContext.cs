@@ -12,6 +12,7 @@ namespace API.Data
         public DbSet<Salary> Salary { get; set; }
         public DbSet<TimeKeeping> TimeKeeping { get; set; }
         public DbSet<Contact> Contact { get; set; }
+        public DbSet<User> User { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

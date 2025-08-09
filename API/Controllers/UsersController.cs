@@ -17,7 +17,7 @@ namespace API.Controllers
             var users = new List<string> { "User1", "User2", "User3" };
             return Ok(users);
         }
-        
+
         [HttpGet("{id}")]
         public ActionResult<string> GetUserById(int id)
         {
@@ -61,6 +61,19 @@ namespace API.Controllers
                 return BadRequest("Invalid user ID.");
             }
             return Ok($"User{id} deleted");
+        }
+
+        [HttpGet("search")]
+        public ActionResult<IEnumerable<string>> SearchUsers(string query)
+        {
+            // This is just a placeholder. In a real application, you would search users in a database.
+            var users = new List<string> { "User1", "User2", "User3" };
+            if (string.IsNullOrEmpty(query))
+            {
+                return BadRequest("Search query cannot be empty.");
+            }
+            var results = users.Where(u => u.Contains(query, StringComparison.OrdinalIgnoreCase));
+            return Ok(results);
         }
     }
 }

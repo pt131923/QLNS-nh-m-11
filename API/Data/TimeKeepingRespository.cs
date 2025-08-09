@@ -4,35 +4,55 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class TimeKeepingRepository
+    public class TimeKeepingRepository( DataContext _context, AutoMapper.IMapper _mapper) : ITimeKeepingRepository
     {
-        public Task<List<TimeKeeping>> GetTimeEntriesForUser(string userId)
+        public async Task<TimeKeeping> CreateTimeEntry(TimeKeepingDto timeKeepingDto)
         {
-            // Implementation goes here
-            throw new NotImplementedException();
+            var timeKeeping = _mapper.Map<TimeKeeping>(timeKeepingDto);
+            await _context.TimeKeeping.AddAsync(timeKeeping);
+            return timeKeeping;
         }
 
-        // Example method to create a time entry
-        public Task<TimeKeeping> CreateTimeEntry(TimeKeepingDto timeKeepingDto)
+        public async Task<List<TimeKeepingDto>> GetTimeEntriesForUser(string employeeId)
         {
-            var timeKeeping = new TimeKeeping
-            {
-                TimeKeepingId = 0, // This will be set by the database
-                EmployeeId = timeKeepingDto.EmployeeId,
-                Date = timeKeepingDto.Date,
-                CheckInTime = timeKeepingDto.CheckInTime,
-                CheckOutTime = timeKeepingDto.CheckOutTime,
-                TotalHoursWorked = timeKeepingDto.TotalHoursWorked,
-                Status = timeKeepingDto.Status,
-                Note = timeKeepingDto.Note,
-            };
+            var timeEntries = await _context.TimeKeeping
+                .Where(x => x.EmployeeId == int.Parse(employeeId))
+                .ToListAsync();
 
-            // Save the timeKeeping entity to the database
-            // Implementation goes here
-            throw new NotImplementedException();
+            return _mapper.Map<List<TimeKeepingDto>>(timeEntries);
+        }
+
+        public async Task<TimeKeepingWithEmployeeDto> GetTimeEntryById(int timeKeepingId)
+        {
+            var timeEntry = await _context.TimeKeeping
+                .Include(x => x.Employee)
+                .FirstOrDefaultAsync(x => x.TimeKeepingId == timeKeepingId);
+
+            return _mapper.Map<TimeKeepingWithEmployeeDto>(timeEntry);
+        }
+
+        public async Task<TimeKeeping> UpdateTimeEntry(TimeKeepingDto timeKeepingDto)
+        {
+            var timeKeeping = await _context.TimeKeeping
+               .FirstOrDefaultAsync(x => x.TimeKeepingId == timeKeepingDto.TimeKeepingId);
+            _mapper.Map(timeKeepingDto, timeKeeping);
+            await _context.SaveChangesAsync();
+            return timeKeeping;
+        }
+
+        public async Task<TimeKeepingDto> UpdateTimeEntry(int timeKeepingId, TimeKeepingUpdateDto timeKeepingUpdateDto)
+        {
+            var timeKeeping = await _context.TimeKeeping
+                .FirstOrDefaultAsync(x => x.TimeKeepingId == timeKeepingId);
+
+            _mapper.Map(timeKeepingUpdateDto, timeKeeping);
+            _context.TimeKeeping.Update(timeKeeping);
+            return await Task.FromResult(_mapper.Map<TimeKeepingDto>(timeKeeping));
         }
     }
 }

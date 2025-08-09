@@ -26,5 +26,22 @@ namespace API.Controllers
             var createdEntry = await _timekeepingRepository.CreateTimeEntry(timeKeepingDto);
             return CreatedAtAction(nameof(GetTimeEntriesForUser), new { employeeId = timeKeepingDto.EmployeeId }, createdEntry);
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateTimeEntry(int id, [FromBody] TimeKeepingDto timeKeepingDto)
+        {
+            if (id != timeKeepingDto.TimeKeepingId)
+            {
+                return BadRequest("ID mismatch");
+            }
+
+            var updatedEntry = await _timekeepingRepository.UpdateTimeEntry(timeKeepingDto);
+            if (updatedEntry == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedEntry);
+        }
     }
 }

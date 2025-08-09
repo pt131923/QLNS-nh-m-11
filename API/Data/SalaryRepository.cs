@@ -7,16 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class SalaryRepository : ISalaryRepository
+    public class SalaryRepository(DataContext _context, AutoMapper.IMapper _mapper) : ISalaryRepository
     {
-        private readonly DataContext _context;
-        private readonly AutoMapper.IMapper _mapper;
-
-        public SalaryRepository(DataContext context, AutoMapper.IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
 
         public async Task<IEnumerable<Salary>> GetSalariesAsync()
         {

@@ -7,17 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class DepartmentRepository : IDepartmentRepository
+    public class DepartmentRepository(DataContext _context, AutoMapper.IMapper _mapper) : IDepartmentRepository
     {
-        private readonly DataContext _context;
-        private readonly AutoMapper.IMapper _mapper;
-
-        public DepartmentRepository(DataContext context, AutoMapper.IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
         public async Task<IEnumerable<AppDepartment>> GetDepartmentsAsync()
         {
             return await _context.Department

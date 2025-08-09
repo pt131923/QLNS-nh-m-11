@@ -42,7 +42,7 @@ const routes: Routes = [
   { path: 'contact-history', component: ContactHistoryComponent, canActivate: [AuthGuard] },
 
   // Employee routes
-  { path: 'employee', component: EmployeeListComponent, canActivate: [AuthGuard] },
+  { path: 'employees', component: EmployeeListComponent, canActivate: [AuthGuard] },
   { path: 'employee-add', component: EmployeeAddComponent, canActivate: [AuthGuard] },
   { path: 'employee-edit/:id', component: EmployeeEditComponent, canActivate: [AuthGuard] },
   { path: 'employee/:id', component: EmployeeDetailComponent, canActivate: [AuthGuard] },

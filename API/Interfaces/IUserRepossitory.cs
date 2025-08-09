@@ -6,7 +6,8 @@ using API.DTOs;
 
 namespace API.Interfaces
 {
-    public interface IUserRepossitory
+    public interface IUserRepository
+
     {
         Task<IEnumerable<UserDto>> GetUsersAsync();
         Task<UserDto> GetUserByIdAsync(int userId);

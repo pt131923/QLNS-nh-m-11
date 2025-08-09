@@ -20,13 +20,13 @@ namespace API.Data
             return await _context.Contact.FindAsync(id);
         }
 
-        public async Task UpdateContactAsync(Contact contact)
+        public async Task UpdateContact(Contact contact)
         {
             _context.Contact.Update(contact);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteContactAsync(int id)
+        public async Task DeleteContact(int id)
         {
             var contact = await _context.Contact.FindAsync(id);
             if (contact != null)
