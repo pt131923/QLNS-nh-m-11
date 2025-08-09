@@ -12,18 +12,8 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DepartmentsController : BaseApiController
+    public class DepartmentsController(DataContext _context, IDepartmentRepository _departmentRepository, AutoMapper.IMapper _mapper) : BaseApiController
     {
-        private readonly DataContext _context;
-        private readonly IDepartmentRepository _departmentRepository;
-        private readonly AutoMapper.IMapper _mapper;
-
-        public DepartmentsController(DataContext context, IDepartmentRepository departmentRepository, AutoMapper.IMapper mapper)
-        {
-            _context = context;
-            _departmentRepository = departmentRepository;
-            _mapper = mapper;
-        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetDepartments()
