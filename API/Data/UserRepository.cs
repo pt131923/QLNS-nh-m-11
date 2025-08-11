@@ -10,8 +10,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class UserRepository(DataContext _context, AutoMapper.IMapper _mapper) : IUserRepossitory
+    public class UserRepository(DataContext _context, AutoMapper.IMapper _mapper) : IUserRepository
     {
+
+        Task<IEnumerable<UserDto>> IUserRepository.GetUsersAsync()
+        {
+            return _context.User
+                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                .ToListAsync()
+                .ContinueWith(task => task.Result.AsEnumerable());
+        }
+
+        public Task<UserDto> GetUserByNameAsync(string userName)
+        {
+            return _context.User
+                .Where(x => x.UserName == userName)
+                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
+        }
+
         public Task<UserDto> GetUserByIdAsync(int userId)
         {
             return _context.User
@@ -19,44 +36,46 @@ namespace API.Data
                 .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }
-        public Task<List<UserDto>> GetAllUsersAsync()
+
+        public Task<bool> UserExistsAsync(string userName)
         {
             return _context.User
-                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-        }
-        public Task AddUserAsync(UserDto user)
-        {
-            var newUser = _mapper.Map<User>(user);
-            _context.User.Add(newUser);
-            return _context.SaveChangesAsync();
-        }
-        public Task UpdateUserAsync(UserDto user)
-        {
-            var existingUser = _context.User.Find(user.UserId);
-            if (existingUser != null)
-            {
-                _mapper.Map(user, existingUser);
-                return _context.SaveChangesAsync();
-            }
-            return Task.CompletedTask;
-        }
-        public Task DeleteUserAsync(int userId)
-        {
-            var user = _context.User.Find(userId);
-            if (user != null)
-            {
-                _context.User.Remove(user);
-                return _context.SaveChangesAsync();
-            }
-            return Task.CompletedTask;
+                .AnyAsync(x => x.UserName == userName);
         }
 
-        public Task<List<UserDto>> GetUsersAsync()
+        public Task<bool> SaveUserAsync(UserDto userDto)
         {
-            return _context.User
-                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+            throw new NotImplementedException();
+        }
+
+        async Task<bool> IUserRepository.DeleteUserAsync(int userId)
+        {
+            var user = await _context.User.FindAsync(userId);
+            if (user == null) return false;
+
+            _context.User.Remove(user);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateUserAsync(UserDto userDto)
+        {
+            var user = await _context.User.FindAsync(userDto.UserId);
+            if (user == null) return false;
+
+            _mapper.Map(userDto, user);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        async Task<bool> IUserRepository.AddUserAsync(UserDto userDto)
+        {
+            var user = _mapper.Map<User>(userDto);
+            _context.User.Add(user);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

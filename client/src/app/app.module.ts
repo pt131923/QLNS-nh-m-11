@@ -42,6 +42,7 @@ import { TimekeepingComponent } from './timekeeping/timekeeping.component';
 import { RecruitmentComponent } from './recruitment/recruitment.component';
 import { ContactHistoryComponent } from './contact-history/contact-history.component';
 
+
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http);
 }

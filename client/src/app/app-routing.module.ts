@@ -19,6 +19,7 @@ import { SalaryEditComponent } from './salary/salary/salary-edit/salary-edit.com
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { AuthGuard } from './_guards/auth.guard';
+
 import { EmployeeDetailComponent } from './employees/employee-detail/employee-detail.component';
 import { DepartmentDetailComponent } from './departments/department-detail/department-detail.component';
 import { SettingComponent } from './setting/setting.component';

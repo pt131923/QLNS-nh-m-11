@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AuthGuard implements CanActivate {
 
+  private loggedIn = false;
   constructor(private router: Router) {}
 
   canActivate(
@@ -23,5 +24,19 @@ export class AuthGuard implements CanActivate {
     }
 
     return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+  }
+
+  login(){
+    this.loggedIn = true;
+  }
+
+  logout(){
+    this.loggedIn = false;
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return this.loggedIn || !!localStorage.getItem('token');
   }
 }

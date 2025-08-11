@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../_services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,12 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  constructor(private fb: FormBuilder, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private route: ActivatedRoute,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -23,34 +29,36 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
   onSubmit(): void {
-  this.submitted = true;
+    this.submitted = true;
 
-  if (this.loginForm.invalid) {
-    this.errorMessage = 'Please fill in all required fields.';
-    this.successMessage = '';
-    return;
+    if (this.loginForm.invalid) {
+      this.errorMessage = 'Please fill in all required fields.';
+      this.successMessage = '';
+      return;
+    }
+
+    const { username, password, rememberMe } = this.loginForm.value;
+
+    // Fake login logic
+    if (username === 'admin' && password === 'password') {
+      this.errorMessage = '';
+      this.successMessage = 'Login successful!';
+
+      setTimeout(() => {
+        this.authService.login('Api', rememberMe);
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+        this.router.navigateByUrl(returnUrl);
+      }, 100);
+    } else {
+      this.errorMessage = 'Invalid username or password.';
+      this.successMessage = '';
+    }
   }
-
-  const { username, password } = this.loginForm.value;
-
-  // Fake login logic
-  if (username === 'admin' && password === 'password') {
-    console.log('Login successful');
-    this.errorMessage = '';
-    this.successMessage = 'Login successful!';
-
-    setTimeout(() => {
-      localStorage.setItem('token', 'Api');
-       const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-      this.router.navigateByUrl(returnUrl);
-    }, 100);
-  } else {
-    this.errorMessage = 'Invalid username or password.';
-    this.successMessage = '';
-  }
-}
-
 
   onReset(): void {
     this.loginForm.reset();
@@ -65,5 +73,10 @@ export class LoginComponent implements OnInit {
     } else if (event.key === 'Escape') {
       this.onReset();
     }
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
