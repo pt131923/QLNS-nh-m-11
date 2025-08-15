@@ -1,49 +1,19 @@
+<div class="container mt-5">
+    <div *ngIf="!registerMode" style="text-align: center;">
+        <h1>Find your match</h1>
+        <p class="lead">Come on in to view of HR Management System... all you need to do is sign up!</p>
+        <div class="text-center">
+            <button (click)="registerToggle()" class="btn btn-primary btn-lg me-2">Register</button>
+            <button class="btn btn-info btn-lg">Learn more</button>
+        </div>
+    </div>
 
-<p class="text-center display-5">Welcome to the HR Management System Dashboard. Here you can manage all your HR tasks efficiently.</p>
-<hr>
-<div class="container mt-4">
-  <div class="row">
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/employees">Go to Employee page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/departments">Go to Department page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/contracts">Go to Contract page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/salaries">Go to Salary page</button>
-  </div>
+    <div *ngIf="registerMode" class="container">
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <app-register (cancelRegister)="cancelRegisterMode(false)"></app-register>
 
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/timekeeping">Go to Timekeeping page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/recruitment">Go to Recruitment page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/performance">Go to Performance page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/benefits">Go to Benefits page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/training">Go to Training page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/leave">Go to Leave page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/settings">Go to Settings page</button>
-  </div>
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/help">Go to Help page</button>
-  </div>
-
-  <div class="col-md-3 mb-3">
-    <button class="btn btn-secondary w-100" routerLink="/contact">Go to Contact page</button>
-  </div>
+            </div>
+        </div>
+    </div>
 </div>
-</div>
-

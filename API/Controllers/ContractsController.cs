@@ -70,7 +70,7 @@ namespace API.Controllers
 
         private async Task<bool> ContractExists(string contractName)
         {
-            return await _context.Contract.AnyAsync(x => x.ContractName == contractName.ToLower());
+            return await _context.Contract.AnyAsync(c => c.ContractName.Equals(contractName, StringComparison.CurrentCultureIgnoreCase));
         }
 
         [HttpDelete("delete-contract/{id}")]
@@ -97,6 +97,7 @@ namespace API.Controllers
 
             return Ok(contracts);
         }
+
         private async Task<bool> EmployeeExists(string employeeName)
         {
             return await _context.Employee

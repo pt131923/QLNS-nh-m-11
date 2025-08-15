@@ -7,4 +7,10 @@ import { Component } from '@angular/core';
 })
 export class TrainingComponent {
 
+  contructor() {
+
+  }
+  ngOnInit(): void {
+    // Initialization logic can go here
+  }
 }

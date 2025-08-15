@@ -6,4 +6,28 @@ import { Component } from '@angular/core';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent {
+  registerMode = false;
+  users: any;
+  $event: any;
+
+  title = 'HR Management System';
+
+  constructor() {}
+
+  ngOnInit(): void {
+  }
+
+  registerToggle() {
+    this.registerMode = !this.registerMode
+  }
+
+  cancelRegisterMode(event: boolean) {
+    this.registerMode = event;
+    if (this.registerMode) {
+      this.users = null;
+    }
+  }
+  onUserSelected(user: any) {
+    this.users = user;
+ }
 }
