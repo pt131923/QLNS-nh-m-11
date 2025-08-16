@@ -3,7 +3,9 @@
     "",
     "\\API",
     "\\API\\Controllers",
-    "\\API\\Data"
+    "\\API\\Data", 
+    "\\API\\Entities",
+    "\\API\\Services"
   ],
   "SelectedNode": "\\API\\Controllers\\DepartmentsController.cs",
   "PreviewInSolutionExplorer": false

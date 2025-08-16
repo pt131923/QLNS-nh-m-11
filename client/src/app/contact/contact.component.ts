@@ -10,7 +10,7 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./contact.component.css']
 })
 export class ContactComponent {
-   contactForm: FormGroup;
+  contactForm: FormGroup;
   isSubmitting = false;
   lastSubmissionTime: number | null = null;
   readonly MIN_SUBMISSION_INTERVAL = 3000; // 30 giây

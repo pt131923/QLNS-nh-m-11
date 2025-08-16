@@ -14,21 +14,21 @@ export class ContractAddComponent implements OnInit {
   @ViewChild('addForm2') addForm2!: NgForm;
 
   contract: Contract = {
-    ContractImage: undefined,
+    ContractImage: '',
     ContractId: 0,
     ContractName: '',
     ContractType: '',
-    EmployeeName:'',
+    EmployeeName: '',
     StartDate: '',
     EndDate: '',
     BasicSalary: 0,
-      Allowance: 0,
-      CreateAt: '',
-      UpdateAt: '',
-      JobDescription: '',
-      ContractTerm: '',
-      WorkLocation: '',
-      Leaveofabsence: ''
+    Allowance: 0,
+    CreateAt: '',
+    UpdateAt: '',
+    JobDescription: '',
+    ContractTerm: '',
+    WorkLocation: '',
+    Leaveofabsence: ''
   };
 
   contracts: Contract[] = [];
@@ -44,37 +44,35 @@ export class ContractAddComponent implements OnInit {
   }
 
   AddContract(): void {
-    if (this.addForm2.invalid) {
+    if (!this.addForm2 || this.addForm2.invalid) {
       this.toastr.error('Please fill in all required fields');
       return;
     }
 
     let Contract: Contract = { ...this.contract };
 
-    // Validation
-    if (!Contract.ContractName || !Contract.StartDate || !Contract.EndDate|| !Contract.CreateAt|| !Contract.UpdateAt || !Contract.ContractType || !Contract.EmployeeName|| !Contract.BasicSalary || !Contract.Allowance|| !Contract.JobDescription || !Contract.ContractTerm || !Contract.WorkLocation || !Contract.Leaveofabsence) {
+    // Validation cơ bản
+    if (!Contract.ContractName?.trim() ||
+        !Contract.EmployeeName?.trim() ||
+        !Contract.ContractType?.trim() ||
+        !Contract.StartDate || !Contract.EndDate) {
       this.toastr.error('Please fill in all required fields');
       return;
     }
 
-    if (Contract.ContractType.trim() === '') {
-      this.toastr.error('Contract Type is required');
-      return;
-    }
-    if (Contract.EmployeeName.trim() === '') {
-      this.toastr.error('Employee Name is required');
-      return;
-    }
-
+    // Ngày bắt đầu phải trước ngày kết thúc
     if (new Date(Contract.StartDate) >= new Date(Contract.EndDate)) {
       this.toastr.error('Start date must be before end date');
       return;
     }
 
+    // Ngày kết thúc không được nhỏ hơn ngày hiện tại
     if (new Date(Contract.EndDate) < new Date()) {
       this.toastr.error('End date cannot be in the past');
       return;
     }
+
+    // Lương và phụ cấp
     if (Contract.BasicSalary < 0) {
       this.toastr.error('Basic Salary cannot be negative');
       return;
@@ -84,40 +82,22 @@ export class ContractAddComponent implements OnInit {
       return;
     }
 
-    if(!Contract.JobDescription || !Contract.ContractTerm || !Contract.WorkLocation || !Contract.Leaveofabsence) {
-      this.toastr.error('Job Description, Contract Term, Work Location, and Leave of Absence are required');
-      return;
-    }
-
-    if (Contract.ContractTerm.trim() === '') {
-      this.toastr.error('Contract Term is required');
-      return;
-    }
-    if (Contract.WorkLocation.trim() === '') {
-      this.toastr.error('Work Location is required');
-      return;
-    }
-    if (Contract.Leaveofabsence.trim() === '') {
-      this.toastr.error('Leave of Absence is required');
-      return;
-    }
-
+    // Chuẩn hoá dữ liệu
     Contract.ContractName = Contract.ContractName.trim();
     Contract.ContractType = Contract.ContractType.trim();
     Contract.EmployeeName = Contract.EmployeeName.trim();
     Contract.StartDate = new Date(Contract.StartDate).toISOString();
     Contract.EndDate = new Date(Contract.EndDate).toISOString();
-    Contract.BasicSalary = Contract.BasicSalary || 0;
-    Contract.Allowance = Contract.Allowance || 0;
-    Contract.CreateAt = Contract.CreateAt || new Date().toISOString();
+    Contract.CreateAt = new Date().toISOString();
     Contract.UpdateAt = new Date().toISOString();
     Contract.JobDescription = Contract.JobDescription?.trim() || '';
     Contract.ContractTerm = Contract.ContractTerm?.trim() || '';
     Contract.WorkLocation = Contract.WorkLocation?.trim() || '';
     Contract.Leaveofabsence = Contract.Leaveofabsence?.trim() || '';
 
+    // Gọi API
     this.contractService.AddContract(Contract).subscribe({
-      next: (response) => {
+      next: () => {
         this.toastr.success('Contract added successfully!');
         this.resetForm();
         this.router.navigate(['/contracts']);
@@ -129,15 +109,6 @@ export class ContractAddComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
-    if (this.addForm2.invalid) {
-      this.toastr.error('Please fill in all required fields');
-      return;
-    }
-
-    this.AddContract();
-  }
-
   onCancel(): void {
     this.resetForm();
     this.router.navigate(['/contracts']);
@@ -145,7 +116,7 @@ export class ContractAddComponent implements OnInit {
 
   private resetForm(): void {
     this.contract = {
-      ContractImage:'',
+      ContractImage: '',
       ContractId: 0,
       ContractName: '',
       ContractType: '',
@@ -161,7 +132,9 @@ export class ContractAddComponent implements OnInit {
       WorkLocation: '',
       Leaveofabsence: ''
     };
-    this.addForm2.resetForm();
+    if (this.addForm2) {
+      this.addForm2.resetForm();
+    }
   }
 
   getContracts(): void {

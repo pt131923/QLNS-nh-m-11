@@ -22,7 +22,6 @@ export class ContactHistoryComponent {
   }
 
   deleteContact(contactId: number) {
-    // Logic to delete contact
     console.log('Deleting contact with ID:', contactId);
   }
 }

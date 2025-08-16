@@ -80,7 +80,7 @@ export class DepartmentListComponent implements OnInit {
   onBtExport() {
     if (this.gridApi) {
       this.gridApi.exportDataAsCsv({
-        fileName: 'Danh sách phòng banban.csv',
+        fileName: 'Danh sách phòng ban.csv',
         columnKeys: ['DepartmentId', 'Name', 'Description', 'SlNhanVien', 'Addresses', 'Notes']
       });
     } else {

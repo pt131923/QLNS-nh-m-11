@@ -26,7 +26,7 @@ export class ContractListComponent implements OnInit {
     headerName: '',
     checkboxSelection: true,
     width: 40,
-    headerCheckboxSelection: true, // chọn tất cả
+    headerCheckboxSelection: true,
     headerCheckboxSelectionFilteredOnly: true,
     pinned: 'left'
   },

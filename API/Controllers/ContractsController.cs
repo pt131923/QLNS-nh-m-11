@@ -45,7 +45,10 @@ namespace API.Controllers
 
             _contractRepository.Update(contract);
 
-            if(await _contractRepository.SaveAllAsync()) return NoContent();
+            if(await _contractRepository.SaveAllAsync())
+            {
+                return NoContent();
+            }   
 
             return BadRequest("Failed to update contract");
         }
