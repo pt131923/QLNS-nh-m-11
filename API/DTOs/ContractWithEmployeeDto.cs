@@ -11,10 +11,10 @@ namespace API.DTOs
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public string JobDescription { get; set; }
-        public DateTime ContractTerm { get; set; }
+        public string ContractTerm { get; set; }
         public DateTime StartDate { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
         public string WorkLocation { get; set; }
         public string Leaveofabsence { get; set; }
     }

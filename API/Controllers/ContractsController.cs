@@ -55,25 +55,37 @@ namespace API.Controllers
 
         [HttpPost("add-contract")]
         public async Task<ActionResult<ContractDto>> AddContract([FromBody] ContractDto contractDto)
-        {  
-            if (await ContractExists(contractDto.ContractName))
+        {
+            // Kiểm tra contract name có tồn tại chưa (không phân biệt hoa/thường)
+            if (await _context.Contract.AnyAsync(c => c.ContractName.ToLower() == contractDto.ContractName.ToLower()))
+            {
                 return BadRequest("Contract name already exists");
+            }
 
-            var employeeExists = await _context.Employee.AnyAsync(e => e.EmployeeName == contractDto.EmployeeName);
+            // Kiểm tra employee có tồn tại không
+            var employeeExists = await _context.Employee
+                .AnyAsync(e => e.EmployeeName.ToLower() == contractDto.EmployeeName.ToLower());
+
             if (!employeeExists)
+            {
                 return BadRequest("Employee does not exist");
+            }
 
+            // Map DTO sang entity
             var contract = _mapper.Map<Contract>(contractDto);
 
+            // Add vào DB
             _context.Contract.Add(contract);
             await _context.SaveChangesAsync();
 
-            return Ok(contract);
+            // Trả về contract vừa tạo
+            return CreatedAtRoute("GetContractById", new { id = contract.ContractId }, contract);
         }
 
         private async Task<bool> ContractExists(string contractName)
         {
-            return await _context.Contract.AnyAsync(c => c.ContractName.Equals(contractName, StringComparison.CurrentCultureIgnoreCase));
+             return await _context.Contract
+             .AnyAsync(c => EF.Functions.Like(c.ContractName, contractName));
         }
 
         [HttpDelete("delete-contract/{id}")]

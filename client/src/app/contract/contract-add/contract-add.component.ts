@@ -12,6 +12,7 @@ import { ContractService } from 'src/app/_services/contract.service';
 })
 export class ContractAddComponent implements OnInit {
 @ViewChild('addForm') addForm!: NgForm;
+
   contracts: Contract[] = [];
 
   constructor(
@@ -30,36 +31,26 @@ export class ContractAddComponent implements OnInit {
       return;
     }
 
-    // Chuyển đổi StartDate và EndDate sang yyyy-MM-dd (an toàn hơn toISOString)
-    const startDate = this.addForm.value.StartDate
-      ? new Date(this.addForm.value.StartDate).toISOString().split('T')[0]
-      : null;
-
-    const endDate = this.addForm.value.EndDate
-      ? new Date(this.addForm.value.EndDate).toISOString().split('T')[0]
-      : null;
-
     let contractData: Contract = {
       ContractId: 0,
       ContractName: this.addForm.value.ContractName?.trim(),
       ContractType: this.addForm.value.ContractType?.trim(),
       EmployeeName: this.addForm.value.EmployeeName?.trim(),
-      StartDate: startDate!,
-      EndDate: endDate!,
+      StartDate: new Date(this.addForm.value.StartDate).toISOString(),
+      EndDate: new Date(this.addForm.value.EndDate).toISOString(),
       BasicSalary: this.addForm.value.BasicSalary,
       Allowance: this.addForm.value.Allowance,
-      // CreateAt và UpdateAt để backend tự sinh
-      CreateAt: new Date().toISOString(),
-      UpdateAt: new Date().toISOString(),
-      JobDescription: this.addForm.value.JobDescription?.trim(),
-      ContractTerm: this.addForm.value.ContractTerm?.trim(),
-      WorkLocation: this.addForm.value.WorkLocation?.trim(),
-      Leaveofabsence: this.addForm.value.Leaveofabsence?.trim()
+      CreateAt: new Date(this.addForm.value.CreateAt).toISOString(),
+      UpdateAt: new Date(this.addForm.value.UpdateAt).toISOString(),
+      JobDescription: this.addForm.value.JobDescription?.trim() || '',
+      ContractTerm: this.addForm.value.ContractTerm?.trim() || '',
+      WorkLocation: this.addForm.value.WorkLocation?.trim() || '',
+      Leaveofabsence: this.addForm.value.Leaveofabsence?.trim() || ''
     };
 
-    console.log('Contract Data:', contractData);
+    console.log(contractData);
 
-    // Validate logic cơ bản
+    // Validation logic
     if (!contractData.ContractName || !contractData.EmployeeName || !contractData.ContractType) {
       this.toastr.error('Please fill in all required fields');
       return;
@@ -75,6 +66,31 @@ export class ContractAddComponent implements OnInit {
       return;
     }
 
+    // Check CreateAt
+if (!contractData.CreateAt || isNaN(Date.parse(contractData.CreateAt))) {
+  this.toastr.error('CreateAt is required and must be a valid date');
+  return;
+}
+
+// Check UpdateAt
+if (!contractData.UpdateAt || isNaN(Date.parse(contractData.UpdateAt))) {
+  this.toastr.error('UpdateAt is required and must be a valid date');
+  return;
+}
+
+// Business logic: CreateAt <= today
+if (new Date(contractData.CreateAt) > new Date()) {
+  this.toastr.error('CreateAt cannot be in the future');
+  return;
+}
+
+// Business logic: UpdateAt >= CreateAt
+if (new Date(contractData.UpdateAt) < new Date(contractData.CreateAt)) {
+  this.toastr.error('UpdateAt cannot be before CreateAt');
+  return;
+}
+
+
     if (contractData.ContractTerm && contractData.ContractTerm.length > 100) {
       this.toastr.error('Contract Term cannot exceed 100 characters');
       return;
@@ -87,16 +103,6 @@ export class ContractAddComponent implements OnInit {
 
     if (contractData.Allowance < 0) {
       this.toastr.error('Allowance cannot be negative');
-      return;
-    }
-
-    if (contractData.CreateAt && contractData.CreateAt.length > 100) {
-      this.toastr.error('CreateAt cannot exceed 100 characters');
-      return;
-    }
-
-    if (contractData.UpdateAt && contractData.UpdateAt.length > 100) {
-      this.toastr.error('UpdateAt cannot exceed 100 characters');
       return;
     }
 

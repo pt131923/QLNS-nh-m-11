@@ -46,6 +46,22 @@ namespace API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "User",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Addresses = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_User", x => x.UserId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Employee",
                 columns: table => new
                 {
@@ -87,18 +103,18 @@ namespace API.Migrations
                 {
                     ContractId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ContractName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    ContractName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ContractType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: true),
+                    ContractType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     BasicSalary = table.Column<int>(type: "int", nullable: false),
                     Allowance = table.Column<int>(type: "int", nullable: false),
                     CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ContractTerm = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ContractTerm = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     WorkLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Leaveofabsence = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -109,8 +125,7 @@ namespace API.Migrations
                         name: "FK_Contract_Employee_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employee",
-                        principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "EmployeeId");
                 });
 
             migrationBuilder.CreateTable(
@@ -210,6 +225,9 @@ namespace API.Migrations
 
             migrationBuilder.DropTable(
                 name: "TimeKeeping");
+
+            migrationBuilder.DropTable(
+                name: "User");
 
             migrationBuilder.DropTable(
                 name: "Employee");

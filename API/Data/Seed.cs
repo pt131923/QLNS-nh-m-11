@@ -120,7 +120,6 @@ namespace API.Data
                 {
                     // Gán EmployeeId ngẫu nhiên
                     var randomEmployee = employees[System.Security.Cryptography.RandomNumberGenerator.GetInt32(employees.Count)];
-                    contract.EmployeeId = randomEmployee.EmployeeId;
 
                     // Gán mặc định nếu cần
                     contract.BasicSalary = contract.BasicSalary == 0 ? 8000000 : contract.BasicSalary;
@@ -132,8 +131,8 @@ namespace API.Data
                     // Gán thời gian mặc định nếu cần
                     contract.CreateAt = contract.CreateAt == default ? DateTime.Now : contract.CreateAt;
                     contract.UpdateAt = contract.UpdateAt == default ? DateTime.Now : contract.UpdateAt;
-                    contract.ContractTerm = contract.ContractTerm == default && contract.EndDate != null
-                        ? contract.EndDate.Value
+                    contract.ContractTerm = contract.ContractTerm == default
+                        ? contract.EndDate.ToString()
                         : contract.ContractTerm;
 
                     // Ràng buộc hợp đồng cho nhân viên
