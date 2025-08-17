@@ -1,5 +1,4 @@
 export interface Contract {
-  ContractImage: any,
   ContractId: number;
   ContractName: string;
   ContractType: string;

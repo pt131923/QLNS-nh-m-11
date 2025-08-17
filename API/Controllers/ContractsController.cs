@@ -55,7 +55,7 @@ namespace API.Controllers
 
         [HttpPost("add-contract")]
         public async Task<ActionResult<ContractDto>> AddContract([FromBody] ContractDto contractDto)
-        {
+        {  
             if (await ContractExists(contractDto.ContractName))
                 return BadRequest("Contract name already exists");
 

@@ -22,7 +22,7 @@ export class ContractListComponent implements OnInit {
   selectedContractId: number | null = null;
 
   public columnDefs: ColDef<Contract>[] = [
-    {
+  {
     headerName: '',
     checkboxSelection: true,
     width: 40,

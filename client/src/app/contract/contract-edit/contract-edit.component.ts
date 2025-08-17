@@ -49,7 +49,6 @@ export class ContractEditComponent implements OnInit {
     console.log('Updated Contract Data:', updatedContractData);
 
     let updatedContract: Contract = {
-      ContractImage: updatedContractData.contractImage,
       ContractId: updatedContractData.contractId,
       ContractName: updatedContractData.contractName,
       ContractType: updatedContractData.contractType,
@@ -198,7 +197,6 @@ export class ContractEditComponent implements OnInit {
     // If all validations pass, proceed to update the contract
     updatedContract = {
       ...updatedContract,
-      ContractImage: updatedContractData.contractImage || this.contract.ContractImage,
       CreateAt: new Date().toISOString(),
       UpdateAt: new Date().toISOString()
     };

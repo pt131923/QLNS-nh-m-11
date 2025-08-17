@@ -13,11 +13,6 @@
       <h3>Contract Details</h3>
     </div>
 
-    <div class="card-footer text-center">
-      <img *ngIf="contract.ContractImage" [src]="contract.ContractImage" alt="Department Image" class="img-fluid" style="max-height: 200px;" />
-      <p *ngIf="!contract.ContractImage">No image available</p>
-    </div>
-
     <div class="card-body">
       <h5 class="card-title">{{ contract.ContractName }}</h5>
       <p><strong>ContractType:</strong> {{ contract.ContractType }}</p>

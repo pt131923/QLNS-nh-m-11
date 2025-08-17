@@ -1,83 +1,95 @@
 <div class="col-8">
-  <form #addForm2="ngForm" id="addForm2" (ngSubmit)="AddContract()">
+  <form #addForm="ngForm" id="addForm" (ngSubmit)="AddContract()">
     <h4 class="mt-2">Contract Name:</h4>
     <input type="text" class="form-control"
-           [(ngModel)]="contract.ContractName"
            name="ContractName"
+           ngModel
            required>
 
     <h4 class="mt-3">Employee Name:</h4>
     <input type="text" class="form-control"
-           [(ngModel)]="contract.EmployeeName"
            name="EmployeeName"
+           ngModel
            required>
 
     <h4 class="mt-3">Contract Type:</h4>
     <input type="text" class="form-control"
-           [(ngModel)]="contract.ContractType"
            name="ContractType"
+           ngModel
            required>
 
     <h4 class="mt-3">Start Date:</h4>
     <input type="date" class="form-control"
-           [(ngModel)]="contract.StartDate"
            name="StartDate"
+           ngModel
            required>
 
     <h4 class="mt-3">End Date:</h4>
     <input type="date" class="form-control"
-           [(ngModel)]="contract.EndDate"
            name="EndDate"
+           ngModel
            required>
 
     <h4 class="mt-3">Basic Salary:</h4>
     <input type="number" class="form-control"
-           [(ngModel)]="contract.BasicSalary"
            name="BasicSalary"
+           ngModel
            min="0"
            required>
 
     <h4 class="mt-3">Allowance:</h4>
     <input type="number" class="form-control"
-           [(ngModel)]="contract.Allowance"
            name="Allowance"
+           ngModel
            min="0"
            required>
 
     <h4 class="mt-3">Job Description:</h4>
     <input type="text" class="form-control"
-           [(ngModel)]="contract.JobDescription"
            name="JobDescription"
+           ngModel>
+
+    <h4 class="mt-3">CreateAt:</h4>
+    <input type="date" class="form-control"
+           name="CreateAt"
+           ngModel
+           required>
+
+    <h4 class="mt-3">UpdateAt:</h4>
+    <input type="date" class="form-control"
+           name="UpdateAt"
+           ngModel
+           required>
+
+           name="EndDate"
+           ngModel
            required>
 
     <h4 class="mt-3">Contract Term:</h4>
     <input type="text" class="form-control"
-           [(ngModel)]="contract.ContractTerm"
            name="ContractTerm"
-           placeholder="e.g. 12 months"
-           required>
+           ngModel
+           placeholder="e.g. 12 months">
 
     <h4 class="mt-3">Work Location:</h4>
     <input type="text" class="form-control"
-           [(ngModel)]="contract.WorkLocation"
            name="WorkLocation"
-           required>
+           ngModel>
 
     <h4 class="mt-3">Leave of Absence:</h4>
     <input type="text" class="form-control"
-           [(ngModel)]="contract.Leaveofabsence"
            name="Leaveofabsence"
-           required>
-  </form>
+           ngModel>
 
-  <div class="card-footer mt-2">
-    <button type="submit"
-            form="addForm2"
-            class="btn btn-success col-4">Save changes
-    </button>
-    <button type="button"
-            class="btn btn-secondary col-4 ms-5"
-            (click)="onCancel()">Cancel
-    </button>
-  </div>
+    <div class="card-footer mt-3">
+      <button type="submit"
+              class="btn btn-success col-4">Save changes
+      </button>
+      <button type="button"
+              class="btn btn-secondary col-4 ms-5"
+              (click)="onCancel()">Cancel
+      </button>
+    </div>
+  </form>
 </div>
+

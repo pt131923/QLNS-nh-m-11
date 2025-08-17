@@ -44,7 +44,6 @@ export class ContractService {
   }
 
   AddContract(contract: Contract): Observable<Contract> {
-      // ✅ Gọi đúng endpoint add-contract
       return this.http.post<Contract>(`${this.baseUrl3}/add-contract`, contract);
     }
 

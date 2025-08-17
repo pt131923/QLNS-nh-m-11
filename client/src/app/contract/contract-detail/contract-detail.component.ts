@@ -39,7 +39,6 @@ export class ContractDetailComponent implements OnInit{
        },
        error: () => {
          this.contract = {
-          ContractImage: '',
           ContractId: 0,
           ContractName: '',
           ContractType: '',

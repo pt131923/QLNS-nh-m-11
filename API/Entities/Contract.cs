@@ -14,6 +14,7 @@ namespace API.Entities
         public string ContractName { get; set; }
 
         [ForeignKey("Employee")]
+
         public int EmployeeId { get; set; }
         public string EmployeeName { get; set; }
 
