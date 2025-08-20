@@ -36,12 +36,12 @@ export class ContractAddComponent implements OnInit {
       ContractName: this.addForm.value.ContractName?.trim(),
       ContractType: this.addForm.value.ContractType?.trim(),
       EmployeeName: this.addForm.value.EmployeeName?.trim(),
-      StartDate: new Date(this.addForm.value.StartDate).toISOString(),
-      EndDate: new Date(this.addForm.value.EndDate).toISOString(),
+      StartDate: this.addForm.value.StartDate,
+      EndDate: this.addForm.value.EndDate,
       BasicSalary: this.addForm.value.BasicSalary,
       Allowance: this.addForm.value.Allowance,
-      CreateAt: new Date(this.addForm.value.CreateAt).toISOString(),
-      UpdateAt: new Date(this.addForm.value.UpdateAt).toISOString(),
+      CreateAt: this.addForm.value.CreateAt,
+      UpdateAt: this.addForm.value.UpdateAt,
       JobDescription: this.addForm.value.JobDescription?.trim() || '',
       ContractTerm: this.addForm.value.ContractTerm?.trim() || '',
       WorkLocation: this.addForm.value.WorkLocation?.trim() || '',
@@ -56,24 +56,24 @@ export class ContractAddComponent implements OnInit {
       return;
     }
 
-    if (new Date(contractData.StartDate) >= new Date(contractData.EndDate)) {
+    if (contractData.StartDate && contractData.EndDate && new Date(contractData.StartDate) >= new Date(contractData.EndDate)) {
       this.toastr.error('Start date must be before end date');
       return;
     }
 
-    if (new Date(contractData.EndDate) < new Date()) {
+    if (contractData.EndDate && new Date(contractData.EndDate) < new Date()) {
       this.toastr.error('End date cannot be in the past');
       return;
     }
 
     // Check CreateAt
-if (!contractData.CreateAt || isNaN(Date.parse(contractData.CreateAt))) {
+if (!contractData.CreateAt || isNaN(Date.parse(contractData.CreateAt.toString()))) {
   this.toastr.error('CreateAt is required and must be a valid date');
   return;
 }
 
 // Check UpdateAt
-if (!contractData.UpdateAt || isNaN(Date.parse(contractData.UpdateAt))) {
+if (!contractData.UpdateAt || isNaN(Date.parse(contractData.UpdateAt.toString()))) {
   this.toastr.error('UpdateAt is required and must be a valid date');
   return;
 }

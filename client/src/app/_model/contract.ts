@@ -3,12 +3,12 @@ export interface Contract {
   ContractName: string;
   ContractType: string;
   EmployeeName: string;
-  StartDate: string;
-  EndDate: string;
+  StartDate: Date | undefined;
+  EndDate: Date | undefined;
   BasicSalary: number;
   Allowance: number;
-  CreateAt: string;
-  UpdateAt: string;
+  CreateAt: Date | undefined;
+  UpdateAt: Date | undefined;
   JobDescription: string;
   ContractTerm: string;
   WorkLocation: string;

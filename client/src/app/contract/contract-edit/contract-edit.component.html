@@ -1,101 +1,112 @@
-<div class="col-8">
-  <form #editForm="ngForm" id="editForm" (ngSubmit)="UpdateContract()">
-    <h4 class="mt-2">Contract ID:</h4>
-    <input type="text" class="form-control"
-        [(ngModel)]="contract!.ContractId"
-        name="contractId"
-        readonly
-    >
+<div class="col-8" *ngIf="contract">
+  <form #editForm="ngForm" id="editForm" (ngSubmit)="UpdateContract()" class="mt-3">
+    <div class="mb-3">
+      <label for="ContractName" class="form-label fw-bold">Contract Name</label>
+      <input type="text" id="ContractName" class="form-control"
+             [(ngModel)]="contract.ContractName"
+             name="ContractName"
+             required>
+    </div>
 
-    <h4 class="mt-3">Contract Name:</h4>
-    <input type="text" class="form-control"
-        [(ngModel)]="contract!.ContractName"
-        name="contractName"
-    >
+    <div class="mb-3">
+      <label for="EmployeeName" class="form-label fw-bold">Employee Name</label>
+      <input type="text" id="EmployeeName" class="form-control"
+             [(ngModel)]="contract.EmployeeName"
+             name="EmployeeName"
+             required>
+    </div>
 
-    <h4 class="mt-3">Employee Name:</h4>
-    <input type="number" class="form-control"
-        [(ngModel)]="contract!.EmployeeName"
-        name="employeeId"
-    >
-
-    <h4 class="mt-3">Contract Type:</h4>
-    <input type="text" class="form-control"
-        [(ngModel)]="contract!.ContractType"
-        name="contractType"
-    >
+    <div class="mb-3">
+      <label for="ContractType" class="form-label fw-bold">Contract Type</label>
+      <input type="text" id="ContractType" class="form-control"
+             [(ngModel)]="contract.ContractType"
+             name="ContractType"
+             required>
+    </div>
 
     <h4 class="mt-3">Basic Salary:</h4>
     <input type="number" class="form-control"
-        [(ngModel)]="contract!.BasicSalary"
-        name="basicSalary"
-    >
+           name="BasicSalary"
+           ngModel
+           min="0"
+           required>
 
     <h4 class="mt-3">Allowance:</h4>
     <input type="number" class="form-control"
-        [(ngModel)]="contract!.Allowance"
-        name="allowance"
-    >
+           name="Allowance"
+           ngModel
+           min="0"
+           required>
 
-    <h4 class="mt-3">Job Description:</h4>
-    <textarea class="form-control"
-        [(ngModel)]="contract!.JobDescription"
-        name="jobDescription"
-        rows="2"
-    ></textarea>
+    <div class="mb-3">
+      <label for="JobDescription" class="form-label fw-bold">Job Description</label>
+      <textarea id="JobDescription" class="form-control"
+                [(ngModel)]="contract.JobDescription"
+                name="JobDescription"
+                rows="2"></textarea>
+    </div>
 
-    <h4 class="mt-3">Work Location:</h4>
-    <textarea class="form-control"
-        [(ngModel)]="contract!.WorkLocation"
-        name="WorkLocation"
-        rows="2"
-    ></textarea>
+    <div class="mb-3">
+      <label for="WorkLocation" class="form-label fw-bold">Work Location</label>
+      <textarea id="WorkLocation" class="form-control"
+                [(ngModel)]="contract.WorkLocation"
+                name="WorkLocation"
+                rows="2"></textarea>
+    </div>
 
     <h4 class="mt-3">Leave of Absence:</h4>
-    <textarea class="form-control"
-        [(ngModel)]="contract!.Leaveofabsence"
-        name="leaveofabsence"
-        rows="1"
-    ></textarea>
+    <input type="text" class="form-control"
+           name="Leaveofabsence"
+           ngModel>
 
-    <h4 class="mt-3">Start Date:</h4>
-    <input type="date" class="form-control"
-        [(ngModel)]="contract!.StartDate"
-        name="startDate"
-    >
+    <div class="mb-3">
+      <label for="StartDate" class="form-label fw-bold">Start Date</label>
+      <input type="date" id="StartDate" class="form-control"
+             [(ngModel)]="contract.StartDate"
+             name="StartDate"
+             required>
+    </div>
 
-    <h4 class="mt-3">End Date:</h4>
-    <input type="date" class="form-control"
-        [(ngModel)]="contract!.EndDate"
-        name="endDate"
-    >
+    <div class="mb-3">
+      <label for="EndDate" class="form-label fw-bold">End Date</label>
+      <input type="date" id="EndDate" class="form-control"
+             [(ngModel)]="contract.EndDate"
+             name="EndDate"
+             required>
+    </div>
 
-    <h4 class="mt-3">Contract Term:</h4>
-    <input type="date" class="form-control"
-        [(ngModel)]="contract!.ContractTerm"
-        name="contractTerm"
-    >
+    <div class="mb-3">
+      <label for="ContractTerm" class="form-label fw-bold">Contract Term</label>
+      <input type="text" id="ContractTerm" class="form-control"
+             [(ngModel)]="contract.ContractTerm"
+             name="ContractTerm"
+             placeholder="e.g. 12 months">
+    </div>
 
-    <h4 class="mt-3">Created At:</h4>
-    <input type="datetime-local" class="form-control"
-        [(ngModel)]="contract!.CreateAt"
-        name="createAt"
-    >
+    <div class="mb-3">
+      <label for="CreateAt" class="form-label fw-bold">Created At</label>
+      <input type="date" id="CreateAt" class="form-control"
+             [(ngModel)]="contract.CreateAt"
+             name="CreateAt"
+             required>
+    </div>
 
-    <h4 class="mt-3">Updated At:</h4>
-    <input type="datetime-local" class="form-control"
-        [(ngModel)]="contract!.UpdateAt"
-        name="updateAt"
-    >
+    <div class="mb-3">
+      <label for="UpdateAt" class="form-label fw-bold">Updated At</label>
+      <input type="date" id="UpdateAt" class="form-control"
+             [(ngModel)]="contract.UpdateAt"
+             name="UpdateAt"
+             required>
+    </div>
 
-    <div class="card-footer mt-4 d-flex justify-content-between">
-      <button type="submit"
-          form="editForm"
-          class="btn btn-success col-5">Save Changes
+    <div class="d-flex justify-content-between mt-4">
+      <button type="submit" form="editForm" class="btn btn-success col-5">
+        💾 Save Changes
       </button>
-      <button type="button"
-          class="btn btn-secondary col-5">Cancel
+      <button type="button" class="btn btn-secondary col-5" (click)="Cancel()">
+        ❌ Cancel
       </button>
     </div>
+
   </form>
 </div>

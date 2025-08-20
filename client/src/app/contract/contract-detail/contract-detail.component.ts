@@ -43,16 +43,16 @@ export class ContractDetailComponent implements OnInit{
           ContractName: '',
           ContractType: '',
           EmployeeName: '',
-          StartDate: '',
-          EndDate: '',
+          StartDate: DateTime(),
+          EndDate: DateTime(),
           BasicSalary: 0,
-      Allowance: 0,
-      CreateAt: '',
-      UpdateAt: '',
-      JobDescription: '',
-      ContractTerm: '',
-      WorkLocation: '',
-      Leaveofabsence: ''
+          Allowance: 0,
+          CreateAt: DateTime(),
+          UpdateAt: DateTime(),
+          JobDescription: '',
+          ContractTerm: '',
+          WorkLocation: '',
+          Leaveofabsence: ''
          };
        }
      });
@@ -62,3 +62,7 @@ export class ContractDetailComponent implements OnInit{
      this.router.navigate(['/contracts', id]);
   }
 }
+function DateTime(): Date {
+  throw new Error('Function not implemented.');
+}
+

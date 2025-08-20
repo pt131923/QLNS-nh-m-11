@@ -19,10 +19,10 @@
       <p><strong>Employee Name:</strong> {{ contract.EmployeeName }}</p>
       <p *ngIf="contract.StartDate"><strong>StartDate:</strong> {{ contract.StartDate }}</p>
       <p *ngIf="contract.EndDate"><strong>EndDate:</strong> {{ contract.EndDate }}</p>
-      <p><strong>Contract Term:</strong> {{ contract.ContractTerm | date:'mediumDate' }}</p>
+      <p *ngIf="contract.ContractTerm"><strong>Contract Term:</strong> {{ contract.ContractTerm }}</p>
 
-      <p><strong>Basic Salary:</strong> {{ contract.BasicSalary | currency:'VND':'symbol':'1.0-0' }}</p>
-      <p><strong>Allowance:</strong> {{ contract.Allowance | currency:'VND':'symbol':'1.0-0' }}</p>
+      <p *ngIf="contract.BasicSalary"><strong>Basic Salary:</strong> {{ contract.BasicSalary | currency:'VND':'symbol':'1.0-0' }}</p>
+      <p *ngIf="contract.Allowance"><strong>Allowance:</strong> {{ contract.Allowance | currency:'VND':'symbol':'1.0-0' }}</p>
 
       <p><strong>Job Description:</strong> {{ contract.JobDescription }}</p>
       <p><strong>Work location:</strong> {{ contract.WorkLocation }}</p>

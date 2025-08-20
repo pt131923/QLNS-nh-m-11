@@ -49,7 +49,7 @@ export class EmployeeEditComponent {
 
   ngOnInit(): void {
     this.getDepartments();
-    this.getEmployee(); // Lấy thông tin nhân viên
+    this.getEmployee();
   }
 
   getDepartments() {
