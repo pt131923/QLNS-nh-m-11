@@ -48,7 +48,7 @@ namespace API.Controllers
             if(await _contractRepository.SaveAllAsync())
             {
                 return NoContent();
-            }   
+            }
 
             return BadRequest("Failed to update contract");
         }
@@ -56,7 +56,6 @@ namespace API.Controllers
         [HttpPost("add-contract")]
         public async Task<ActionResult<ContractDto>> AddContract([FromBody] ContractDto contractDto)
         {
-            // Kiểm tra contract name có tồn tại chưa (không phân biệt hoa/thường)
             if (await _context.Contract.AnyAsync(c => c.ContractName.ToLower() == contractDto.ContractName.ToLower()))
             {
                 return BadRequest("Contract name already exists");
@@ -82,12 +81,6 @@ namespace API.Controllers
             return CreatedAtRoute("GetContractById", new { id = contract.ContractId }, contract);
         }
 
-        private async Task<bool> ContractExists(string contractName)
-        {
-             return await _context.Contract
-             .AnyAsync(c => EF.Functions.Like(c.ContractName, contractName));
-        }
-
         [HttpDelete("delete-contract/{id}")]
         public async Task<ActionResult> DeleteContract(int id)
         {
@@ -111,12 +104,6 @@ namespace API.Controllers
                 .ToListAsync();
 
             return Ok(contracts);
-        }
-
-        private async Task<bool> EmployeeExists(string employeeName)
-        {
-            return await _context.Employee
-                .AnyAsync(e => e.EmployeeName == employeeName);
         }
     }
 }

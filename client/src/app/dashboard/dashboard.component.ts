@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 })
 export class DashboardComponent {
   registerMode = false;
+  loginMode = false;
   users: any;
   $event: any;
 
@@ -21,12 +22,21 @@ export class DashboardComponent {
     this.registerMode = !this.registerMode
   }
 
+  loginToggle() {
+    this.loginMode = !this.loginMode;
+  }
+
   cancelRegisterMode(event: boolean) {
     this.registerMode = event;
     if (this.registerMode) {
       this.users = null;
     }
   }
+
+  cancelLoginMode(event: boolean) {
+    this.loginMode = event;
+  }
+
   onUserSelected(user: any) {
     this.users = user;
  }

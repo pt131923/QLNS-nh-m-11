@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
@@ -9,6 +9,7 @@ import { AuthService } from '../_services/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
+  @Output() cancelLogin = new EventEmitter<boolean>();
   loginForm!: FormGroup;
   submitted = false;
   errorMessage = '';
@@ -78,5 +79,13 @@ export class LoginComponent implements OnInit {
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  cancel(){
+    this.cancelLogin.emit(false);
+  }
+
+  gotoDashboard() {
+    this.router.navigate(['/dashboard']);
   }
 }

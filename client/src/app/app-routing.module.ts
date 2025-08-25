@@ -36,7 +36,7 @@ import { LeaveComponent } from './leave/leave.component';
 import { ContactHistoryComponent } from './contact-history/contact-history.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
 
   // Contact history route

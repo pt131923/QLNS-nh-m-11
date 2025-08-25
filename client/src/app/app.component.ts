@@ -10,5 +10,6 @@ export class AppComponent{
   [x: string]: any;
   title = 'HR Management System';
 
+  constructor(private http: HttpClient) {}
 }
 

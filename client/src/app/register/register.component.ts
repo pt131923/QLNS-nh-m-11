@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
+  @Output() cancelRegister = new EventEmitter<boolean>();
   registerForm: any; // Define the type according to your form structure
   submitted = false;
   errorMessage = '';
@@ -62,6 +63,14 @@ export class RegisterComponent {
     this.submitted = false;
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  cancel(){
+    this.cancelRegister.emit(false);
+  }
+
+  gotoDashboard() {
+    this.router.navigate(['/dashboard']);
   }
 }
 
