@@ -40,4 +40,9 @@ export class DashboardComponent {
   onUserSelected(user: any) {
     this.users = user;
  }
+
+  loggedIn() {
+    const token = localStorage.getItem('token');
+    return !!token;
+  }
 }

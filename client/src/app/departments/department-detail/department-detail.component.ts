@@ -50,7 +50,6 @@ export class DepartmentDetailComponent implements OnInit {
   });
   }
 
-
   goToDepartmentDetail(id: number): void {
   this.router.navigate(['/department', id]);
 }
