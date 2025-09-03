@@ -35,14 +35,12 @@ export class DashboardComponent {
 
   cancelLoginMode(event: boolean) {
     this.loginMode = event;
+    if (this.loginMode) {
+      this.users = null;
+    }
   }
 
   onUserSelected(user: any) {
     this.users = user;
  }
-
-  loggedIn() {
-    const token = localStorage.getItem('token');
-    return !!token;
-  }
 }

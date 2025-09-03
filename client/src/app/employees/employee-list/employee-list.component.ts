@@ -198,7 +198,7 @@ export class EmployeeListComponent implements OnInit{
     this.router.navigate(['/employee', employee.EmployeeId]);
   } else {
     console.error('Invalid employee data:', employee);
-    this.toastr.error('Không thể chuyển hướng vì thiếu thông tin nhân viên.');
+    this.toastr.error('Not found');
   }
 }
 }

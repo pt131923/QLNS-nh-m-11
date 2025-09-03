@@ -59,8 +59,7 @@
               "ViewState": "AQIAAEMAAAAAAAAAAADwvyYAAAAhAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-15T12:18:06.458Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -130,7 +129,7 @@
               "RelativeDocumentMoniker": "API\\Controllers\\ContactController.cs",
               "ToolTip": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\Controllers\\ContactController.cs",
               "RelativeToolTip": "API\\Controllers\\ContactController.cs",
-              "ViewState": "AQIAAAkAAAAAAAAAAAAIwDEAAAAAAAAA",
+              "ViewState": "AQIAAAYAAAAAAAAAAAAIwDEAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-01T15:28:30.903Z",
               "EditorCaption": ""

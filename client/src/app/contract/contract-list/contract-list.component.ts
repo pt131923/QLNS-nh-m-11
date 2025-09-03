@@ -82,7 +82,7 @@ export class ContractListComponent implements OnInit {
     if (this.gridApi) {
       this.gridApi.exportDataAsCsv({
         fileName: 'Danh sách hợp đồng.csv',
-        columnKeys: ['ContractId', 'ContractName', 'EmployeeId', 'ContractType', 'StartDate', 'EndDate'],
+        columnKeys: ['ContractId', 'ContractName', 'EmployeeId', 'ContractType', 'StartDate', 'EndDate', 'BasicSalary', 'Allowance', 'CreateAt', 'UpdateAt', 'JobDescription', 'ContractTerm', 'WorkLocation', 'Leaveofabsence'],
       });
     } else {
       alert('Grid API is not initialized.');
