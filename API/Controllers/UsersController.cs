@@ -2,32 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using API.Interfaces;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController(IUserRepository _userRepository) : ControllerBase
     {
         [HttpGet]
-        public ActionResult<IEnumerable<string>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
-            // This is just a placeholder. In a real application, you would retrieve users from a database.
-            var users = new List<string> { "User1", "User2", "User3" };
+            var users = await _userRepository.GetUsersAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<string> GetUserById(int id)
+        public async Task<ActionResult<string>> GetUserById(int id)
         {
             // This is just a placeholder. In a real application, you would retrieve the user from a database.
             if (id <= 0)
             {
                 return BadRequest("Invalid user ID.");
             }
-            var user = $"User{id}";
-            return Ok(user);
+            var users = await _userRepository.GetUserByIdAsync(id);
+            return Ok(users);
         }
 
         [HttpPost]
