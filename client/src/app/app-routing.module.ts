@@ -70,9 +70,9 @@ const routes: Routes = [
   // Register route (nếu cần, có thể thêm vào)
   { path: 'register', component: RegisterComponent },
   { path: 'timekeeping', component: TimekeepingComponent, canActivate: [AuthGuard] },
-  { path: 'training', component: TrainingComponent, canActivate: [AuthGuard] },
+  { path: 'trainings', component: TrainingComponent, canActivate: [AuthGuard] },
   { path: 'performance', component: PerformanceComponent, canActivate: [AuthGuard] },
-  { path: 'recruitment', component: RecruitmentComponent, canActivate: [AuthGuard] },
+  { path: 'recruitments', component: RecruitmentComponent, canActivate: [AuthGuard] },
   { path: 'benefits', component: BenefitsComponent, canActivate: [AuthGuard] },
   { path: 'leave', component: LeaveComponent, canActivate: [AuthGuard] },
 

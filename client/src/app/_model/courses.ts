@@ -1,4 +1,4 @@
-export interface Training{
+export interface Coursse{
   TrainingId: number;
   Title: string;
   Description: string;

@@ -44,6 +44,14 @@ export class RecruitmentComponent implements OnInit {
         description: 'Manage recruitment and employee relations.',
         location: 'Đà Nẵng, Việt Nam',
         postedDate: new Date('2025-09-14')
+      },
+
+      {
+        id: 4,
+        title: 'Fullstack Developer',
+        description: 'Develop both frontend and backend components with Java and ReactJS.',
+        location: 'Đà Nẵng, Việt Nam',
+        postedDate: new Date('2025-09-14')
       }
     ];
   }
@@ -62,9 +70,5 @@ export class RecruitmentComponent implements OnInit {
   applyJob(job: Job) {
     // Ví dụ: chuyển hướng sang trang apply với jobId
     this.router.navigate(['/apply', job.id]);
-  }
-
-  isAuthenticated(): boolean {
-    return this.authGuard.isLoggedIn();
   }
 }
