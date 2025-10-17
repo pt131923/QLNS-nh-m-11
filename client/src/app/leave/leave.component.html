@@ -1,21 +1,29 @@
 <div class="container mt-5" *ngIf="contract">
-  <h3>Information Contract</h3>
-  <table class="table table-bordered">
-    <tr><th>Contract ID</th><td>{{ contract.ContractId }}</td></tr>
-    <tr><th>Contract Name</th><td>{{ contract.ContractName }}</td></tr>
-    <tr><th>Employee Name</th><td>{{ contract.EmployeeName }}</td></tr>
-    <tr><th>Contract Type</th><td>{{ contract.ContractType }}</td></tr>
-    <tr><th>Start Date</th><td>{{ contract.StartDate }}</td></tr>
-    <tr><th>End Date</th><td>{{ contract.EndDate }}</td></tr>
-    <tr><th>Basic Salary</th><td>{{ contract.BasicSalary | number }}</td></tr>
-    <tr><th>Allowance</th><td>{{ contract.Allowance | number }}</td></tr>
-    <tr><th>Created At</th><td>{{ contract.CreateAt }}</td></tr>
-    <tr><th>Updated At</th><td>{{ contract.UpdateAt }}</td></tr>
-    <tr><th>Job Description</th><td>{{ contract.JobDescription }}</td></tr>
-    <tr><th>Contract Term</th><td>{{ contract.ContractTerm }}</td></tr>
-    <tr><th>Work Location</th><td>{{ contract.WorkLocation }}</td></tr>
-    <tr><th>Leave of Absence</th><td>{{ contract.Leaveofabsence }}</td></tr>
-  </table>
+  <h2>List of Leaves</h2>
+  <div>
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Leave ID</th>
+          <th>Employee ID</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Reason</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let leave of leaves">
+          <td>{{ leave.LeaveId }}</td>
+          <td>{{ leave.EmployeeName }}</td>
+          <td>{{ leave.StartDate | date }}</td>
+          <td>{{ leave.EndDate | date }}</td>
+          <td>{{ leave.Reason }}</td>
+          <td>{{ leave.Status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 

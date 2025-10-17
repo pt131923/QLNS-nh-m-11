@@ -15,6 +15,7 @@ export class ContractService {
   private contractData!: Contract;
 
   private contractDataForLeave: Contract | null = null;
+  getLeaveDataForContract: any;
 
   constructor(private http: HttpClient) {
 

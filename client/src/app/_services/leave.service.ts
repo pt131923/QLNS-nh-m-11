@@ -29,16 +29,8 @@ export class LeaveService {
     return this.http.get<Leave[]>(`${this.baseUrl}/search?${params.toString()}`);
   }
 
-  AddLeave(leave: Leave): Observable<Leave> {
-    return this.http.post<Leave>(`${this.baseUrl}/add-leave`, leave);
-  }
-
-  UpdateLeave(id: number, leave: Leave): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${id}`, leave);
-  }
-
-  getLeaveById(id: number): Observable<Leave> {
-    return this.http.get<Leave>(`${this.baseUrl}/${id}`);
+  getLeaveDataForContract(id: number): Observable<Leave[]> {
+    return this.http.get<Leave[]>(`${this.baseUrl}/contract/${id}/leaves`);
   }
 }
 

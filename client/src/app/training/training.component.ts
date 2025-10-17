@@ -71,6 +71,6 @@ export class TrainingComponent {
    // Xử lý khi nhấn Apply Now
    applyJob(courses: Course) {
      // Ví dụ: chuyển hướng sang trang apply với jobId
-     this.router.navigate(['/apply', courses.CourseId]);
+     this.router.navigate(['/training', courses.CourseId]);
    }
 }

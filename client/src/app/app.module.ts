@@ -37,7 +37,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { BenefitsComponent } from './benefits/benefits.component';
 import { LeaveComponent } from './leave/leave.component';
 import { TrainingComponent } from './training/training.component';
-import { PerformanceComponent } from './performance/performance.component';
 import { TimekeepingComponent } from './timekeeping/timekeeping.component';
 import { RecruitmentComponent } from './recruitment/recruitment.component';
 import { ContactHistoryComponent } from './contact-history/contact-history.component';
@@ -75,7 +74,6 @@ export function HttpLoaderFactory(http: HttpClient) {
     BenefitsComponent,
     LeaveComponent,
     TrainingComponent,
-    PerformanceComponent,
     TimekeepingComponent,
     RecruitmentComponent,
     ContactHistoryComponent,

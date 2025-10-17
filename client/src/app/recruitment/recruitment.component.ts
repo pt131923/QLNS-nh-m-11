@@ -16,8 +16,8 @@ interface Job {
 })
 export class RecruitmentComponent implements OnInit {
 
-  loginMode = false;   // kiểm soát form login
-  jobs: Job[] = [];    // danh sách công việc
+  loginMode = false;
+  jobs: Job[] = [];
 
   constructor(private router: Router, private authGuard: AuthGuard) {}
 

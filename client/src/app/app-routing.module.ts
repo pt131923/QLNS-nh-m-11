@@ -29,7 +29,6 @@ import { ContractDetailComponent } from './contract/contract-detail/contract-det
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TimekeepingComponent } from './timekeeping/timekeeping.component';
 import { TrainingComponent } from './training/training.component';
-import { PerformanceComponent } from './performance/performance.component';
 import { RecruitmentComponent } from './recruitment/recruitment.component';
 import { BenefitsComponent } from './benefits/benefits.component';
 import { LeaveComponent } from './leave/leave.component';
@@ -71,10 +70,9 @@ const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'timekeeping', component: TimekeepingComponent, canActivate: [AuthGuard] },
   { path: 'trainings', component: TrainingComponent, canActivate: [AuthGuard] },
-  { path: 'performance', component: PerformanceComponent, canActivate: [AuthGuard] },
   { path: 'recruitments', component: RecruitmentComponent, canActivate: [AuthGuard] },
   { path: 'benefits', component: BenefitsComponent, canActivate: [AuthGuard] },
-  { path: 'leave', component: LeaveComponent, canActivate: [AuthGuard] },
+  { path: 'leaves', component: LeaveComponent, canActivate: [AuthGuard] },
 
   // User routes
   {
