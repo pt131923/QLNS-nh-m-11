@@ -7,6 +7,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class EmployeeService {
+  [x: string]: any;
   private baseUrl = 'http://localhost:5002/api/employees'; // Địa chỉ API của bạn
 
   constructor(private http: HttpClient) {  }
@@ -42,5 +43,17 @@ export class EmployeeService {
 
   DeleteEmployee(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/delete-employee/${id}`);
+  }
+
+  uploadExcel(file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<void>(`${this.baseUrl}/upload-excel`, formData);
+  }
+
+  importEmployees(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/import-employees`, formData);
   }
 }

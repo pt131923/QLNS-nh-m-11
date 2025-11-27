@@ -17,7 +17,7 @@ export class SalaryService {
   }
 
   getSalariesWithEmployees(): Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/salaries-with-employees`);
+    return this.http.get<any[]>(`${this.baseUrl}/salaries-with-employees`);
   }
 
   searchSalaries(employeeName?: string, id?: number): Observable<Salary[]> {
@@ -37,12 +37,30 @@ export class SalaryService {
   }
 
   DeleteSalary(id: number): Observable<string> {
-  return this.http.delete<string>(`${this.baseUrl}/delete-salary/${id}`, {
-    responseType: 'text' as 'json'
-  });
-}
+    return this.http.delete<string>(`${this.baseUrl}/delete-salary/${id}`, {
+      responseType: 'text' as 'json'
+    });
+  }
 
   getSalaryById(id: number): Observable<Salary> {
     return this.http.get<Salary>(`${this.baseUrl}/${id}`);
+  }
+
+  uploadExcel(file: File, departmentId?: number): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (departmentId) {
+      formData.append('departmentId', departmentId.toString());
+    }
+    return this.http.post<void>(`${this.baseUrl}/upload-excel`, formData);
+  }
+
+  importSalaries(file: File, departmentId?: number): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (departmentId) {
+      formData.append('departmentId', departmentId.toString());
+    }
+    return this.http.post<any>(`${this.baseUrl}/import-salaries`, formData);
   }
 }

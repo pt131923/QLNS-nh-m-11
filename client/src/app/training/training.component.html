@@ -1,14 +1,16 @@
 <div class ="container mt-4">
-  <h2 class="mb-4">Training Courses</h2>
+  <h2 class="mb-4">{{ 'training.title' | translate }}</h2> 
   <div class="row">
     <div class="col-md-4 mb-4" *ngFor="let course of courses">
       <div class="card h-100">
         <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ course.Title }}</h5>
-          <p class="card-text">{{ course.Description }}</p>
-          <p class="card-text"><small class="text-muted">Trainer: {{ course.Trainer }}</small></p>
-          <p class="card-text"><small class="text-muted">Time: {{ course.TimeOfCourse | date }}</small></p>
-          <a href="#" class="btn btn-primary mt-auto">Enroll Now</a>
+          <h5 class="card-title">{{ course.Title | translate }}</h5> 
+          <p class="card-text">{{ course.Description | translate }}</p>
+          <p class="card-text"><small class="text-muted">{{ 'common.Trainer' | translate }}: {{ course.Trainer | translate }}</small></p> 
+          <p class="card-text"><small class="text-muted">{{ 'common.TimeOfCourse' | translate }}: {{ course.TimeOfCourse | date:'short' }}</small></p> 
+          <a href="#" class="btn btn-primary mt-auto">{{ 'common.Enroll Now' | translate }}</a> 
+        </div>
       </div>
     </div>
   </div>
+</div>

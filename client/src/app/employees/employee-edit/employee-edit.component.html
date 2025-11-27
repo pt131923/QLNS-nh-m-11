@@ -1,21 +1,21 @@
 <div class="col-8">
     <form #editForm="ngForm" id="editForm" (ngSubmit)="UpdateEmployee()">
-        <h4 class="mt-2">Employee Name:</h4>
+        <h4 class="mt-2">{{ 'employee.employeeName' | translate }}:</h4>
         <input type="text" class="form-control"
             [(ngModel)]="employee!.EmployeeName"
             name="employeeName"
             required />
-        <h4 class="mt-2">Employee Email:</h4>
+        <h4 class="mt-2">{{ 'employee.employeeEmail' | translate }}:</h4>
         <input type="email" class="form-control"
             [(ngModel)]="employee!.EmployeeEmail"
             name="employeeEmail"
             required />
-        <h4 class="mt-2">Employee Phone:</h4>
+        <h4 class="mt-2">{{ 'employee.employeePhone' | translate }}:</h4>
         <input type="text" class="form-control"
             [(ngModel)]="employee!.EmployeePhone"
             name="employeePhone"
             required />
-        <h4 class="mt-2">Employee Address:</h4>
+        <h4 class="mt-2">{{ 'employee.employeeAddress' | translate }}:</h4>
         <textarea class="form-control"
             [(ngModel)]="employee!.EmployeeAddress"
             name="employeeAddress"
@@ -23,66 +23,66 @@
             required></textarea>
         <div class="row mb-3">
     <div class="col-md-6">
-      <label class="form-label">DateOfBirth</label>
+      <label class="form-label">{{ 'employee.dateOfBirth' | translate }}</label>
       <input type="date" class="form-control" [(ngModel)]="employee.BirthDate" name="DateofBirth">
     </div>
     <div class="col-md-6">
-      <label class="form-label">Place of Birth</label>
+      <label class="form-label">{{ 'employee.placeOfBirth' | translate }}</label>
       <input type="text" class="form-control" [(ngModel)]="employee.PlaceOfBirth" name="PlaceOfBirth">
     </div>
   </div>
 
   <div class="row mb-3">
     <div class="col-md-6">
-      <label class="form-label">Gender</label>
+      <label class="form-label">{{ 'employee.gender' | translate }}</label>
       <select class="form-select" [(ngModel)]="employee.Gender" name="Gender">
-        <option value="">-- Select --</option>
+        <option value="">-- {{ 'common.select' | translate }} --</option>
         <option value="Nam">Nam</option>
         <option value="Nữ">Nữ</option>
       </select>
     </div>
     <div class="col-md-6">
-      <label class="form-label">Marital Status</label>
+      <label class="form-label">{{ 'employee.maritalStatus' | translate }}</label>
       <input type="text" class="form-control" [(ngModel)]="employee.MaritalStatus" name="MaritalStatus">
     </div>
   </div>
 
   <div class="row mb-3">
     <div class="col-md-6">
-      <label class="form-label">Identity Number</label>
+      <label class="form-label">{{ 'employee.identityNumber' | translate }}</label>
       <input type="text" class="form-control" [(ngModel)]="employee.IdentityNumber" name="IdentityNumber">
     </div>
     <div class="col-md-6">
-      <label class="form-label">Identity Issued Date</label>
+      <label class="form-label">{{ 'employee.identityIssuedDate' | translate }}</label>
       <input type="date" class="form-control" [(ngModel)]="employee.IdentityIssuedDate" name="IdentityIssuedDate">
     </div>
   </div>
 
   <div class="mb-3">
-    <label class="form-label">Identity Issued Place</label>
+    <label class="form-label">{{ 'employee.identityIssuedPlace' | translate }}</label>
     <input type="text" class="form-control" [(ngModel)]="employee.IdentityIssuedPlace" name="IdentityIssuedPlace">
   </div>
 
   <div class="row mb-3">
     <div class="col-md-4">
-      <label class="form-label">Religion</label>
+      <label class="form-label">{{ 'employee.religion' | translate }}</label>
       <input type="text" class="form-control" [(ngModel)]="employee.Religion" name="Religion">
     </div>
     <div class="col-md-4">
-      <label class="form-label">Ethnicity</label>
+      <label class="form-label">{{ 'employee.ethnicity' | translate }}</label>
       <input type="text" class="form-control" [(ngModel)]="employee.Ethnicity" name="Ethnicity">
     </div>
     <div class="col-md-4">
-      <label class="form-label">Nationality</label>
+      <label class="form-label">{{ 'employee.nationality' | translate }}</label>
       <input type="text" class="form-control" [(ngModel)]="employee.Nationality" name="Nationality">
     </div>
   </div>
 
   <div class="row mb-3">
     <div class="col-md-6">
-      <label class="form-label">Education Level</label>
+      <label class="form-label">{{ 'employee.educationLevel' | translate }}</label>
       <select class="form-select" [(ngModel)]="employee.EducationLevel" name="EducationLevel">
-        <option value="">-- Select --</option>
+        <option value="">-- {{ 'common.select' | translate }} --</option>
         <option value="Trung cấp">Trung cấp</option>
         <option value="Cao đẳng">Cao đẳng</option>
         <option value="Đại học">Đại học</option>
@@ -90,11 +90,11 @@
       </select>
     </div>
     <div class="col-md-6">
-      <label class="form-label">Specialization</label>
+      <label class="form-label">{{ 'employee.specialization' | translate }}</label>
       <input type="text" class="form-control" [(ngModel)]="employee.Specialization" name="Specialization">
     </div>
   </div>
-        <h4 class="mt-2">Department Id:</h4>
+        <h4 class="mt-2">{{ 'employee.departmentId' | translate }}:</h4>
         <select class="form-control"
             [(ngModel)]="selectedDepartmentId"
             name="DepartmentId"
@@ -105,8 +105,8 @@
         </select>
 
         <div class="card-footer mt-2">
-            <button type="submit" form="editForm" class="btn btn-success col-4">Save changes</button>
-            <button type="button" class="btn btn-secondary col-4 ms-5">Cancel</button>
+            <button type="submit" form="editForm" class="btn btn-success col-4">{{ 'common.saveChanges' | translate }}</button>
+            <button type="button" class="btn btn-secondary col-4 ms-5">{{ 'common.cancel' | translate }}</button>
         </div>
     </form>
 </div>

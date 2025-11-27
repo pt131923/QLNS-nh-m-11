@@ -1,122 +1,212 @@
 <div class="col-8">
-    <form #addForm="ngForm" id="addForm" (ngSubmit)="AddEmployee()">
-        <h4 class="mt-2">EmployeeName:</h4>
-        <textarea class="form-control"
-            [(ngModel)]="employee.EmployeeName"
-            name="EmployeeName"
-            rows="1"
-        ></textarea>
+  <div class="mt-4">
+      <h5>{{ 'employee.importFromExcel' | translate }}</h5>
+      <input #excelInput type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" class="form-control w-50">
 
-        <h4 class="mt-2">departmentId:</h4>
-        <input type="number" class="form-control"
-            [(ngModel)]="employee.DepartmentId"
-            name="DepartmentId"
-            required
-        />
+      <div class="mt-2">
 
-        <h4 class="mt-2">EmployeeEmail:</h4>
-        <input type="email" class="form-control"
-            [(ngModel)]="employee.EmployeeEmail"
-            name="EmployeeEmail"
-            required
-        />
-        <h4 class="mt-2">EmployeePhone:</h4>
-        <input type="text" class="form-control"
-            [(ngModel)]="employee.EmployeePhone"
-            name="EmployeePhone"
-            required
-            />
-        <h4 class="mt-2">EmployeeAddress:</h4>
-        <textarea class="form-control"
-            [(ngModel)]="employee.EmployeeAddress"
-            name="EmployeeAddress"
-            rows="3"
-            required
-        ></textarea>
+          <!-- Tên file đã chọn -->
+          <span class="text-success small" *ngIf="selectedFileName">
+              {{ 'employee.fileSelected' | translate }}: {{ selectedFileName }}
+          </span>
 
-        <div class="row mb-3">
-    <div class="col-md-6">
-      <label class="form-label">Date of Birth</label>
-      <input type="date" class="form-control" [(ngModel)]="employee.BirthDate" name="DateofBirth">
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Place ofBirth</label>
-      <input type="text" class="form-control" [(ngModel)]="employee.PlaceOfBirth" name="PlaceOfBirth">
-    </div>
+          <!-- ❗ lỗi file Excel (bao gồm lỗi: file đã được upload trước đó) -->
+          <span class="text-danger small d-block" *ngIf="fileError">
+              {{ fileError }}
+          </span>
+
+          <span class="text-muted small" *ngIf="!selectedFileName && !fileError">
+              {{ 'employee.noFileSelected' | translate }}
+          </span>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap mt-2">
+          <button class="btn btn-primary"
+                  (click)="uploadExcel()"
+                  [disabled]="isUploading || !selectedFile || !!fileError">
+              <span class="spinner-border spinner-border-sm me-2" *ngIf="isUploading"></span>
+              {{ 'employee.uploadExcel' | translate }}
+          </button>
+
+          <button class="btn btn-outline-primary"
+                  (click)="importEmployees()"
+                  [disabled]="isImporting || !selectedFile || !!fileError">
+              <span class="spinner-border spinner-border-sm me-2" *ngIf="isImporting"></span>
+              {{ 'employee.importEmployees' | translate }}
+          </button>
+      </div>
+
+      <div class="table-responsive mt-3" *ngIf="previewRows.length && previewColumns.length">
+          <p class="small text-muted mb-1">
+              {{ 'employee.previewRows' | translate: {count: previewRows.length} }}
+          </p>
+          <table class="table table-bordered table-sm">
+              <thead>
+                  <tr>
+                      <th *ngFor="let column of previewColumns">{{ column }}</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let row of previewRows">
+                      <td *ngFor="let column of previewColumns">{{ row[column] }}</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
   </div>
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label class="form-label">Gender</label>
-      <select class="form-select" [(ngModel)]="employee.Gender" name="Gender">
-        <option value="">-- Select --</option>
-        <option value="Nam">Nam</option>
-        <option value="Nữ">Nữ</option>
-      </select>
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Marital Status</label>
-      <input type="text" class="form-control" [(ngModel)]="employee.MaritalStatus" name="MaritalStatus">
-    </div>
+  <form #addForm="ngForm" id="addForm" (ngSubmit)="AddEmployee()">
+
+      <h4 class="mt-2">{{ 'employee.employeeName' | translate }}:</h4>
+      <textarea class="form-control"
+          [(ngModel)]="employee.EmployeeName"
+          name="EmployeeName"
+          rows="1"
+      ></textarea>
+
+      <div class="row mt-t2">
+          <div class="col-md-8">
+              <label class="form-label">{{ 'employee.departmentId' | translate }}:</label>
+              <select class="form-select" [(ngModel)]="employee.DepartmentId" name="DepartmentId">
+                  <option value="0">-- {{ 'common.selectDepartment' | translate }} --</option>
+                  <option *ngFor="let department of departments" [value]="department.DepartmentId">
+                      {{ department.Name }}
+                  </option>
+              </select>
+          </div>
+      </div>
+
+      <h4 class="mt-2">{{ 'employee.employeeEmail' | translate }}:</h4>
+      <input type="email" class="form-control"
+          [(ngModel)]="employee.EmployeeEmail"
+          name="EmployeeEmail"
+          required
+      />
+
+      <h4 class="mt-2">{{ 'employee.employeePhone' | translate }}:</h4>
+      <input type="text" class="form-control"
+          [(ngModel)]="employee.EmployeePhone"
+          name="EmployeePhone"
+          required
+      />
+
+      <h4 class="mt-2">{{ 'employee.employeeAddress' | translate }}:</h4>
+      <textarea class="form-control"
+          [(ngModel)]="employee.EmployeeAddress"
+          name="EmployeeAddress"
+          rows="3"
+          required
+      ></textarea>
+
+      <div class="row mb-3">
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.dateOfBirth' | translate }}</label>
+              <input type="date" class="form-control" [(ngModel)]="employee.BirthDate" name="DateofBirth">
+          </div>
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.placeOfBirth' | translate }}</label>
+              <input type="text" class="form-control" [(ngModel)]="employee.PlaceOfBirth" name="PlaceOfBirth">
+          </div>
+      </div>
+
+      <div class="row mb-3">
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.gender' | translate }}</label>
+              <select class="form-select" [(ngModel)]="employee.Gender" name="Gender">
+                  <option value="">-- {{ 'common.select' | translate }} --</option>
+                  <option value="Nam">Nam</option>
+                  <option value="Nữ">Nữ</option>
+              </select>
+          </div>
+
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.maritalStatus' | translate }}</label>
+              <input type="text" class="form-control" [(ngModel)]="employee.MaritalStatus" name="MaritalStatus">
+          </div>
+      </div>
+
+      <div class="row mb-3">
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.identityNumber' | translate }}</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="employee.IdentityNumber"
+                     name="IdentityNumber">
+
+              <!-- ❗ hiển thị lỗi CCCD -->
+              <small class="text-danger" *ngIf="cccdError">{{ cccdError }}</small>
+          </div>
+
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.identityIssuedDate' | translate }}</label>
+              <input type="date" class="form-control"
+                     [(ngModel)]="employee.IdentityIssuedDate"
+                     name="IdentityIssuedDate">
+          </div>
+      </div>
+
+      <div class="mb-3">
+          <label class="form-label">{{ 'employee.identityIssuedPlace' | translate }}</label>
+          <input type="text" class="form-control"
+                 [(ngModel)]="employee.IdentityIssuedPlace"
+                 name="IdentityIssuedPlace">
+      </div>
+
+      <div class="row mb-3">
+          <div class="col-md-4">
+              <label class="form-label">{{ 'employee.religion' | translate }}</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="employee.Religion"
+                     name="Religion">
+          </div>
+          <div class="col-md-4">
+              <label class="form-label">{{ 'employee.ethnicity' | translate }}</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="employee.Ethnicity"
+                     name="Ethnicity">
+          </div>
+          <div class="col-md-4">
+              <label class="form-label">{{ 'employee.nationality' | translate }}</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="employee.Nationality"
+                     name="Nationality">
+          </div>
+      </div>
+
+      <div class="row mb-3">
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.educationLevel' | translate }}</label>
+              <select class="form-select"
+                      [(ngModel)]="employee.EducationLevel"
+                      name="EducationLevel">
+                  <option value="">-- {{ 'common.select' | translate }} --</option>
+                  <option value="Trung cấp">Trung cấp</option>
+                  <option value="Cao đẳng">Cao đẳng</option>
+                  <option value="Đại học">Đại học</option>
+                  <option value="Sau đại học">Sau đại học</option>
+              </select>
+          </div>
+
+          <div class="col-md-6">
+              <label class="form-label">{{ 'employee.specialization' | translate }}</label>
+              <input type="text" class="form-control"
+                     [(ngModel)]="employee.Specialization"
+                     name="Specialization">
+          </div>
+      </div>
+
+  </form>
+
+  <!-- ❗ hiển thị lỗi API từ server -->
+  <div *ngIf="apiError" class="alert alert-danger mt-2 py-2">
+      {{ apiError }}
   </div>
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label class="form-label">Identity Number</label>
-      <input type="text" class="form-control" [(ngModel)]="employee.IdentityNumber" name="IdentityNumber">
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Identity Issued Date</label>
-      <input type="date" class="form-control" [(ngModel)]="employee.IdentityIssuedDate" name="IdentityIssuedDate">
-    </div>
+  <div class="card-footer mt-2">
+      <button type="submit" form="addForm" class="btn btn-success col-4">
+          {{ 'common.saveChanges' | translate }}
+      </button>
+      <button type="button" class="btn btn-secondary col-4 ms-5">
+          {{ 'common.cancel' | translate }}
+      </button>
   </div>
-
-  <div class="mb-3">
-    <label class="form-label">Identity Issued Place</label>
-    <input type="text" class="form-control" [(ngModel)]="employee.IdentityIssuedPlace" name="IdentityIssuedPlace">
-  </div>
-
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <label class="form-label">Religion</label>
-      <input type="text" class="form-control" [(ngModel)]="employee.Religion" name="Religion">
-    </div>
-    <div class="col-md-4">
-      <label class="form-label">Ethnicity</label>
-      <input type="text" class="form-control" [(ngModel)]="employee.Ethnicity" name="Ethnicity">
-    </div>
-    <div class="col-md-4">
-      <label class="form-label">Nationality</label>
-      <input type="text" class="form-control" [(ngModel)]="employee.Nationality" name="Nationality">
-    </div>
-  </div>
-
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <label class="form-label">Education Level</label>
-      <select class="form-select" [(ngModel)]="employee.EducationLevel" name="EducationLevel">
-        <option value="">-- Select --</option>
-        <option value="Trung cấp">Trung cấp</option>
-        <option value="Cao đẳng">Cao đẳng</option>
-        <option value="Đại học">Đại học</option>
-        <option value="Sau đại học">Sau đại học</option>
-      </select>
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Specialization</label>
-      <input type="text" class="form-control" [(ngModel)]="employee.Specialization" name="Specialization">
-    </div>
-  </div>
-
-    </form>
-
-    <div class="card-footer mt-2">
-        <button type="submit"
-            form="addForm"
-            class="btn btn-success col-4">Save changes
-        </button>
-        <button type="button"
-            class="btn btn-secondary col-4 ms-5">Cancel
-        </button>
-    </div>
 </div>

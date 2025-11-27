@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthGuard } from '../_guards/auth.guard';
 
@@ -16,7 +16,7 @@ interface Course {
   styleUrls: ['./training.component.css']
 })
 
-export class TrainingComponent {
+export class TrainingComponent implements OnInit {
 
  loginMode = false;   // kiểm soát form login
    courses: Course[] = [];    // danh sách khóa học
@@ -68,9 +68,10 @@ export class TrainingComponent {
      this.loginMode = event;
    }
 
-   // Xử lý khi nhấn Apply Now
-   applyJob(courses: Course) {
-     // Ví dụ: chuyển hướng sang trang apply với jobId
-     this.router.navigate(['/training', courses.CourseId]);
-   }
+  // Xử lý khi nhấn Apply Now
+  applyJob(course: Course) {
+    // Ví dụ: chuyển hướng sang trang apply với jobId
+    this.router.navigate(['/training', course.CourseId]);
+    //link sang các trang tương ứng 
+  }
 }

@@ -1,80 +1,127 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using API.DTOs;
 using API.Interfaces;
 
 namespace API.Controllers
 {
+    
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController(IUserRepository _userRepository) : ControllerBase
+    public class UsersController : ControllerBase
     {
+        private readonly IUserRepository _userRepository;
+
+        public UsersController(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
+
+        // --------------------------------------------------
+        // GET: /api/users
+        // --------------------------------------------------
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
             var users = await _userRepository.GetUsersAsync();
             return Ok(users);
         }
 
+        // --------------------------------------------------
+        // GET: /api/users/{id}
+        // --------------------------------------------------
         [HttpGet("{id}")]
-        public async Task<ActionResult<string>> GetUserById(int id)
+        public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
-            // This is just a placeholder. In a real application, you would retrieve the user from a database.
             if (id <= 0)
-            {
                 return BadRequest("Invalid user ID.");
-            }
-            var users = await _userRepository.GetUserByIdAsync(id);
-            return Ok(users);
+
+            var user = await _userRepository.GetUserByIdAsync(id);
+
+            if (user == null)
+                return NotFound($"User with ID {id} not found.");
+
+            return Ok(user);
         }
 
+        // --------------------------------------------------
+        // GET: /api/users/by-name/{username}
+        // --------------------------------------------------
+        [HttpGet("by-name/{userName}")]
+        public async Task<ActionResult<UserDto>> GetUserByName(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+                return BadRequest("Username cannot be empty.");
+
+            var user = await _userRepository.GetUserByNameAsync(userName);
+
+            if (user == null)
+                return NotFound($"User '{userName}' not found.");
+
+            return Ok(user);
+        }
+
+        // --------------------------------------------------
+        // POST: /api/users
+        // --------------------------------------------------
         [HttpPost]
-        public ActionResult<string> CreateUser([FromBody] string userName)
+        public async Task<ActionResult> AddUser([FromBody] UserDto userDto)
         {
-            // This is just a placeholder. In a real application, you would save the user to a database.
-            if (string.IsNullOrEmpty(userName))
-            {
+            if (userDto == null || string.IsNullOrWhiteSpace(userDto.UserName))
                 return BadRequest("User name cannot be empty.");
-            }
-            return CreatedAtAction(nameof(GetUserById), new { id = 1 }, userName);
+
+            // Check user exists
+            if (await _userRepository.UserExistsAsync(userDto.UserName))
+                return BadRequest($"User '{userDto.UserName}' already exists.");
+
+            var success = await _userRepository.AddUserAsync(userDto);
+
+            if (!success)
+                return BadRequest("Failed to create user.");
+
+            await _userRepository.SaveChangesAsync();
+
+            return Ok("User created successfully.");
         }
 
-        [HttpPut("{id}")]
-        public ActionResult<string> UpdateUser(int id, [FromBody] string userName)
+        // --------------------------------------------------
+        // PUT: /api/users
+        // Cập nhật dùng UserDto, không có ID ở route
+        // --------------------------------------------------
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser([FromBody] UserDto userDto)
         {
-            // This is just a placeholder. In a real application, you would update the user in a database.
-            if (id <= 0 || string.IsNullOrEmpty(userName))
-            {
-                return BadRequest("Invalid user ID or user name.");
-            }
-            return Ok($"User{id} updated to {userName}");
+            if (userDto == null || userDto.UserId <= 0)
+                return BadRequest("Invalid user data.");
+
+            var success = await _userRepository.UpdateUserAsync(userDto);
+
+            if (!success)
+                return NotFound($"User with ID {userDto.UserId} not found.");
+
+            await _userRepository.SaveChangesAsync();
+
+            return Ok("User updated successfully.");
         }
 
+        // --------------------------------------------------
+        // DELETE: /api/users/{id}
+        // --------------------------------------------------
         [HttpDelete("{id}")]
-        public ActionResult<string> DeleteUser(int id)
+        public async Task<ActionResult> DeleteUser(int id)
         {
-            // This is just a placeholder. In a real application, you would delete the user from a database.
             if (id <= 0)
-            {
                 return BadRequest("Invalid user ID.");
-            }
-            return Ok($"User{id} deleted");
-        }
 
-        [HttpGet("search")]
-        public ActionResult<IEnumerable<string>> SearchUsers(string query)
-        {
-            // This is just a placeholder. In a real application, you would search users in a database.
-            var users = new List<string> { "User1", "User2", "User3" };
-            if (string.IsNullOrEmpty(query))
-            {
-                return BadRequest("Search query cannot be empty.");
-            }
-            var results = users.Where(u => u.Contains(query, StringComparison.OrdinalIgnoreCase));
-            return Ok(results);
+            var success = await _userRepository.DeleteUserAsync(id);
+
+            if (!success)
+                return NotFound($"User with ID {id} not found.");
+
+            await _userRepository.SaveChangesAsync();
+
+            return Ok("User deleted successfully.");
         }
     }
 }

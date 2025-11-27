@@ -1,36 +1,81 @@
 <div class="col-8">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">{{ 'salary.selectDepartment' | translate }}</label>
+        <select class="form-select w-50" [(ngModel)]="selectedDepartmentId" name="selectedDepartmentId">
+            <option [ngValue]="null">-- {{ 'common.selectDepartment' | translate }} --</option>
+            <option *ngFor="let dept of departments" [ngValue]="dept.DepartmentId">
+                {{ dept.Name }}
+            </option>
+        </select>
+        <small class="text-muted d-block mt-1" *ngIf="loadingDepartments">{{ 'salary.loadingDepartments' | translate }}</small>
+    </div>
+    <div class="mt-4">
+        <h5>{{ 'salary.importFromExcel' | translate }}</h5>
+        <input #excelInput type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" class="form-control w-50">
+        <div class="mt-2">
+            <span class="text-success small" *ngIf="selectedFileName">{{ 'salary.fileSelected' | translate }}: {{ selectedFileName }}</span>
+            <span class="text-danger small d-block" *ngIf="fileError">{{ fileError }}</span>
+            <span class="text-muted small" *ngIf="!selectedFileName && !fileError">{{ 'salary.noFileSelected' | translate }}</span>
+        </div>
+        <div class="d-flex gap-2 flex-wrap mt-2">
+            <button class="btn btn-primary" (click)="uploadExcel()" [disabled]="isUploading || !selectedFile || !!fileError">
+                <span class="spinner-border spinner-border-sm me-2" *ngIf="isUploading"></span>
+                {{ 'salary.uploadExcel' | translate }}
+            </button>
+            <button class="btn btn-outline-primary" (click)="importSalaries()" [disabled]="isImporting || !selectedFile || !!fileError">
+                <span class="spinner-border spinner-border-sm me-2" *ngIf="isImporting"></span>
+                {{ 'salary.importSalaries' | translate }}
+            </button>
+        </div>
+        <div class="table-responsive mt-3" *ngIf="previewRows.length && previewColumns.length">
+            <p class="small text-muted mb-1">{{ 'salary.previewRows' | translate: {count: previewRows.length} }}</p>
+            <table class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th *ngFor="let column of previewColumns">{{ column }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of previewRows">
+                        <td *ngFor="let column of previewColumns">{{ row[column] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <form #addSalaryForm="ngForm" id="addSalaryForm" (ngSubmit)="AddSalary()">
         <div class="form-group mt-2">
-            <label for="employeeSelect">Employee:</label>
+            <label for="employeeSelect">{{ 'salary.employee' | translate }}:</label>
             <select class="form-control"
                     id="employeeSelect"
                     [(ngModel)]="salary.EmployeeId"
                     name="employeeId"
                     required>
-                <option value="" disabled selected>Select employee</option>
+                <option value="" disabled selected>{{ 'common.selectEmployee' | translate }}</option>
                 <option *ngFor="let emp of employees" [value]="emp.EmployeeId">
                     {{ emp.EmployeeName }}
                 </option>
             </select>
             <div *ngIf="addSalaryForm.controls['employeeId']?.invalid && (addSalaryForm.controls['employeeId']?.dirty || addSalaryForm.controls['employeeId']?.touched)" class="text-danger">
-                Employee is required.
+                {{ 'salary.employeeRequired' | translate }}
             </div>
         </div>
 
         <div class="form-group mt-3">
-            <label for="salaryDate">Date:</label>
+            <label for="salaryDate">{{ 'salary.date' | translate }}:</label>
             <input type="date" class="form-control"
                    id="salaryDate"
                    [(ngModel)]="salary.Date"
                    name="date"
                    required>
             <div *ngIf="addSalaryForm.controls['date']?.invalid && (addSalaryForm.controls['date']?.dirty || addSalaryForm.controls['date']?.touched)" class="text-danger">
-                Date is required.
+                {{ 'salary.dateRequired' | translate }}
             </div>
         </div>
 
         <div class="form-group mt-3">
-            <label for="monthlySalary">Monthly Salary:</label>
+            <label for="monthlySalary">{{ 'salary.monthlySalary' | translate }}:</label>
             <input type="number" class="form-control"
                    id="monthlySalary"
                    [(ngModel)]="salary.MonthlySalary"
@@ -38,12 +83,12 @@
                    (input)="updateTotalSalary()"
                    required>
             <div *ngIf="addSalaryForm.controls['monthlySalary']?.invalid && (addSalaryForm.controls['monthlySalary']?.dirty || addSalaryForm.controls['monthlySalary']?.touched)" class="text-danger">
-                Monthly Salary is required and must be a number.
+                {{ 'salary.monthlySalaryRequired' | translate }}
             </div>
         </div>
 
         <div class="form-group mt-3">
-            <label for="bonus">Bonus:</label>
+            <label for="bonus">{{ 'salary.bonus' | translate }}:</label>
             <input type="number" class="form-control"
                    id="bonus"
                    [(ngModel)]="salary.Bonus"
@@ -52,7 +97,7 @@
             </div>
 
         <div class="form-group mt-3">
-            <label for="totalSalary">Total Salary:</label>
+            <label for="totalSalary">{{ 'salary.totalSalary' | translate }}:</label>
             <input type="number" class="form-control"
                    id="totalSalary"
                    [ngModel]="salary.TotalSalary"
@@ -61,7 +106,7 @@
         </div>
 
         <div class="form-group mt-3">
-            <label for="salaryNotes">Notes:</label>
+            <label for="salaryNotes">{{ 'salary.notes' | translate }}:</label>
             <textarea class="form-control"
                       id="salaryNotes"
                       [(ngModel)]="salary.SalaryNotes"
@@ -75,12 +120,12 @@
         <button type="submit"
                 form="addSalaryForm"
                 class="btn btn-success col-4"
-                [disabled]="!addSalaryForm.valid"> Save changes
+                [disabled]="!addSalaryForm.valid">{{ 'common.saveChanges' | translate }}
         </button>
         <button type="button"
                 class="btn btn-secondary col-4 ms-5"
                 (click)="onCancel()">
-            Cancel
+            {{ 'common.cancel' | translate }}
         </button>
     </div>
 </div>

@@ -160,17 +160,25 @@ export class EmployeeListComponent implements OnInit{
     const selectedRows = this.gridApi.getSelectedRows();
     if (selectedRows.length === 1) {
       const employeeData = selectedRows[0];
-      const id = employeeData.EmployeeId; // Lấy ID từ hàng được chọn
-      this.empService.DeleteEmployee(id).subscribe({
-        next: _ => {
-          this.toastr.success('Employee deleted successfully');
-          this.loadEmployee(); // Tải lại danh sách nhân viên để cập nhật
-        },
-        error: (err: any) => {
-          console.error(err);
-          this.toastr.error('Failed to delete employee');
-        }
-      });
+      const id = employeeData.EmployeeId;
+      if (!id) {
+        this.toastr.error('EmployeeId is required');
+        return;
+      }
+      //thêm thông báo cho người dùng
+      this.toastr.warning('Are you sure you want to delete this employee?');
+      if (confirm('Are you sure you want to delete this employee?')) {
+        this.empService.DeleteEmployee(id).subscribe({
+          next: _ => {
+            this.toastr.success('Employee deleted successfully');
+            this.loadEmployee(); // Tải lại danh sách nhân viên để cập nhật
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.toastr.error('Failed to delete employee');
+          }
+        });
+      }
     } else {
       alert('Please select one employee to delete.');
     }

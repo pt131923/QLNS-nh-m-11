@@ -1,26 +1,32 @@
 <div class="container-fluid p-4">
-  <h2 class="mb-4">📞 Contact</h2>
+  <h2 class="mb-4">📞 {{ 'contact.title' | translate }}</h2>
 
-  <p>If you have any problems or need assistance, please contact:</p>
+  <p>{{ 'contact.contactInfo' | translate }}</p>
 
   <ul class="list-group mb-4">
     <li class="list-group-item">
-      📧 Email: <a href="mailto:support@yourcompany.com">Công ty TNHH 1 thành viên ĐHXD.com</a>
+      📧 {{ 'contact.email' | translate }}:
+      <a href="mailto:PhongNH@HR-System-HUCE.com">
+        Công ty TNHH 1 thành viên ĐHXD.com
+      </a>
     </li>
+
     <li class="list-group-item">
-      ☎️ Phone: <b>028-1234-5678</b>
+      ☎️ {{ 'contact.phone' | translate }}: <b>028-1234-5678</b>
     </li>
+
     <li class="list-group-item">
-      🏢 Office: 55 Giải Phóng, Quận Hai Bà Trưng, Hà Nội
+      🏢 {{ 'contact.office' | translate }}: 55 Giải Phóng, Quận Hai Bà Trưng, Hà Nội
     </li>
   </ul>
 
-  <h5>Send request directly:</h5>
+  <h5>{{ 'contact.sendRequest' | translate }}</h5>
 
   <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" novalidate>
-    <!-- Name Field -->
+
+    <!-- Name -->
     <div class="mb-3">
-      <label class="form-label">Name</label>
+      <label class="form-label">{{ 'contact.name' | translate }}</label>
       <input
         type="text"
         formControlName="Name"
@@ -28,29 +34,29 @@
         [ngClass]="{ 'is-invalid': f['Name'].touched && f['Name'].errors }"
       />
       <div *ngIf="f['Name'].touched && f['Name'].errors" class="invalid-feedback">
-        <div *ngIf="f['Name'].errors?.['required']">Name is required</div>
-        <div *ngIf="f['Name'].errors?.['pattern']">Name can only contain letters and spaces</div>
+        <div *ngIf="f['Name'].errors?.['required']">{{ 'contact.nameRequired' | translate }}</div>
+        <div *ngIf="f['Name'].errors?.['pattern']">{{ 'contact.namePattern' | translate }}</div>
       </div>
     </div>
 
-    <!-- Email Field -->
+    <!-- Email -->
     <div class="mb-3">
-      <label class="form-label">Email</label>
+      <label class="form-label">{{ 'contact.emailLabel' | translate }}</label>
       <input
-        type="Email"
+        type="email"
         formControlName="Email"
         class="form-control"
         [ngClass]="{ 'is-invalid': f['Email'].touched && f['Email'].errors }"
       />
       <div *ngIf="f['Email'].touched && f['Email'].errors" class="invalid-feedback">
-        <div *ngIf="f['Email'].errors?.['required']">Email is required</div>
-        <div *ngIf="f['Email'].errors?.['email']">Please enter a valid email address</div>
+        <div *ngIf="f['Email'].errors?.['required']">{{ 'contact.emailRequired' | translate }}</div>
+        <div *ngIf="f['Email'].errors?.['email']">{{ 'contact.emailInvalid' | translate }}</div>
       </div>
     </div>
 
-    <!-- Phone Number Field -->
+    <!-- Phone -->
     <div class="mb-3">
-      <label class="form-label">Phone Number</label>
+      <label class="form-label">{{ 'contact.phoneNumber' | translate }}</label>
       <input
         type="text"
         formControlName="PhoneNumber"
@@ -58,14 +64,14 @@
         [ngClass]="{ 'is-invalid': f['PhoneNumber'].touched && f['PhoneNumber'].errors }"
       />
       <div *ngIf="f['PhoneNumber'].touched && f['PhoneNumber'].errors" class="invalid-feedback">
-        <div *ngIf="f['PhoneNumber'].errors?.['required']">Phone number is required</div>
-        <div *ngIf="f['PhoneNumber'].errors?.['pattern']">Phone number must be 10 digits</div>
+        <div *ngIf="f['PhoneNumber'].errors?.['required']">{{ 'contact.phoneRequired' | translate }}</div>
+        <div *ngIf="f['PhoneNumber'].errors?.['pattern']">{{ 'contact.phonePattern' | translate }}</div>
       </div>
     </div>
 
-    <!-- Message Field -->
+    <!-- Message -->
     <div class="mb-3">
-      <label class="form-label">Message</label>
+      <label class="form-label">{{ 'contact.message' | translate }}</label>
       <textarea
         formControlName="Message"
         class="form-control"
@@ -73,34 +79,32 @@
         [ngClass]="{ 'is-invalid': f['Message'].touched && f['Message'].errors }"
       ></textarea>
       <div *ngIf="f['Message'].touched && f['Message'].errors" class="invalid-feedback">
-        <div *ngIf="f['Message'].errors?.['required']">Message is required</div>
-        <div *ngIf="f['Message'].errors?.['maxLength']">Message cannot exceed 1000 characters</div>
+        <div *ngIf="f['Message'].errors?.['required']">{{ 'contact.messageRequired' | translate }}</div>
+        <div *ngIf="f['Message'].errors?.['maxLength']">{{ 'contact.messageMaxLength' | translate }}</div>
       </div>
       <small class="text-muted">
-        {{ contactForm.get('Message')?.value?.length || 0 }}/1000 characters
+        {{ contactForm.get('Message')?.value?.length || 0 }}/1000 {{ 'contact.characters' | translate }}
       </small>
     </div>
 
-    <!-- CreatedAt Field -->
+    <!-- CreatedAt -->
     <div class="mb-3">
-      <h4 class="mt-3">Created At:</h4>
-        <input type="date" class="form-control"
-            formControlName="CreatedAt"
-            required>
+      <label class="form-label">{{ 'contact.createdAt' | translate }}</label>
+      <input
+        type="date"
+        class="form-control"
+        formControlName="CreatedAt"
+      />
       <div *ngIf="f['CreatedAt'].touched && f['CreatedAt'].errors" class="invalid-feedback">
-        <div *ngIf="f['CreatedAt'].errors?.['required']">Created At is required</div>
+        <div *ngIf="f['CreatedAt'].errors?.['required']">{{ 'contact.createdAtRequired' | translate }}</div>
       </div>
     </div>
 
-    <!-- Submit Button -->
-    <button
-      type="submit"
-      class="btn btn-success"
-      [disabled]="isSubmitting"
-    >
-      <span *ngIf="!isSubmitting">Send Contact</span>
-      <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-      <span *ngIf="isSubmitting"> Sending...</span>
+    <!-- Buttons -->
+    <button type="submit" class="btn btn-success" [disabled]="isSubmitting">
+      <span *ngIf="!isSubmitting">{{ 'contact.sendContact' | translate }}</span>
+      <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+      <span *ngIf="isSubmitting"> {{ 'common.sending' | translate }}</span>
     </button>
 
     <button
@@ -108,8 +112,8 @@
       class="btn btn-secondary ms-2"
       (click)="viewContactHistory()"
     >
-      View Contact History
+      {{ 'contact.viewContactHistory' | translate }}
     </button>
+
   </form>
 </div>
-

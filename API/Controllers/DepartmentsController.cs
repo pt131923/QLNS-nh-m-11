@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    
     [ApiController]
     [Route("api/[controller]")]
     public class DepartmentsController(DataContext _context, IDepartmentRepository _departmentRepository, AutoMapper.IMapper _mapper) : BaseApiController

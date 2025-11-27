@@ -1,6 +1,6 @@
 <div class="col-8">
     <form #editForm="ngForm" id="editForm" (ngSubmit)="UpdateDepartment()">
-        <h4 class="mt-2">Department Name:</h4>
+        <h4 class="mt-2">{{ 'department.name' | translate }}:</h4>
         <textarea class="form-control"
             [(ngModel)]="department!.Name"
             name="Name"
@@ -8,28 +8,28 @@
         ></textarea>
     </form>
 
-    <h4 class="mt-3"> Description:</h4>
+    <h4 class="mt-3">{{ 'department.description' | translate }}:</h4>
     <textarea class="form-control"
         [(ngModel)]="department!.Description"
         name="Description"
         rows="5"
     ></textarea>
 
-    <h4 class="mt-3">SLNhanVien:</h4>
+    <h4 class="mt-3">{{ 'department.slNhanVien' | translate }}:</h4>
     <textarea class="form-control"
         [(ngModel)]="department!.SlNhanVien"
         name="SlNhanVien"
         rows="1"
     ></textarea>
 
-    <h4 class="mt-3">Adresses:</h4>
+    <h4 class="mt-3">{{ 'department.addresses' | translate }}:</h4>
     <textarea class="form-control"
         [(ngModel)]="department!.Addresses"
         name="Adresses"
         rows="1"
     ></textarea>
 
-    <h4 class="mt-3">Notes:</h4>
+    <h4 class="mt-3">{{ 'department.notes' | translate }}:</h4>
     <textarea class="form-control"
         [(ngModel)]="department!.Notes"
         name="email"
@@ -39,10 +39,10 @@
     <div class="card-footer mt-2">
         <button type="submit"
             form="editForm"
-            class="btn btn-success col-4">Save changes
+            class="btn btn-success col-4">{{ 'common.saveChanges' | translate }}
         </button>
         <button type="button"
-            class="btn btn-secondary col-4 ms-5">Cancel
+            class="btn btn-secondary col-4 ms-5">{{ 'common.cancel' | translate }}
         </button>
     </div>
 </div>

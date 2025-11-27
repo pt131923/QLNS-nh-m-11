@@ -1,4 +1,5 @@
 export interface Employee {
+    [x: string]: any;
     EmployeeId: number;
     EmployeeName: string;
     DepartmentId: number;

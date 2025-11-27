@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250817162212_InitialCreate")]
+    [Migration("20251126063525_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -212,6 +212,32 @@ namespace API.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Employee");
+                });
+
+            modelBuilder.Entity("API.Entities.FileHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FileHistory");
                 });
 
             modelBuilder.Entity("API.Entities.TimeKeeping", b =>

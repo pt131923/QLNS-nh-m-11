@@ -1,37 +1,60 @@
-<div class ="container mt5">
-  <div class="text-center">
-    <h1>Recruitment Management System</h1>
-    <p class="lead">
-      Welcome to the Recruitment Management System. Please log in to continue.
-    </p>
+<div class="container mt-5">
+
+  <!-- Header -->
+  <div class="text-center mb-5">
+    <h1>{{ 'recruitment.title' | translate }}</h1>
+    <p class="lead">{{ 'recruitment.welcome' | translate }}</p>
+
     <button (click)="loginToggle()" class="btn btn-primary btn-lg me-2">
-      Login
+      {{ 'dashboard.login' | translate }}
     </button>
   </div>
 
-  <!-- Form Login -->
-  <div *ngIf="loginMode" class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-4">
+  <!-- Login Form -->
+  <ng-container *ngIf="loginMode; else jobList">
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-4">
         <app-login (cancelLogin)="cancelLoginMode($event)"></app-login>
       </div>
     </div>
-  </div>
+  </ng-container>
 
-  <div *ngIf="!loginMode" class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-8">
-        <h2 class="text-center mb-4">Current Job Openings</h2>
-        <div *ngFor="let job of jobs" class="card mb-3">
+  <!-- Job List (fallback of *ngIf) -->
+  <ng-template #jobList>
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-8">
+
+        <h2 class="text-center mb-4">
+          {{ 'recruitment.currentJobOpenings' | translate }}
+        </h2>
+
+        <div *ngFor="let job of jobs" class="card mb-3 shadow-sm">
           <div class="card-body">
-            <h5 class="card-title
-">{{ job.title }}</h5>
-            <p class="card-text">{{ job.description }}</p>
-            <p class="card-text"><strong>Location:</strong> {{ job.location }}</p>
-            <p class="card-text"><strong>Posted on:</strong> {{ job.postedDate | date }}</p>
-           <button class="btn btn-success" (click)="applyJob(job)">Apply Now</button>
+
+            <h5 class="card-title">{{ job.title | translate }}</h5>
+
+            <p class="card-text">{{ job.description | translate }}</p>
+
+            <p class="card-text">
+              <strong>{{ 'recruitment.location' | translate }}:</strong>
+              {{ job.location }}
+            </p>
+
+            <p class="card-text">
+              <strong>{{ 'recruitment.postedOn' | translate }}:</strong>
+              {{ job.postedDate | date }}
+            </p>
+
+            <button class="btn btn-success"
+                    (click)="applyJob(job)">
+              {{ 'common.apply' | translate }}
+            </button>
+
           </div>
         </div>
+
       </div>
     </div>
-  </div>
+  </ng-template>
+
+</div>

@@ -39,11 +39,14 @@ import { LeaveComponent } from './leave/leave.component';
 import { TrainingComponent } from './training/training.component';
 import { TimekeepingComponent } from './timekeeping/timekeeping.component';
 import { RecruitmentComponent } from './recruitment/recruitment.component';
-import { ContactHistoryComponent } from './contact-history/contact-history.component';
+import { ContactHistoryComponent } from './history/contact-history/contact-history.component';
+import { JobDetailComponent } from './recruitment/job-detail/job-detail.component';
+import { CourseDetailComponent } from './training/course-detail/course-detail.component';
+import { HistoryComponent } from './history/history.component';
 
 
 export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http);
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
 @NgModule({
@@ -77,6 +80,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     TimekeepingComponent,
     RecruitmentComponent,
     ContactHistoryComponent,
+    JobDetailComponent,
+    CourseDetailComponent,
+    HistoryComponent,
   ],
   imports: [
     UserModule,

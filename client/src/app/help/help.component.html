@@ -1,22 +1,32 @@
 <div class="container-fluid p-4">
-  <h2 class="mb-4"><i class="fa fa-question-circle text-danger me-2"></i> Help</h2>
+  <h2 class="mb-4">
+    <i class="fa fa-question-circle text-danger me-2"></i>
+    {{ 'help.title' | translate }}
+  </h2>
 
   <div *ngFor="let faq of faqs; let i = index" class="faq-item border rounded mb-3 overflow-hidden">
-    <div class="faq-question p-3 bg-light d-flex justify-content-between align-items-center"
-         (click)="toggle(i)" style="cursor: pointer;">
-      {{ faq.question }}
-      <span class="toggle-icon fs-4">
-        {{ activeIndex === i ? '−' : '+' }}
-      </span>
+
+    <!-- Câu hỏi -->
+    <div 
+      class="faq-question p-3 bg-light d-flex justify-content-between align-items-center"
+      (click)="toggle(i)"
+      style="cursor: pointer;"
+    >
+      {{ faq.question | translate }}
+
+      <span class="fs-4">{{ getToggleSymbol(i) }}</span>
     </div>
 
-    <div class="faq-answer-wrapper"
-         [class.open]="activeIndex === i"
-         [style.maxHeight]="activeIndex === i ? '500px' : '0'">
+    <!-- Câu trả lời -->
+    <div 
+      class="faq-answer-wrapper"
+      [style.maxHeight]="activeIndex === i ? '500px' : '0'"
+      [class.open]="activeIndex === i"
+    >
       <div class="faq-answer p-3">
-        {{ faq.answer }}
+        {{ faq.answer | translate }}
       </div>
     </div>
+
   </div>
 </div>
-

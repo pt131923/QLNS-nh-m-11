@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
+    
     [ApiController]
     [Route("api/[controller]")]
     public class ContractsController(DataContext _context, IContractRepository _contractRepository, AutoMapper.IMapper _mapper) : BaseApiController

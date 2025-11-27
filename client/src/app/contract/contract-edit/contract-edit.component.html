@@ -1,7 +1,7 @@
 <div class="col-8" *ngIf="contract">
   <form #editForm="ngForm" id="editForm" (ngSubmit)="UpdateContract()" class="mt-3">
     <div class="mb-3">
-      <label for="ContractName" class="form-label fw-bold">Contract Name</label>
+      <label for="ContractName" class="form-label fw-bold">{{ 'contract.contractName' | translate }}</label>
       <input type="text" id="ContractName" class="form-control"
              [(ngModel)]="contract.ContractName"
              name="ContractName"
@@ -9,7 +9,7 @@
     </div>
 
     <div class="mb-3">
-      <label for="EmployeeName" class="form-label fw-bold">Employee Name</label>
+      <label for="EmployeeName" class="form-label fw-bold">{{ 'contract.employeeName' | translate }}</label>
       <input type="text" id="EmployeeName" class="form-control"
              [(ngModel)]="contract.EmployeeName"
              name="EmployeeName"
@@ -17,21 +17,21 @@
     </div>
 
     <div class="mb-3">
-      <label for="ContractType" class="form-label fw-bold">Contract Type</label>
+      <label for="ContractType" class="form-label fw-bold">{{ 'contract.contractType' | translate }}</label>
       <input type="text" id="ContractType" class="form-control"
              [(ngModel)]="contract.ContractType"
              name="ContractType"
              required>
     </div>
 
-    <h4 class="mt-3">Basic Salary:</h4>
+    <h4 class="mt-3">{{ 'contract.basicSalary' | translate }}:</h4>
     <input type="number" class="form-control"
            name="BasicSalary"
            ngModel
            min="0"
            required>
 
-    <h4 class="mt-3">Allowance:</h4>
+    <h4 class="mt-3">{{ 'contract.allowance' | translate }}:</h4>
     <input type="number" class="form-control"
            name="Allowance"
            ngModel
@@ -39,7 +39,7 @@
            required>
 
     <div class="mb-3">
-      <label for="JobDescription" class="form-label fw-bold">Job Description</label>
+      <label for="JobDescription" class="form-label fw-bold">{{ 'contract.jobDescription' | translate }}</label>
       <textarea id="JobDescription" class="form-control"
                 [(ngModel)]="contract.JobDescription"
                 name="JobDescription"
@@ -47,20 +47,20 @@
     </div>
 
     <div class="mb-3">
-      <label for="WorkLocation" class="form-label fw-bold">Work Location</label>
+      <label for="WorkLocation" class="form-label fw-bold">{{ 'contract.workLocation' | translate }}</label>
       <textarea id="WorkLocation" class="form-control"
                 [(ngModel)]="contract.WorkLocation"
                 name="WorkLocation"
                 rows="2"></textarea>
     </div>
 
-    <h4 class="mt-3">Leave of Absence:</h4>
+    <h4 class="mt-3">{{ 'contract.leaveOfAbsence' | translate }}:</h4>
     <input type="text" class="form-control"
            name="Leaveofabsence"
            ngModel>
 
     <div class="mb-3">
-      <label for="StartDate" class="form-label fw-bold">Start Date</label>
+      <label for="StartDate" class="form-label fw-bold">{{ 'contract.startDate' | translate }}</label>
       <input type="date" id="StartDate" class="form-control"
              [(ngModel)]="contract.StartDate"
              name="StartDate"
@@ -68,7 +68,7 @@
     </div>
 
     <div class="mb-3">
-      <label for="EndDate" class="form-label fw-bold">End Date</label>
+      <label for="EndDate" class="form-label fw-bold">{{ 'contract.endDate' | translate }}</label>
       <input type="date" id="EndDate" class="form-control"
              [(ngModel)]="contract.EndDate"
              name="EndDate"
@@ -76,7 +76,7 @@
     </div>
 
     <div class="mb-3">
-      <label for="ContractTerm" class="form-label fw-bold">Contract Term</label>
+      <label for="ContractTerm" class="form-label fw-bold">{{ 'contract.contractTerm' | translate }}</label>
       <input type="text" id="ContractTerm" class="form-control"
              [(ngModel)]="contract.ContractTerm"
              name="ContractTerm"
@@ -84,7 +84,7 @@
     </div>
 
     <div class="mb-3">
-      <label for="CreateAt" class="form-label fw-bold">Created At</label>
+      <label for="CreateAt" class="form-label fw-bold">{{ 'contract.createAt' | translate }}</label>
       <input type="date" id="CreateAt" class="form-control"
              [(ngModel)]="contract.CreateAt"
              name="CreateAt"
@@ -92,7 +92,7 @@
     </div>
 
     <div class="mb-3">
-      <label for="UpdateAt" class="form-label fw-bold">Updated At</label>
+      <label for="UpdateAt" class="form-label fw-bold">{{ 'contract.updateAt' | translate }}</label>
       <input type="date" id="UpdateAt" class="form-control"
              [(ngModel)]="contract.UpdateAt"
              name="UpdateAt"
@@ -101,10 +101,10 @@
 
     <div class="d-flex justify-content-between mt-4">
       <button type="submit" form="editForm" class="btn btn-success col-5">
-        💾 Save Changes
+        💾 {{ 'common.saveChanges' | translate }}
       </button>
       <button type="button" class="btn btn-secondary col-5" (click)="Cancel()">
-        ❌ Cancel
+        ❌ {{ 'common.cancel' | translate }}
       </button>
     </div>
 

@@ -1,0 +1,48 @@
+<div class="container-fluid p-4">
+  <h2 class="mb-4">📋 {{ 'contactHistory.title' | translate }}</h2>
+  
+  <div *ngIf="isLoading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && contacts.length === 0" class="alert alert-info">
+    {{ 'contactHistory.noHistory' | translate }}
+  </div>
+
+  <div *ngIf="!isLoading && contacts.length > 0" class="card">
+    <div class="card-body">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>{{ 'contactHistory.name' | translate }}</th>
+            <th>{{ 'contactHistory.email' | translate }}</th>
+            <th>{{ 'contactHistory.phone' | translate }}</th>
+            <th>{{ 'contactHistory.message' | translate }}</th>
+            <th>{{ 'contactHistory.createdAt' | translate }}</th>
+            <th>{{ 'contactHistory.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contact of contacts">
+            <td>{{ contact.Name }}</td>
+            <td>{{ contact.Email }}</td>
+            <td>{{ contact.PhoneNumber }}</td>
+            <td>{{ contact.Message }}</td>
+            <td>{{ contact.CreatedAt | date:'short' }}</td>
+            <td>
+              <button class="btn btn-sm btn-info me-2" (click)="viewContact(contact)">
+                {{ 'contactHistory.view' | translate }}
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="deleteContact(contact.ContactId)">
+                {{ 'contactHistory.delete' | translate }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

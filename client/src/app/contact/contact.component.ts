@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ContactService } from '../_services/contact.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-contact',
@@ -14,10 +15,8 @@ export class ContactComponent {
   isSubmitting = false;
   lastSubmissionTime: number | null = null;
   readonly MIN_SUBMISSION_INTERVAL = 3000; // 30 giây
-  contactHistory: any[] = [];
-  router: any;
 
-  constructor(private fb: FormBuilder, private contactService: ContactService, private http: HttpClient, private toastr: ToastrService) {
+  constructor(private fb: FormBuilder, private contactService: ContactService, private http: HttpClient, private toastr: ToastrService, private router: Router) {
     this.contactForm = this.fb.group({
       Name: ['', [Validators.required, Validators.pattern(/^[a-zA-ZÀ-ỹ\s]+$/)]],
       Email: ['', [Validators.required, Validators.email]],
@@ -72,17 +71,8 @@ export class ContactComponent {
       alert('Thank you for contacting us. We will respond as soon as possible.');
     }, 50);
   }
-  viewContactHistory() {
-    this.contactService.getContactHistory().subscribe(
-      (data: any[]) => {
-        this.contactHistory = data;
-      },
-      error => {
-        console.error('Error fetching contact history:', error);
-        this.toastr.error('Failed to load contact history.');
-      }
-    );
-  }
+
+  // trả lời contact 
 
  sendContact() {
   const contact = this.contactForm.value;
@@ -91,5 +81,9 @@ export class ContactComponent {
     next: () => this.toastr.success('Contact sent successfully!'),
     error: () => this.toastr.error('Failed to send contact.')
   });
-}
+  }
+
+  viewContactHistory() {
+    this.router.navigate(['/contact-history']);
+  }
 }

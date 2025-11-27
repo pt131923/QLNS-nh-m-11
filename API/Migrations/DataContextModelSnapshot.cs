@@ -211,6 +211,32 @@ namespace API.Migrations
                     b.ToTable("Employee");
                 });
 
+            modelBuilder.Entity("API.Entities.FileHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FileHistory");
+                });
+
             modelBuilder.Entity("API.Entities.TimeKeeping", b =>
                 {
                     b.Property<int>("TimeKeepingId")

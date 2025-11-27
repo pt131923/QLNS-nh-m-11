@@ -8,6 +8,7 @@ using API.Entities;
 
 namespace API.Controllers
 {
+    
     [ApiController]
     [Route("api/[controller]")]
     public class LeaveController : ControllerBase

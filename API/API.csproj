@@ -43,6 +43,7 @@
     <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="26.1.42" />
     <PackageReference Include="System.Collections" Version="4.3.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.7" />
+    <PackageReference Include="EPPlus" Version="7.5.2" />
   </ItemGroup>
 
 </Project>

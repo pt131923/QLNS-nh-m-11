@@ -37,7 +37,7 @@ export class ContactService {
   }
 
   getContactHistory(): Observable<any> {
-    return this.http.get<any[]>('/api/contact/history');
+    return this.http.get<any[]>(`${this.baseUrl}/history`);
   }
 }
 

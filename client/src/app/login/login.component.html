@@ -1,9 +1,10 @@
 <div class="login-container">
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-    <h2>LogIn</h2>>
+    <h2>{{ 'login.title' | translate }}</h2>
 
+    <!-- Username -->
     <div class="form-group">
-      <label for="username">Username</label>
+      <label for="username">{{ 'login.username' | translate }}</label>
       <input
         type="text"
         id="username"
@@ -12,12 +13,13 @@
         [class.invalid]="submitted && loginForm.controls['username'].invalid"
       />
       <div class="error" *ngIf="submitted && loginForm.controls['username'].invalid">
-        Please enter your username.
+        {{ 'login.username_required' | translate }}
       </div>
     </div>
 
+    <!-- Password -->
     <div class="form-group">
-      <label for="password">Password</label>
+      <label for="password">{{ 'login.password' | translate }}</label>
       <input
         type="password"
         id="password"
@@ -26,32 +28,35 @@
         [class.invalid]="submitted && loginForm.controls['password'].invalid"
       />
       <div class="error" *ngIf="submitted && loginForm.controls['password'].invalid">
-        Please enter your password.
+        {{ 'login.password_required' | translate }}
       </div>
     </div>
 
+    <!-- Remember Me -->
     <div class="form-group">
       <label>
-        <input
-          type="checkbox"
-          formControlName="rememberMe"
-        />
-        Remember Me
+        <input type="checkbox" formControlName="rememberMe" />
+        {{ 'login.remember' | translate }}
       </label>
     </div>
 
+    <!-- Buttons -->
     <div class="mt-3">
-      <button type="submit" class="btn btn-primary me-2">Login</button>
-      <button *ngIf="isLoggedIn()" type="button" class="btn btn-danger" (click)="onLogout()">Logout</button>
+      <button type="submit" class="btn btn-primary me-2">
+        {{ 'dashboard.login' | translate }}
+      </button>
     </div>
 
-    <div class="text-success mt-2" *ngIf="successMessage">{{ successMessage }}</div>
-    <div class="text-danger mt-2" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <!-- Error Message -->
+    <div class="text-danger mt-2" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
   </form>
 
+  <!-- Back to dashboard -->
   <div class="mt-3">
-       <button class="btn btn-secondary" (click)="gotoDashboard()">⬅ Back to Dashboard</button>
-    </div>
+    <button class="btn btn-secondary" (click)="gotoDashboard()">
+      ⬅ {{ 'nav.dashboard' | translate }}
+    </button>
+  </div>
 </div>
-
-
