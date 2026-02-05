@@ -1,4 +1,9 @@
 <div class="col-8">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/employees']">
+      <i class="bi bi-arrow-left-short me-1"></i> Back to Employees
+    </button>
+  </div>
     <form #editForm="ngForm" id="editForm" (ngSubmit)="UpdateEmployee()">
         <h4 class="mt-2">{{ 'employee.employeeName' | translate }}:</h4>
         <input type="text" class="form-control"

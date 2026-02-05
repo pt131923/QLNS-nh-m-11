@@ -1,13 +1,14 @@
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class SalaryRepository(DataContext _context, AutoMapper.IMapper _mapper) : ISalaryRepository
+    public class SalaryRepository(DataContext _context, AutoMapper.IMapper _mapper, IDashboardService _dashboardService) : ISalaryRepository
     {
 
         public async Task<IEnumerable<Salary>> GetSalariesAsync()
@@ -33,7 +34,15 @@ namespace API.Data
 
         public async Task<bool> SaveAllAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu lương
+            if (result)
+            {
+                await _dashboardService.NotifyDataChangedWithCheckAsync();
+            }
+
+            return result;
         }
 
         public void Add(Salary salary)

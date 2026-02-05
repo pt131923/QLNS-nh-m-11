@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
+import { DashboardService } from '../_services/dashboard.service';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,8 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit(): void {
@@ -31,94 +33,95 @@ export class LoginComponent implements OnInit {
       rememberMe: [false]
     });
 
-    // Nếu đã login → chuyển về Dashboard luôn
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/dashboard'], { replaceUrl: true });
     }
   }
 
-  // -------------------------------------------------------
-  // SUBMIT LOGIN
-  // -------------------------------------------------------
-  onSubmit(): void {
-    this.submitted = true;
-    this.errorMessage = '';
+  // Trong login.component.ts
 
-    if (this.loginForm.invalid) {
-      this.errorMessage = 'Vui lòng nhập đầy đủ thông tin.';
-      return;
-    }
+onSubmit(): void {
+  this.submitted = true;
+  this.errorMessage = '';
 
-    this.loading = true;
+  if (this.loginForm.invalid) {
+    this.errorMessage = 'Vui lòng nhập đầy đủ thông tin.';
+    return;
+  }
 
-    const { username, password, rememberMe } = this.loginForm.value;
+  this.loading = true;
 
-    this.authService.login({ username, password }).subscribe({
-      next: (res: any) => {
-        this.loading = false;
+  const { username, password } = this.loginForm.value;
 
-        if (!res || !res.token) {
-          this.errorMessage = 'Token không hợp lệ từ server.';
-          return;
-        }
+  this.authService.login({ username, password }).subscribe({
+    next: (res: any) => {
+      this.loading = false;
 
-        // Lưu token
-        this.authService.saveToken(res.token, rememberMe);
-
-        // Điều hướng
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-        this.router.navigateByUrl(returnUrl);
-      },
-
-      error: (err) => {
-        this.loading = false;
-
-        switch (err.status) {
-          case 400:
-          case 401:
-            this.errorMessage = 'Sai username hoặc password.';
-            break;
-
-          case 0:
-            this.errorMessage = 'Không thể kết nối server.';
-            break;
-
-          default:
-            this.errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại.';
-            break;
-        }
+      if (!res || !res.token) {
+        this.errorMessage = 'Token không hợp lệ từ server.';
+        return;
       }
-    });
-  }
 
-  // -------------------------------------------------------
-  // RESET FORM
-  // -------------------------------------------------------
+      // 1. Save token TRƯỚC TIÊN
+      console.log('💾 Saving token to localStorage...');
+      this.authService.saveToken(res.token);
+      
+      // Verify token was saved
+      const savedToken = this.authService.getToken();
+      if (!savedToken || savedToken !== res.token) {
+        console.error('❌ Token was not saved correctly!');
+        this.errorMessage = 'Lỗi lưu token. Vui lòng thử lại.';
+        return;
+      }
+      console.log('✅ Token saved successfully, length:', savedToken.length);
+
+      // 2. Save user info
+      let userData = res.user || res;
+      if (userData && !userData.token) {
+        localStorage.setItem('user', JSON.stringify(userData));
+      } else if (res.user) {
+        localStorage.setItem('user', JSON.stringify(res.user));
+      }
+
+      console.log('✅ Login successful. Token and user saved.');
+      
+      // 3. Đợi một chút để đảm bảo token đã được lưu và interceptor sẵn sàng
+      // Sau đó mới khởi động SignalR và redirect
+      setTimeout(() => {
+        console.log('🚀 Starting SignalR connection and redirecting...');
+        // Khởi động SignalR connection sau khi đăng nhập thành công
+        this.dashboardService.startSignalRConnection();
+
+        // Chuyển hướng bằng Router của Angular
+        // Điều này ngăn chặn việc tải lại toàn bộ ứng dụng và đảm bảo Interceptor hoạt động ngay lập tức
+        this.router.navigate(['/dashboard'], { replaceUrl: true });
+      }, 100); // Đợi 100ms để đảm bảo token đã được lưu
+    },
+
+    error: (err) => {
+      this.loading = false;
+      if (err.status === 400 || err.status === 401) {
+        this.errorMessage = 'Sai username hoặc password.';
+      } else if (err.status === 0) {
+        this.errorMessage = 'Không thể kết nối server.';
+      } else {
+        this.errorMessage = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+      }
+    }
+  });
+}
+
   onReset(): void {
     this.loginForm.reset();
     this.submitted = false;
     this.errorMessage = '';
   }
 
-  // -------------------------------------------------------
-  // KEYBOARD SHORTCUT
-  // -------------------------------------------------------
-  onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') this.onSubmit();
-    if (event.key === 'Escape') this.onReset();
-  }
-
-  // -------------------------------------------------------
-  // LOGOUT
-  // -------------------------------------------------------
   onLogout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/dashboard']);
   }
 
-  // -------------------------------------------------------
-  // CANCEL
-  // -------------------------------------------------------
   cancel() {
     this.cancelLogin.emit(false);
   }

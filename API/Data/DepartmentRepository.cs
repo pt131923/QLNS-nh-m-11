@@ -1,13 +1,14 @@
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class DepartmentRepository(DataContext _context, AutoMapper.IMapper _mapper) : IDepartmentRepository
+    public class DepartmentRepository(DataContext _context, AutoMapper.IMapper _mapper, IDashboardService _dashboardService) : IDepartmentRepository
     {
         public async Task<IEnumerable<AppDepartment>> GetDepartmentsAsync()
         {
@@ -31,7 +32,15 @@ namespace API.Data
 
         public async Task<bool> SaveAllAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu
+            if (result)
+            {
+                await _dashboardService.NotifyDataChangedWithCheckAsync();
+            }
+
+            return result;
         }
 
         public void Add(AppDepartment depart)

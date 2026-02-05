@@ -1,25 +1,160 @@
-<div class="container mt-5">
-  <div class="text-center">
-    <h1>{{ 'dashboard.title' | translate }}</h1>
-    <p class="lead">
-      {{ 'dashboard.welcome' | translate }}
-    </p>
+<div class="dashboard-container container-fluid bg-light min-vh-100 d-flex flex-column p-0">
 
-    <!-- Nút chuyển hướng -->
-    <div class="text-center">
-      <button (click)="registerNavigate()" class="btn btn-primary btn-lg me-2">
-        {{ 'dashboard.register' | translate }}
-      </button>
-
-      <button class="btn btn-info btn-lg">{{ 'dashboard.learnMore' | translate }}</button>
+  <!-- ========================= -->
+  <!-- 🔵 HEADER / TOP BAR -->
+  <!-- ========================= -->
+  <header class="d-flex justify-content-between align-items-center py-3 px-4 bg-white shadow-sm mb-4">
+    <div>
+      <h4 class="mb-0 fw-bold text-primary">
+        <i class="bi bi-speedometer2 me-2"></i>{{ 'dashboard.systemOverview' | translate }}
+      </h4>
+      <small class="text-muted">{{ 'dashboard.overview' | translate }}</small>
     </div>
 
-    <hr />
+    <div class="d-flex align-items-center gap-3">
+      <ng-container *ngIf="user; else notLoggedIn">
+        <!-- Actions -->
+        <div class="d-none d-md-flex gap-2 me-2">
+             <button class="btn btn-outline-warning btn-sm" (click)="testAPI()" title="Test API">
+              <i class="bi bi-bug"></i> Test API
+            </button>
+            <button class="btn btn-outline-info btn-sm" (click)="forceLoadSummary()" title="Reload Data">
+              <i class="bi bi-arrow-clockwise"></i> Load Data
+            </button>
+        </div>
 
-    <p class="lead">{{ 'dashboard.alreadyHaveAccount' | translate }}</p>
+        <!-- User Profile -->
+        <div class="d-flex align-items-center" style="cursor: pointer;" (click)="goToProfile()" [title]="'dashboard.viewProfile' | translate">
+            <img [src]="user.avatar || 'assets/default-avatar.png'"
+                 width="40" height="40"
+                 class="rounded-circle border me-2 object-fit-cover">
+            <div class="d-none d-sm-block text-end me-2">
+                <div class="fw-semibold text-dark" style="font-size: 0.9rem;">{{ user.fullName }}</div>
+                <div class="text-muted" style="font-size: 0.75rem;">User</div>
+            </div>
+        </div>
+        
+        <button class="btn btn-light text-danger btn-sm ms-1" (click)="logout()" [title]="'common.logout' | translate">
+            <i class="bi bi-box-arrow-right fs-5"></i>
+        </button>
+      </ng-container>
 
-    <button (click)="loginNavigate()" class="btn btn-success btn-lg me-2">
-      {{ 'dashboard.login' | translate }}
-    </button>
+      <ng-template #notLoggedIn>
+        <button class="btn btn-outline-primary btn-sm me-2" (click)="loginNavigate()">
+          <i class="bi bi-box-arrow-in-right me-1"></i> {{ 'dashboard.login' | translate }}
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="registerNavigate()">
+          <i class="bi bi-person-plus me-1"></i> {{ 'dashboard.register' | translate }}
+        </button>
+      </ng-template>
+    </div>
+  </header>
+
+  <!-- ========================= -->
+  <!-- 🔵 MAIN CONTENT -->
+  <!-- ========================= -->
+  <div class="flex-grow-1 px-4 pb-4">
+    
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-sm-6 col-xl-3" *ngFor="let item of sidebarStats">
+        <div class="card border-0 shadow-sm h-100 overflow-hidden stat-card-hover"
+               [style.cursor]="(user || authService.isLoggedIn()) ? 'pointer' : 'default'"
+               (click)="(user || authService.isLoggedIn()) ? navigateTo(item.link) : null"
+               [class.opacity-50]="!(user || authService.isLoggedIn())"
+               [title]="(user || authService.isLoggedIn()) ? ('dashboard.clickToView' | translate) : ('dashboard.pleaseLoginFirst' | translate)">
+          
+          <div class="card-body p-4 position-relative">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted text-uppercase fw-semibold mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        {{ item.label }}
+                    </p>
+                    <h3 class="fw-bold mb-0 text-dark">{{ item.value | number }}</h3>
+                </div>
+                <div class="stat-icon-wrapper bg-opacity-10 rounded-3 p-2 d-flex align-items-center justify-content-center" [ngClass]="item.colorClass ? item.colorClass.replace('text-', 'bg-') : 'bg-primary'" style="width: 48px; height: 48px;">
+                    <i [class]="'bi ' + item.icon + ' fs-4 ' + (item.colorClass || 'text-primary')"></i>
+                </div>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-0 py-2 px-4" *ngIf="user || authService.isLoggedIn()">
+              <small class="text-primary fw-semibold" style="font-size: 0.8rem;">
+                  {{ 'dashboard.clickToView' | translate }} <i class="bi bi-arrow-right ms-1"></i>
+              </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mock Content for Realism (Charts/Tables) -->
+    <div class="row g-4">
+        <!-- Main Chart Section -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-dark">Analytics Overview</h6>
+                    <button class="btn btn-light btn-sm"><i class="bi bi-three-dots"></i></button>
+                </div>
+                <div class="card-body">
+                    <!-- Mock Chart Visual -->
+                    <div class="d-flex align-items-end justify-content-around h-100 py-4" style="min-height: 300px;">
+                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 40%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
+                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 65%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
+                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 50%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
+                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 85%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
+                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 60%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
+                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 75%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
+                    </div>
+                    <div class="text-center text-muted small mt-2">Monthly Performance Data (Mockup)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel / Recent Activity -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 fw-bold text-dark">Recent Activities</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item border-0 px-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;"><i class="bi bi-person-plus"></i></div>
+                                <div>
+                                    <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">New Employee Onboarded</h6>
+                                    <small class="text-muted">Sarah Jenkins joined the Design Team</small>
+                                </div>
+                                <small class="text-muted ms-auto">2h</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item border-0 px-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;"><i class="bi bi-file-earmark-text"></i></div>
+                                <div>
+                                    <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">Contract Expiring</h6>
+                                    <small class="text-muted">3 contracts expiring soon</small>
+                                </div>
+                                <small class="text-muted ms-auto">5h</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item border-0 px-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;"><i class="bi bi-calendar-check"></i></div>
+                                <div>
+                                    <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">Team Meeting</h6>
+                                    <small class="text-muted">Scheduled for tomorrow at 10 AM</small>
+                                </div>
+                                <small class="text-muted ms-auto">1d</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white text-center border-0 py-3">
+                    <a href="javascript:void(0)" class="text-decoration-none fw-semibold" style="font-size: 0.9rem;">View All Activity</a>
+                </div>
+            </div>
+        </div>
+    </div>
   </div>
 </div>

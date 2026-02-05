@@ -1,4 +1,9 @@
 <div class="col-8">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/contracts']">
+      <i class="bi bi-arrow-left-short me-1"></i> Back to Contracts
+    </button>
+  </div>
   <form #addForm="ngForm" id="addForm" (ngSubmit)="AddContract()">
     <h4 class="mt-2">Contract Name:</h4>
     <input type="text" class="form-control"

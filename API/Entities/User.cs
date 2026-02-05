@@ -2,6 +2,8 @@ namespace API.Entities
 {
     public class User
     {
+        public string Role { get; set; } = "user";
+        public string Image { get; set; } = "default.png";
         public int UserId { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }

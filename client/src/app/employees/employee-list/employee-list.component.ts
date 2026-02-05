@@ -1,213 +1,234 @@
-import { Component, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { ColDef, GridApi, GridReadyEvent, GridOptions, RowClickedEvent } from 'ag-grid-community';
 import { EmployeeService } from 'src/app/_services/employee.service';
-import { ModalDirective } from 'ngx-bootstrap/modal'
 import { Router } from '@angular/router';
-import { Employee } from 'src/app/_model/employee';
 import { ToastrService } from 'ngx-toastr';
+import { Employee } from 'src/app/_model/employee';
 import { Department } from 'src/app/_model/department';
+
 @Component({
   selector: 'app-employee-list',
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.css']
 })
+export class EmployeeListComponent implements OnInit {
 
-export class EmployeeListComponent implements OnInit{
-  @ViewChild('loadListEmployee', {static: true}) modal: ModalDirective | undefined;
+  gridOptions: GridOptions = {};
+
+  // Inject services
+  private empService = inject(EmployeeService);
+  private router = inject(Router);
+  private toastr = inject(ToastrService);
 
   private gridApi!: GridApi<Employee>;
-  employees: Employee[] = [];
-  employee: Employee | null = null;
-  public rowSelection: 'single' | 'multiple' = 'multiple';
-  departments: Department[] = [];
-  public columnDefs: ColDef<Employee>[] = [
+
+  // Signals
+  departments = signal<Department[]>([]);
+  employees = signal<Employee[]>([]);
+  rowData = signal<Employee[]>([]);
+
+  // Search text
+  searchText: string = '';
+
+  // Pagination
+  rowSelection: 'single' | 'multiple' = 'multiple';
+  pagination = true;
+  paginationPageSize = 10;
+  paginationPageSizeSelector = [5, 10, 15, 20, 25, 30, 35, 40];
+
+  // Column definitions
+  columnDefs: ColDef<Employee>[] = [
     {
-    headerName: '',
-    checkboxSelection: true,
-    width: 40,
-    headerCheckboxSelection: true,
-    headerCheckboxSelectionFilteredOnly: true,
-    pinned: 'left'
-  },
-  { field: 'EmployeeId', headerName: 'EmployeeId' },
-  { field: 'EmployeeName', headerName: 'EmployeeName', filter: true },
-  {
-    field: 'DepartmentId',
-    headerName: 'DepartmentId',
-    filter: true
-  },
-  { field: 'EmployeeEmail', headerName: 'EmployeeEmail', filter: true },
-  { field: 'EmployeePhone', headerName: 'EmployeePhone', filter: true },
-  { field: 'EmployeeAddress', headerName: 'EmployeeAddress', filter: true },
-  { field: 'BirthDate', headerName: 'BirthDate', filter: true },
-  { field: 'PlaceOfBirth', headerName: 'PlaceOfBirth', filter: true },
-  { field: 'Gender', headerName: 'Gender', filter: true },
-  { field: 'MaritalStatus', headerName: 'MaritalStatus', filter: true },
-  { field: 'IdentityNumber', headerName: 'IdentityNumber', filter: true },
-  { field: 'IdentityIssuedDate', headerName: 'IdentityIssuedDate', filter: true },
-  { field: 'IdentityIssuedPlace', headerName: 'IdentityIssuedPlace', filter: true },
-  { field: 'Religion', headerName: 'Religion', filter: true },
-  { field: 'Ethnicity', headerName: 'Ethnicity', filter: true },
-  { field: 'Nationality', headerName: 'Nationality', filter: true },
-  { field: 'EducationLevel', headerName: 'EducationLevel', filter: true },
-  { field: 'Specialization', headerName: 'Specialization', filter: true }
-];
+      headerName: '',
+      checkboxSelection: true,
+      width: 40,
+      headerCheckboxSelection: true,
+      headerCheckboxSelectionFilteredOnly: true,
+      pinned: 'left'
+    },
+    { field: 'EmployeeId', headerName: 'Employee ID', maxWidth: 100 },
+    { field: 'EmployeeName', headerName: 'Employee Name', filter: true, minWidth: 150 },
+    {
+      field: 'DepartmentId',
+      headerName: 'Department',
+      filter: true,
+      valueFormatter: (params) => {
+        const dep = this.departments().find(d => d.DepartmentId === params.value);
+        return dep ? dep.Name : 'N/A';
+      },
+      minWidth: 150,
+    },
+    { field: 'EmployeeEmail', headerName: 'Email', filter: true, minWidth: 150 },
+    { field: 'EmployeePhone', headerName: 'Phone', filter: true, minWidth: 120 },
+    { field: 'EmployeeAddress', headerName: 'Address', filter: true, minWidth: 200 },
+    { field: 'BirthDate', headerName: 'Birth Date', filter: true, minWidth: 120 },
+    { field: 'Gender', headerName: 'Gender', filter: true, minWidth: 100 },
+    { field: 'IdentityNumber', headerName: 'ID Number', filter: true },
+    { field: 'EducationLevel', headerName: 'Education Level', filter: true }
+  ];
 
-
-  public gridOptions: GridOptions<Employee> = {
-    rowSelection: 'multiple',
-    columnDefs: this.columnDefs,
-  };
-
-  defaultColDef = {
+  defaultColDef: ColDef = {
     flex: 1,
-    minWidth: 100,
+    minWidth: 80,
     sortable: true,
     resizable: true,
-  }
+    filter: true,
+  };
 
-  pagination = true;
-  paginationPageSize = 5;
-  paginationPageSizeSelector = [5, 10, 15,20, 25, 30, 35, 40];
-  searchText: string = ''; // Khởi tạo searchText là string rỗng
-  rowData: Employee[] = []; // Sử dụng kiểu Employee[] cho rowData và khởi tạo là mảng rỗng
-
-  constructor(private empService: EmployeeService, private router: Router, private toastr: ToastrService) {  }
-
+  // ------------ Lifecycle ------------
   ngOnInit(): void {
+    this.loadDepartments();
     this.loadEmployee();
-    this.empService.getEmployees().subscribe({
-      next: (employees: Employee[]) => {
-        this.employee = employees.length > 0 ? employees[0] : null;
-      },
-      error: (err) => {
-        console.error('Error loading employees:', err);
-        this.employee = null;
-      }
-    });
   }
 
   onGridReady(event: GridReadyEvent<Employee>) {
     this.gridApi = event.api;
   }
 
-  onBtExport() {
-  // Đảm bảo map chứa dữ liệu đúng
-  const departmentMap = new Map<number, string>();
-  this.departments.forEach(dep => {
-    // Kiểm tra xem DepartmentId có hợp lệ không
-    if (dep.DepartmentId === undefined || dep.Name === undefined) {
-      console.warn('Invalid department data:', dep);
-      return;
-    }
-    // Thêm vào map với DepartmentId là key và Name là value
-    if (typeof dep.DepartmentId !== 'number' || typeof dep.Name !== 'string') {
-      console.warn('DepartmentId must be a number and Name must be a string:', dep);
-      return;
-    }
-  departmentMap.set(dep.DepartmentId, dep.Name);
-   });
+  // ------------ Load Data ------------
 
-  this.gridApi.exportDataAsCsv({
-    processCellCallback: (params) => {
-      const colId = params.column.getColId();
-
-      if (colId === 'DepartmentId') {
-        console.log('DepartmentId raw:', params.value);
-        const name = departmentMap.get(params.value);
-        return name || 'Không xác định';
-      }
-
-      return params.value;
-    },
-    fileName: 'Danh_sach_nhan_vien.csv'
-  });
-}
-
-  loadEmployee() {
-    this.empService.getEmployees().subscribe({
-      next: (employees: Employee[]) => {
-        this.employees = employees;
-        this.rowData = employees; // Gán dữ liệu nhận được vào rowData
-        console.log('Employees loaded:', this.employees);
+  loadDepartments() {
+    this.empService.getDepartment().subscribe({
+      next: (dep) => {
+        this.departments.set(dep);
       },
       error: (err) => {
-        console.error('Error loading employees:', err);
+        console.error(err);
+        this.toastr.error('Unable to load departments.');
       }
     });
   }
 
-  onEditRow() {
-    const selectedRows = this.gridApi.getSelectedRows();
-    if (selectedRows.length === 1) {
-      const employeeData = selectedRows[0];
-      this.empService.setEmployeeData(employeeData);
-
-      // Kiểm tra ID trước khi điều hướng
-      if (employeeData.EmployeeId) {
-        this.router.navigate(['/employee-edit', employeeData.EmployeeId]);
-      } else {
-        alert('Selected employee does not have a valid ID.');
+  loadEmployee() {
+    this.empService.getEmployees().subscribe({
+      next: (employees) => {
+        this.employees.set(employees);
+        this.rowData.set(employees);
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Unable to load employees.');
       }
-
-    } else {
-      alert('Please select one employee to edit.');
-    }
+    });
   }
 
+  // ------------ Export CSV ------------
 
-  onDeleteRow() {
-    const selectedRows = this.gridApi.getSelectedRows();
-    if (selectedRows.length === 1) {
-      const employeeData = selectedRows[0];
-      const id = employeeData.EmployeeId;
-      if (!id) {
-        this.toastr.error('EmployeeId is required');
-        return;
-      }
-      //thêm thông báo cho người dùng
-      this.toastr.warning('Are you sure you want to delete this employee?');
-      if (confirm('Are you sure you want to delete this employee?')) {
-        this.empService.DeleteEmployee(id).subscribe({
-          next: _ => {
-            this.toastr.success('Employee deleted successfully');
-            this.loadEmployee(); // Tải lại danh sách nhân viên để cập nhật
-          },
-          error: (err: any) => {
-            console.error(err);
-            this.toastr.error('Failed to delete employee');
+  onBtExport() {
+    const depMap = new Map<number, string>();
+    this.departments().forEach(d => depMap.set(d.DepartmentId, d.Name));
+
+    this.gridApi.exportDataAsCsv({
+      fileName: 'Employee_List_Export.csv',
+      processCellCallback: (params) => {
+        const colId = params.column.getColId();
+
+        if (colId === 'DepartmentId') {
+          return depMap.get(params.value) || 'Unknown';
+        }
+
+        if (colId === 'BirthDate' || colId === 'IdentityIssuedDate') {
+          if (params.value instanceof Date) {
+            return params.value.toLocaleDateString('en-US');
           }
-        });
-      }
-    } else {
-      alert('Please select one employee to delete.');
-    }
+        }
+
+        return params.value;
+      },
+      prependContent: [
+        [{ data: 'EMPLOYEE LIST' as any }],
+        [{ data: 'Export Date:' }, { data: new Date().toLocaleDateString('en-US') }],
+        []
+      ],
+
+      columnKeys: this.columnDefs.map(c => c.field).filter(f => f) as string[],
+      skipColumnHeaders: false,
+      suppressQuotes: true
+    });
+
+    this.toastr.success('CSV export completed successfully!');
   }
+
+  // ------------ Edit ------------
+
+  onEditRow() {
+    const rows = this.gridApi.getSelectedRows();
+    if (rows.length !== 1) {
+      this.toastr.warning('Please select exactly one employee to edit.');
+      return;
+    }
+
+    const emp = rows[0];
+    if (!emp.EmployeeId) {
+      this.toastr.error('Invalid Employee ID.');
+      return;
+    }
+
+    this.empService.setEmployeeData(emp);
+    this.router.navigate(['/employee-edit', emp.EmployeeId]);
+  }
+
+  // ------------ Delete ------------
+
+  handleDeleteConfirmation() {
+    const rows = this.gridApi.getSelectedRows();
+    if (rows.length !== 1) {
+      this.toastr.warning('Please select exactly one employee to delete.');
+      return;
+    }
+
+    const emp = rows[0];
+    if (!emp.EmployeeId) {
+      this.toastr.error('Invalid Employee ID.');
+      return;
+    }
+
+    this.toastr.info(`Deleting employee with ID: ${emp.EmployeeId}...`);
+
+    this.deleteEmployee(emp.EmployeeId);
+  }
+
+  private deleteEmployee(id: number) {
+    this.empService.DeleteEmployee(id).subscribe({
+      next: () => {
+        this.toastr.success('Employee deleted successfully!');
+        this.loadEmployee();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to delete employee.');
+      }
+    });
+  }
+
+  // ------------ Search ------------
 
   onSearch() {
-    if (this.searchText) {
-      const searchTextLower = this.searchText.toLowerCase();
-      this.rowData = this.employees.filter(row => {
-        return Object.values(row).some(value => {
-          if (typeof value === 'string') {
-            return value.toLowerCase().includes(searchTextLower);
-          }
-          return false;
-        });
-      });
-    } else {
-      this.rowData = [...this.employees]; // Nếu search text trống, hiển thị lại toàn bộ dữ liệu
-    }
-    this.gridApi.setGridOption('rowData', this.rowData);
-  }
-  onRowClicked(event: any): void {
-  const employee = event.data;
-  if (employee && employee.EmployeeId) {
-    this.router.navigate(['/employee', employee.EmployeeId]);
-  } else {
-    console.error('Invalid employee data:', employee);
-    this.toastr.error('Not found');
-  }
-}
-}
+    const text = this.searchText.toLowerCase().trim();
 
+    if (!text) {
+      this.rowData.set([...this.employees()]);
+      return;
+    }
+
+    const filtered = this.employees().filter(emp =>
+      Object.values(emp).some(v =>
+        typeof v === 'string' && v.toLowerCase().includes(text)
+      )
+    );
+
+    this.rowData.set(filtered);
+  }
+
+  // ------------ Row Click ------------
+
+  onRowClicked(event: RowClickedEvent<Employee>) {
+    if (!event.data?.EmployeeId) {
+      this.toastr.error('Employee details not found.');
+      return;
+    }
+
+    this.router.navigate(['/employee', event.data.EmployeeId]);
+  }
+
+}

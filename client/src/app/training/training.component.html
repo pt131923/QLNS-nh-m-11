@@ -1,4 +1,9 @@
 <div class ="container mt-4">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/dashboard']">
+      <i class="bi bi-arrow-left-short me-1"></i> Back to Dashboard
+    </button>
+  </div>
   <h2 class="mb-4">{{ 'training.title' | translate }}</h2> 
   <div class="row">
     <div class="col-md-4 mb-4" *ngFor="let course of courses">

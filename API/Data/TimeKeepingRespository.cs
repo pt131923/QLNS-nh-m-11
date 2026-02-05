@@ -5,16 +5,22 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class TimeKeepingRepository( DataContext _context, AutoMapper.IMapper _mapper) : ITimeKeepingRepository
+    public class TimeKeepingRepository( DataContext _context, AutoMapper.IMapper _mapper, IDashboardService _dashboardService) : ITimeKeepingRepository
     {
         public async Task<TimeKeeping> CreateTimeEntry(TimeKeepingDto timeKeepingDto)
         {
             var timeKeeping = _mapper.Map<TimeKeeping>(timeKeepingDto);
             await _context.TimeKeeping.AddAsync(timeKeeping);
+            await _context.SaveChangesAsync();
+
+            // Trigger cập nhật dashboard khi có thay đổi thời gian làm việc
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+
             return timeKeeping;
         }
 
@@ -42,6 +48,10 @@ namespace API.Data
                .FirstOrDefaultAsync(x => x.TimeKeepingId == timeKeepingDto.TimeKeepingId);
             _mapper.Map(timeKeepingDto, timeKeeping);
             await _context.SaveChangesAsync();
+
+            // Trigger cập nhật dashboard khi có thay đổi thời gian làm việc
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+
             return timeKeeping;
         }
 

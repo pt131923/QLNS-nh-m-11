@@ -1,46 +1,87 @@
 <div class="container-fluid">
+
+  <!-- Back Button -->
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/dashboard']">
+      <i class="bi bi-arrow-left-short me-1"></i>
+      {{ 'Back To Dashboard' | translate }}
+    </button>
+  </div>
+
+  <!-- Main Card -->
   <div class="card mb-4">
     <div class="card-body">
+
+      <!-- Action Buttons -->
       <div class="d-flex flex-wrap gap-2 mb-3">
-        <button class="btn btn-success" [routerLink]="['/employee-add']"><i class="bi bi-plus-circle me-1"></i> {{ 'common.addNew' | translate }}</button>
-        <button class="btn btn-primary" (click)="onEditRow()"><i class="bi bi-pencil-square me-1"></i> {{ 'common.edit' | translate }}</button>
-        <button class="btn btn-danger" (click)="onDeleteRow()"><i class="bi bi-trash me-1"></i> {{ 'common.delete' | translate }}</button>
-        <button class="btn btn-info text-white" (click)="onBtExport()"><i class="bi bi-file-earmark-excel me-1"></i> {{ 'common.exportToExcel' | translate }}</button>
+        <button class="btn btn-success" [routerLink]="['/employee-add']">
+          <i class="bi bi-plus-circle me-1"></i>
+          {{ 'common.addNew' | translate }}
+        </button>
+
+        <button class="btn btn-primary" (click)="onEditRow()">
+          <i class="bi bi-pencil-square me-1"></i>
+          {{ 'common.edit' | translate }}
+        </button>
+
+        <button class="btn btn-danger" (click)="handleDeleteConfirmation()">
+          <i class="bi bi-trash me-1"></i>
+          {{ 'common.delete' | translate }}
+        </button>
+
+        <button class="btn btn-info text-white" (click)="onBtExport()">
+          <i class="bi bi-file-earmark-excel me-1"></i>
+          {{ 'common.exportToExcel' | translate }}
+        </button>
       </div>
 
+      <!-- Search Box -->
       <div class="row mb-3">
         <div class="col-md-4">
-          <input type="text" class="form-control" [placeholder]="'employee.searchPlaceholder' | translate" [(ngModel)]="searchText" (input)="onSearch()">
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="searchText"
+            (input)="onSearch()"
+            [placeholder]="'employee.searchPlaceholder' | translate"
+          />
         </div>
       </div>
 
+      <!-- AG-Grid -->
       <ag-grid-angular
         style="width: 100%; height: 500px;"
         class="ag-theme-alpine"
         [columnDefs]="columnDefs"
-        [rowData]="rowData"
+        [rowData]="rowData()"
         [gridOptions]="gridOptions"
-        (gridReady)="onGridReady($event)"
-        (rowClicked)="onRowClicked($event)"
+        [defaultColDef]="defaultColDef"
+        [rowSelection]="rowSelection"
         [pagination]="pagination"
         [paginationPageSize]="paginationPageSize"
         [paginationPageSizeSelector]="paginationPageSizeSelector"
-        [defaultColDef]="defaultColDef"
-        [rowSelection]="rowSelection"
+        (gridReady)="onGridReady($event)"
+        (rowClicked)="onRowClicked($event)"
       ></ag-grid-angular>
+
     </div>
   </div>
 
+  <!-- Loading Template -->
   <ng-template #loadListEmployee>
     <div class="modal-header">
-      <h4 class="modal-title">{{ 'employee.loading' | translate }}</h4>
+      <h4 class="modal-title">
+        {{ 'employee.loading' | translate }}
+      </h4>
     </div>
+
     <div class="modal-body text-center">
       <p>{{ 'employee.loadingData' | translate }}</p>
+
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
       </div>
     </div>
   </ng-template>
-</div>
 
+</div>

@@ -179,5 +179,98 @@ namespace API.Data
 
             Console.WriteLine("✅ Seeded Salary data.");
         }
+
+        public static async Task SeedTraining(DataContext context)
+        {
+            if (await context.Training.AnyAsync()) return;
+
+            var trainings = new List<Training>
+            {
+                new Training { Title = "React Advanced", Description = "Advanced React Development", Date = DateTime.Now.AddDays(30), Cost = 5000000 },
+                new Training { Title = "C# .NET Core", Description = "Backend Development with .NET", Date = DateTime.Now.AddDays(60), Cost = 7000000 },
+                new Training { Title = "SQL Database", Description = "Database Design and Optimization", Date = DateTime.Now.AddDays(90), Cost = 3000000 },
+                new Training { Title = "Agile Methodology", Description = "Project Management with Agile", Date = DateTime.Now.AddDays(45), Cost = 2000000 },
+                new Training { Title = "DevOps & CI/CD", Description = "DevOps practices and CI/CD pipelines", Date = DateTime.Now.AddDays(75), Cost = 6000000 },
+                new Training { Title = "Cloud Computing", Description = "AWS/Azure cloud architecture", Date = DateTime.Now.AddDays(120), Cost = 8000000 }
+            };
+
+            await context.Training.AddRangeAsync(trainings);
+            await context.SaveChangesAsync();
+
+            Console.WriteLine("✅ Seeded Training data.");
+        }
+
+        public static async Task SeedRecuiment(DataContext context)
+        {
+            if (await context.Recuiment.AnyAsync()) return;
+
+            var recuiments = new List<Recuiment>
+            {
+                new Recuiment { CustomerName = "Tech Solutions", Amount = 15000000, OpeningsCount = 5 },
+                new Recuiment { CustomerName = "Global Corp", Amount = 25000000, OpeningsCount = 8 },
+                new Recuiment { CustomerName = "Startup Inc", Amount = 8000000, OpeningsCount = 3 },
+                new Recuiment { CustomerName = "Enterprise Ltd", Amount = 35000000, OpeningsCount = 12 }
+            };
+
+            await context.Recuiment.AddRangeAsync(recuiments);
+            await context.SaveChangesAsync();
+
+            Console.WriteLine("✅ Seeded Recuiment data.");
+        }
+
+        public static async Task SeedUsers(DataContext context)
+        {
+            if (await context.User.AnyAsync()) return;
+
+            // Tạo password hash cho "admin123"
+            using var hmac = new System.Security.Cryptography.HMACSHA512();
+            var passwordSalt = hmac.Key;
+            var passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes("admin123"));
+
+            var users = new List<User>
+            {
+                new User
+                {
+                    UserName = "admin",
+                    Email = "admin@qlns.com",
+                    PhoneNumber = "0123456789",
+                    Address = "123 Admin Street",
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
+                    Role = "admin",
+                    Image = "admin-avatar.png"
+                },
+                new User
+                {
+                    UserName = "manager",
+                    Email = "manager@qlns.com",
+                    PhoneNumber = "0987654321",
+                    Address = "456 Manager Avenue",
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
+                    Role = "manager",
+                    Image = "manager-avatar.png"
+                },
+                new User
+                {
+                    UserName = "employee",
+                    Email = "employee@qlns.com",
+                    PhoneNumber = "0555666777",
+                    Address = "789 Employee Road",
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
+                    Role = "user",
+                    Image = "employee-avatar.png"
+                }
+            };
+
+            await context.User.AddRangeAsync(users);
+            await context.SaveChangesAsync();
+
+            Console.WriteLine("✅ Seeded User accounts:");
+            Console.WriteLine("   - admin / admin123 (Admin)");
+            Console.WriteLine("   - manager / admin123 (Manager)");
+            Console.WriteLine("   - employee / admin123 (Employee)");
+        }
     }
 }

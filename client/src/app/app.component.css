@@ -1,39 +1,39 @@
-.app {
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
+/*
+ * Styles for Dashboard Component - Tối ưu hóa Global
+ * Áp dụng trong styles.css hoặc app.component.css
+ */
+
+/* ==================================== */
+/* 🌙 GLOBAL FULLSCREEN LAYOUT - LIGHT THEME */
+/* ==================================== */
+
+/* 1. RESET TOÀN TRANG (HTML, BODY) */
+/* Đảm bảo chiếm 100% chiều cao màn hình và loại bỏ lề/đệm mặc định */
+html, body {
+  margin: 0;
+  padding: 0;
+  /* Rất quan trọng: Đảm bảo chiếm toàn bộ chiều cao màn hình */
+  height: 100%; 
+  min-height: 100vh;
+  width: 100vw;
+  box-sizing: border-box; 
+  /* Đã đổi: Màu nền sáng nhạt, đồng bộ với Dashboard/List Component */
+  background-color: #f7f9fc; 
 }
 
-.app h2 {
-  margin-bottom: 16px;
+/* 2. KẾ THỪA BOX-SIZING */
+/* Áp dụng box-sizing cho tất cả các phần tử */
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
-.app form {
-  display: flex;
-  flex-direction: column;
-}
-
-.app label {
-  margin-bottom: 8px;
-}
-
-.app input,
-.app textarea {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 16px;
-}
-
-.app button {
-  padding: 12px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.app button:hover {
-  background-color: #0056b3;
+/* 3. HOST COMPONENT (Nếu đây là Angular) */
+/* Đảm bảo host component cũng tràn màn hình */
+:host {
+  display: block;
+  /* Sử dụng 100% thay vì 100vw để không gây ra thanh cuộn ngang */
+  width: 100%; 
+  min-height: 100vh; 
+  padding: 0; 
+  margin: 0; 
 }

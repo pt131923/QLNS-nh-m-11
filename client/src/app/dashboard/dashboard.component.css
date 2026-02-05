@@ -1,62 +1,156 @@
-body {
-  background-color: #1d1f23;
-  color: white;
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 40px 20px;
-}
+/*
+ * Styles for Dashboard Component - Optimized
+ */
 
-.dashboard-title {
-  text-align: center;
-  font-size: 48px;
-  font-weight: bold;
-  margin-bottom: 40px;
-}
-
+/* ============================ */
+/* 1. Dashboard Container & Global Resets */
+/* ============================ */
 .dashboard-container {
+  /* Đặt màu nền sáng cho toàn bộ dashboard (GIỮ NGUYÊN) */
+  background-color: #f7f9fc; 
+  
+  /* Giúp container mở rộng ít nhất bằng chiều cao màn hình */
+  min-height: 100vh; 
+  
+  padding: 24px; 
+  
+  /* Đảm bảo container này không bị tràn ngang do margin âm của row */
+  overflow-x: hidden; 
+}
+
+/* Loại bỏ padding và margin mặc định của row để kiểm soát tốt hơn */
+.row {
+  margin-left: -8px; 
+  margin-right: -8px;
+}
+
+.row > [class*='col'] {
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-bottom: 16px; /* Khoảng cách giữa các hàng */
+}
+
+/* Global text color - MÀU CHỮ TRÊN NỀN SÁNG */
+/* Màu chữ mặc định cho các phần tử KHÔNG phải Card (ví dụ: tiêu đề) */
+.dashboard-container * {
+  color: #000000; 
+}
+
+/* ============================ */
+/* 2. Tiêu đề - Section Title (Nằm trên nền sáng, giữ màu đen) */
+/* ============================ */
+h1, h2 {
+  font-weight: 600;
+  color: #000000; 
+  margin: 32px 0 20px 0; 
+}
+
+h1 {
+  font-size: 28px;
+  padding-bottom: 5px;
+  /* Đường kẻ phân cách màu xám nhạt */
+  border-bottom: 1px solid #d1d5db; 
+  margin-top: 0; 
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 400;
+  /* Dùng box shadow màu nhấn (xanh) */
+  box-shadow: -4px 0 0 0 #4a80e6; 
+  padding-left: 12px;
+  margin-top: 30px; 
+}
+
+/* ============================ */
+/* 3. Card Style (ĐÃ ĐỔI LẠI MÀU TỐI) */
+/* ============================ */
+.card.stat-card {
+  /* Nền thẻ tối, GIỐNG MÀU GỐC */
+  background-color: #1e2536; 
+  /* Bỏ viền */
+  border: none; 
+  border-radius: 10px;
+  padding: 20px 10px; 
+  height: 150px; 
+  
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   justify-content: center;
-  gap: 20px;
+  align-items: center;
+  transition: all 0.25s ease;
+  
+  /* QUAN TRỌNG: Chuyển màu chữ bên trong Card về màu trắng để tương phản */
+  color: #f0f0f0; 
 }
 
-.card {
-  background-color: #2a2d32;
-  border-radius: 8px;
-  width: 300px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: transform 0.2s;
+/* Áp dụng màu trắng cho tất cả các phần tử con bên trong Card */
+.card.stat-card * {
+  color: #f0f0f0; 
 }
 
-.card:hover {
-  transform: translateY(-5px);
+
+.card.stat-card:hover {
+  transform: translateY(-4px);
+  /* ĐÃ SỬA: Loại bỏ highlight border (0 0 0 3px #4a80e6), chỉ giữ lại bóng đổ nhẹ */
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3); 
+  /* Nền Card hơi tối hơn khi hover */
+  background-color: #242c3d; 
 }
 
-.card-title {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #00ffcc;
+/* Icon */
+.stat-icon {
+  font-size: 30px; 
+  margin-bottom: 8px;
+  /* Icon đã được thiết lập màu trắng qua .card.stat-card * */
 }
 
-.card-text {
-  font-size: 14px;
-  color: #ccc;
+/* Big numbers */
+.metric-value {
+  font-size: 28px; 
+  font-weight: 700;
+  margin-bottom: 4px;
+  /* Màu số liệu là màu xanh đậm, giữ nguyên */
+  color: #4a80e6; 
 }
 
-.navigate-button {
-  display: block;
-  margin: 40px auto 0;
-  background-color: #04aa6d;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 16px;
-  transition: background 0.3s;
+/* Label */
+.metric-label {
+  font-size: 11px; 
+  /* Màu chữ xám nhạt cho label để dễ đọc trên nền tối */
+  color: #9aa0a6; 
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.navigate-button:hover {
-  background-color: #038e5a;
+/* ============================ */
+/* KHẮC PHỤC KHOẢNG TRỐNG DƯ THỪA (QUAN TRỌNG) */
+/* ============================ */
+
+/* Loại bỏ margin dưới cùng của phần tử cuối cùng trong row */
+.dashboard-container .row:last-of-type {
+  margin-bottom: 0; 
+}
+
+/* Thiết lập padding dưới cùng cuối cùng, đảm bảo nội dung không bị dính vào mép dưới */
+.dashboard-container {
+  padding-bottom: 24px; 
+}
+
+
+/* Responsive cho màn hình nhỏ hơn */
+@media (max-width: 767px) {
+  .dashboard-container {
+      padding: 15px; 
+  }
+  .card.stat-card {
+      height: 120px;
+      padding: 15px 5px;
+  }
+  .metric-value {
+      font-size: 24px;
+  }
+  .metric-label {
+      font-size: 10px;
+  }
 }

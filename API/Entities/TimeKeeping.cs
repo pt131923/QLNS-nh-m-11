@@ -15,12 +15,11 @@ namespace API.Entities
         public TimeSpan TotalHoursWorked { get; set; }
         public string Status { get; set; }
         public string Note { get; set; }
+        public decimal TotalHours { get; set; }
 
         // Navigation property
         public Employee Employee { get; set; }
 
         public int DepartmentId { get; set; }
-
-        public ICollection<TimeKeeping> TimeKeepings { get; set; }
     }
 }

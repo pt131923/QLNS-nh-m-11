@@ -1,13 +1,15 @@
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace API.Data
 {
-    public class EmployeeRepository(DataContext _context, AutoMapper.IMapper _mapper) : IEmployeeRepository
+    public class EmployeeRepository(DataContext _context, AutoMapper.IMapper _mapper, IDashboardService _dashboardService) : IEmployeeRepository
     {
 
         public async Task<IEnumerable<Employee>> GetEmployeesAsync()
@@ -32,7 +34,15 @@ namespace API.Data
 
         public async Task<bool> SaveAllAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu
+            if (result)
+            {
+                await _dashboardService.NotifyDataChangedWithCheckAsync();
+            }
+
+            return result;
         }
 
 

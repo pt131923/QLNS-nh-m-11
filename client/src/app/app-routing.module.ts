@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './_guards/auth.guard';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
+
 import { EmployeeListComponent } from './employees/employee-list/employee-list.component';
 import { EmployeeAddComponent } from './employees/employee-add/employee-add.component';
 import { EmployeeEditComponent } from './employees/employee-edit/employee-edit.component';
@@ -39,10 +40,14 @@ import { ContactHistoryComponent } from './history/contact-history/contact-histo
 
 const routes: Routes = [
 
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  // Public
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
 
-  // Dashboard
+  // Protected
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  { path: 'overview', component: DashboardComponent, canActivate: [AuthGuard] },
 
   // Employee
   { path: 'employees', component: EmployeeListComponent, canActivate: [AuthGuard] },
@@ -67,35 +72,24 @@ const routes: Routes = [
   { path: 'salary-add', component: SalaryAddComponent, canActivate: [AuthGuard] },
   { path: 'salary-edit/:id', component: SalaryEditComponent, canActivate: [AuthGuard] },
 
-  // User lazy module (cần guard)
-  {
-    path: 'user',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./User/user/user.module').then(m => m.UserModule)
-  },
-
-  // Other features
+  // Other
   { path: 'settings', component: SettingComponent, canActivate: [AuthGuard] },
   { path: 'contact', component: ContactComponent, canActivate: [AuthGuard] },
   { path: 'help', component: HelpComponent, canActivate: [AuthGuard] },
   { path: 'contact-history', component: ContactHistoryComponent, canActivate: [AuthGuard] },
-
   { path: 'timekeeping', component: TimekeepingComponent, canActivate: [AuthGuard] },
   { path: 'trainings', component: TrainingComponent, canActivate: [AuthGuard] },
   { path: 'recruitments', component: RecruitmentComponent, canActivate: [AuthGuard] },
   { path: 'benefits', component: BenefitsComponent, canActivate: [AuthGuard] },
   { path: 'leaves', component: LeaveComponent, canActivate: [AuthGuard] },
 
-  // Login & Register (không cần guard)
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-
-  // Not found
-  { path: '**', redirectTo: 'dashboard' }
+  // Not Found
+  { path: '**', redirectTo: '/dashboard' }
 ];
+
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

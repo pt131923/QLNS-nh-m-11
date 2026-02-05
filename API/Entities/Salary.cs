@@ -18,4 +18,6 @@ public class Salary
     public decimal TotalSalary { get; set; }
     public string SalaryNotes { get; set; }
     public DateTime Date { get; set; }
+    public long Amount { get; set; }
+
 }

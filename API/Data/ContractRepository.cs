@@ -1,13 +1,14 @@
 using API.Data;
 using API.Entities;
 using API.Interfaces;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace API.Repositories
+namespace API.Data
 {
-    public class ContractRepository(DataContext _context) : IContractRepository
+    public class ContractRepository(DataContext _context, IDashboardService _dashboardService) : IContractRepository
     {
 
         public async Task<IEnumerable<Contract>> GetContractAsync()
@@ -32,7 +33,15 @@ namespace API.Repositories
 
         public async Task<bool> SaveAllAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu hợp đồng
+            if (result)
+            {
+                await _dashboardService.NotifyDataChangedWithCheckAsync();
+            }
+
+            return result;
         }
     }
 }

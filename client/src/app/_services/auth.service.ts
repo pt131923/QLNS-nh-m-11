@@ -1,70 +1,91 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { DashboardService } from './dashboard.service';
+import { Observable } from 'rxjs/internal/Observable';
+import { of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private baseUrl = 'https://localhost:7001/api/auth'; // đổi theo API backend của bạn
+  private baseUrl = `${environment.apiUrl}/auth`;
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {}
+  constructor(private http: HttpClient, private router: Router, private injector: Injector) {}
 
-  // ------------------------------------------------------------
-  // LOGIN
-  // ------------------------------------------------------------
-  login(model: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/login`, model);
+  // ============================
+  // 🔵 LOGIN
+  // ============================
+  login(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/login`, data);
   }
 
-  // ------------------------------------------------------------
-  // LOGOUT
-  // ------------------------------------------------------------
-  logout(): void {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
-  }
-
-  // ------------------------------------------------------------
-  // LƯU TOKEN
-  // ------------------------------------------------------------
-  saveToken(token: string, rememberMe?: any): void {
+  // ============================
+  // 🔵 TOKEN
+  // ============================
+  saveToken(token: string): void {
     localStorage.setItem('token', token);
   }
 
-  // ------------------------------------------------------------
-  // LẤY TOKEN
-  // ------------------------------------------------------------
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  // ------------------------------------------------------------
-  // KIỂM TRA LOGIN
-  // ------------------------------------------------------------
-  isLoggedIn(): boolean {
+  // ============================
+  // 🔵 USER (local + API)
+  // ============================
+  saveUser(user: any): void {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  /** 
+   * 🚀 KHÔNG BAO GIỜ TRẢ NULL
+   * Nếu không có user → trả of(null) để .subscribe() luôn an toàn
+   */
+  getUser(): Observable<any> {
     const token = this.getToken();
-    if (!token) return false;
-
-    // có thể check thêm decode token (expire)
-    return true;
-  }
-
-  // ------------------------------------------------------------
-  // CHECK TOKEN HẾT HẠN (OPTIONAL)
-  // ------------------------------------------------------------
-  isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000; // convert to ms
-      return Date.now() > exp;
-    } catch (error) {
-      return true;
+    const userJson = localStorage.getItem('user');
+    
+    // (1) Kiểm tra token và user đã lưu
+    if (token && userJson) {
+      try {
+        // (2) Trả về user đã lưu NGAY LẬP TỨC để Dashboard tải nhanh hơn
+        return of(JSON.parse(userJson));
+      } catch (e) {
+        console.error("Lỗi parse JSON user:", e);
+        return of(null);
+      }
     }
+    // Nếu không có token hoặc userJson, trả về of(null) để .subscribe() luôn an toàn
+    return of(null);
   }
+
+  // ============================
+  // 🔵 CHECK LOGIN
+  // ============================
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  // ============================
+  // 🔵 LOGOUT
+  // ============================
+  logout(): void {
+    // Stop SignalR connection trước khi logout (lazy injection to avoid circular dependency)
+    try {
+      const dashboardService = this.injector.get(DashboardService);
+      dashboardService.stopSignalRConnection();
+    } catch (error) {
+      // DashboardService might not be available, ignore
+      console.log('DashboardService not available for cleanup');
+    }
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.router.navigate(['/login']);
+  }
+
+
 }

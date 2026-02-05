@@ -48,6 +48,8 @@ namespace API.Entities
 
         public string Specialization { get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
         // Liên kết phòng ban
         [ForeignKey("Department")]
         public int DepartmentId { get; set; }

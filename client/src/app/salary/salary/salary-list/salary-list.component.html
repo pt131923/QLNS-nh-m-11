@@ -1,5 +1,10 @@
 <div class="container-fluid">
   <div class="mb-3">
+    <button class="btn btn-secondary me-2" [routerLink]="['/dashboard']">
+      <i class="bi bi-arrow-left-short me-1"></i> Back to Dashboard
+    </button>
+  </div>
+  <div class="mb-3">
     <button class="btn btn-success me-2" [routerLink]="['/salary-add']">{{ 'common.addNew' | translate }}</button>
     <button class="btn btn-primary me-2" (click)="onEditRow()">{{ 'common.edit' | translate }}</button>
     <button class="btn btn-danger me-2" (click)="onDeleteRow()">{{ 'common.delete' | translate }}</button>

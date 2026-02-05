@@ -52,6 +52,12 @@
           "scrollbar-width: none"
         ]
       }
+    ],
+    "axe/text-alternatives": [
+      "default",
+      {
+        "image-alt": "off"
+      }
     ]
   }
 }

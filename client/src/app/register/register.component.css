@@ -8,6 +8,54 @@
   margin-bottom: 16px;
 }
 
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.error-message {
+  color: #D8000C !important; /* Màu đỏ đậm */
+  font-size: 0.9em;
+  margin-top: 5px;
+  font-weight: 500;
+  display: block;
+}
+
+.error-message div {
+  color: #D8000C !important;
+}
+
+.general-alert {
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.success-message {
+  color: #28a745 !important;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* Thêm border đỏ cho input khi có lỗi */
+.form-control.is-invalid,
+.form-control.ng-invalid.ng-touched,
+.form-control.ng-invalid.ng-dirty {
+  border-color: #D8000C !important;
+  border-width: 2px;
+  background-color: #fff5f5;
+}
+
 .register form {
   display: flex;
   flex-direction: column;
@@ -22,7 +70,7 @@
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .register button {
@@ -32,8 +80,15 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  margin-right: 8px;
+  margin-top: 8px;
 }
 
-.register button:hover {
+.register button:hover:not(:disabled) {
   background-color: #0056b3;
+}
+
+.register button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -110,7 +110,7 @@ export class EmployeeEditComponent {
   }
 
   Cancel() {
-    this.router.navigate(['/employee']);
+    this.router.navigate(['/employees']);
   }
 
   ngAfterViewInit(): void {

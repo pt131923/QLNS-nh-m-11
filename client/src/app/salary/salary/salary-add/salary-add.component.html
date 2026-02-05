@@ -1,4 +1,9 @@
 <div class="col-8">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/salaries']">
+      <i class="bi bi-arrow-left-short me-1"></i> Back to Salary
+    </button>
+  </div>
     <div class="mb-3">
         <label class="form-label fw-semibold">{{ 'salary.selectDepartment' | translate }}</label>
         <select class="form-select w-50" [(ngModel)]="selectedDepartmentId" name="selectedDepartmentId">

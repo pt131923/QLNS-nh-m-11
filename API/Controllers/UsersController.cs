@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using API.DTOs;
 using API.Interfaces;
 
 namespace API.Controllers
 {
-    
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -18,9 +19,29 @@ namespace API.Controllers
             _userRepository = userRepository;
         }
 
-        // --------------------------------------------------
-        // GET: /api/users
-        // --------------------------------------------------
+        // ------------------------------------------------------------
+        // GET CURRENT USER (LẤY TỪ JWT TOKEN)
+        // ------------------------------------------------------------
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDto>> GetCurrentUser()
+        {
+            var username = User.FindFirstValue(ClaimTypes.Name);
+
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized("Cannot read username from token.");
+
+            var user = await _userRepository.GetUserByNameAsync(username);
+
+            if (user == null)
+                return NotFound("User not found.");
+
+            return Ok(user);
+        }
+
+        // ------------------------------------------------------------
+        // GET ALL USERS
+        // ------------------------------------------------------------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
@@ -28,9 +49,9 @@ namespace API.Controllers
             return Ok(users);
         }
 
-        // --------------------------------------------------
-        // GET: /api/users/{id}
-        // --------------------------------------------------
+        // ------------------------------------------------------------
+        // GET BY ID
+        // ------------------------------------------------------------
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
@@ -45,9 +66,9 @@ namespace API.Controllers
             return Ok(user);
         }
 
-        // --------------------------------------------------
-        // GET: /api/users/by-name/{username}
-        // --------------------------------------------------
+        // ------------------------------------------------------------
+        // GET BY NAME
+        // ------------------------------------------------------------
         [HttpGet("by-name/{userName}")]
         public async Task<ActionResult<UserDto>> GetUserByName(string userName)
         {
@@ -62,16 +83,15 @@ namespace API.Controllers
             return Ok(user);
         }
 
-        // --------------------------------------------------
-        // POST: /api/users
-        // --------------------------------------------------
+        // ------------------------------------------------------------
+        // CREATE
+        // ------------------------------------------------------------
         [HttpPost]
         public async Task<ActionResult> AddUser([FromBody] UserDto userDto)
         {
             if (userDto == null || string.IsNullOrWhiteSpace(userDto.UserName))
                 return BadRequest("User name cannot be empty.");
 
-            // Check user exists
             if (await _userRepository.UserExistsAsync(userDto.UserName))
                 return BadRequest($"User '{userDto.UserName}' already exists.");
 
@@ -85,15 +105,14 @@ namespace API.Controllers
             return Ok("User created successfully.");
         }
 
-        // --------------------------------------------------
-        // PUT: /api/users
-        // Cập nhật dùng UserDto, không có ID ở route
-        // --------------------------------------------------
-        [HttpPut]
-        public async Task<ActionResult> UpdateUser([FromBody] UserDto userDto)
+        // ------------------------------------------------------------
+        // UPDATE
+        // ------------------------------------------------------------
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateUser(int id, [FromBody] UserDto userDto)
         {
-            if (userDto == null || userDto.UserId <= 0)
-                return BadRequest("Invalid user data.");
+            if (id != userDto.UserId)
+                return BadRequest("Route ID and body ID do not match.");
 
             var success = await _userRepository.UpdateUserAsync(userDto);
 
@@ -105,9 +124,9 @@ namespace API.Controllers
             return Ok("User updated successfully.");
         }
 
-        // --------------------------------------------------
-        // DELETE: /api/users/{id}
-        // --------------------------------------------------
+        // ------------------------------------------------------------
+        // DELETE
+        // ------------------------------------------------------------
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUser(int id)
         {

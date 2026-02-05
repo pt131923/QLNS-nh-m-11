@@ -5,15 +5,31 @@ using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
-using System.Security.Cryptography; // Cần thiết cho SHA256 Hash
+using System.Security.Cryptography;
 
 namespace API.Controllers
 {
-    
     [ApiController]
     [Route("api/[controller]")]
-    public class EmployeesController(DataContext _context, IEmployeeRepository _employeeRepository, AutoMapper.IMapper _mapper) : BaseApiController
+    public class EmployeesController : BaseApiController
     {
+        private readonly DataContext _context;
+        private readonly IEmployeeRepository _employeeRepository;
+        private readonly AutoMapper.IMapper _mapper;
+
+        public EmployeesController(
+            DataContext context,
+            IEmployeeRepository employeeRepository,
+            AutoMapper.IMapper mapper)
+        {
+            _context = context;
+            _employeeRepository = employeeRepository;
+            _mapper = mapper;
+        }
+
+        // ---------------------------------------------------------------------
+        // GET ALL EMPLOYEES
+        // ---------------------------------------------------------------------
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
         {
@@ -21,30 +37,37 @@ namespace API.Controllers
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
 
+        [HttpGet("count")]
+        public async Task<IActionResult> GetCount()
+        {
+            var count = await _context.Employee.CountAsync();
+            return Ok(count);
+        }
+        // ---------------------------------------------------------------------
+        // GET EMPLOYEE BY ID
+        // ---------------------------------------------------------------------
         [HttpGet("{id}", Name = "GetEmployeeById")]
         public async Task<ActionResult<EmployeeDto>> GetEmployeeById(int id)
         {
             var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
 
             if (employee == null)
-            {
                 return NotFound();
-            }
 
             return Ok(_mapper.Map<EmployeeDto>(employee));
         }
 
+        // ---------------------------------------------------------------------
+        // UPDATE EMPLOYEE
+        // ---------------------------------------------------------------------
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateEmployee(EmployeeUpdateDto employeeUpdateDto, int id)
+        public async Task<ActionResult> UpdateEmployee(int id, EmployeeUpdateDto dto)
         {
             var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
-
             if (employee == null)
-            {
                 return NotFound();
-            }
 
-            _mapper.Map(employeeUpdateDto, employee);
+            _mapper.Map(dto, employee);
             _employeeRepository.Update(employee);
 
             if (await _employeeRepository.SaveAllAsync())
@@ -53,13 +76,18 @@ namespace API.Controllers
             return BadRequest("Failed to update employee");
         }
 
-        [HttpPost("add-employee")]
-        public async Task<ActionResult<EmployeeDto>> AddEmployee([FromBody] EmployeeDto employeeDto)
+        // ---------------------------------------------------------------------
+        // ADD EMPLOYEE (CREATE)
+        // ---------------------------------------------------------------------
+        [HttpPost]
+        public async Task<ActionResult<EmployeeDto>> AddEmployee(EmployeeDto employeeDto)
         {
             if (await EmployeeExists(employeeDto.EmployeeName))
-                return BadRequest("Employee Name is taken");
+                return BadRequest("Employee name already exists");
 
-            var departmentExists = await _context.Department.AnyAsync(d => d.DepartmentId == employeeDto.DepartmentId);
+            var departmentExists = await _context.Department
+                .AnyAsync(d => d.DepartmentId == employeeDto.DepartmentId);
+
             if (!departmentExists)
                 return BadRequest("Department does not exist");
 
@@ -69,18 +97,23 @@ namespace API.Controllers
             _context.Employee.Add(employee);
             await _context.SaveChangesAsync();
 
-            var result = _mapper.Map<EmployeeDto>(employee);
-
-            // ✅ Trả về đúng theo chuẩn RESTful
-            return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.EmployeeId }, result);
+            return CreatedAtAction(nameof(GetEmployeeById),
+                new { id = employee.EmployeeId },
+                _mapper.Map<EmployeeDto>(employee));
         }
 
-        private async Task<bool> EmployeeExists(string employeeName)
+        private async Task<bool> EmployeeExists(string name)
         {
-            return await _context.Employee.AnyAsync(e => e.EmployeeName.ToLower() == employeeName.Trim().ToLower());
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            var cleaned = name.Trim().ToLower();
+            return await _context.Employee
+                .AnyAsync(e => e.EmployeeName.ToLower() == cleaned);
         }
 
-        [HttpDelete("delete-employee/{id}")]
+        // ---------------------------------------------------------------------
+        // DELETE EMPLOYEE
+        // ---------------------------------------------------------------------
+        [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteEmployee(int id)
         {
             var employee = await _employeeRepository.GetEmployeeByIdAsync(id);
@@ -91,12 +124,15 @@ namespace API.Controllers
             _employeeRepository.Delete(employee);
 
             if (await _employeeRepository.SaveAllAsync())
-                return Ok();
+                return NoContent();
 
-            return BadRequest("Failed to delete the employee");
+            return BadRequest("Failed to delete employee");
         }
 
-        [HttpGet("employees-with-departments")]
+        // ---------------------------------------------------------------------
+        // GET EMPLOYEES + DEPARTMENT
+        // ---------------------------------------------------------------------
+        [HttpGet("with-departments")]
         public async Task<ActionResult<IEnumerable<EmployeeWithDepartmentDto>>> GetEmployeesWithDepartments()
         {
             var employees = await _context.Employee
@@ -107,361 +143,201 @@ namespace API.Controllers
             return Ok(employees);
         }
 
+        // ---------------------------------------------------------------------
+        // SEARCH EMPLOYEE
+        // ---------------------------------------------------------------------
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(string Name = null, int? departmentId = null)
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(
+            string name = null,
+            int? departmentId = null)
         {
             var query = _context.Employee.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                query = query.Where(e => e.EmployeeName.ToLower().Contains(Name.ToLower()));
-            }
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(e => e.EmployeeName.ToLower().Contains(name.ToLower()));
 
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
+            if (departmentId.HasValue)
                 query = query.Where(e => e.DepartmentId == departmentId);
-            }
 
             var employees = await query.ToListAsync();
+
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
-        
-        // --- CÁC HÀM HỖ TRỢ ---
 
-        private async Task<string> CalculateHash(IFormFile file)
-        {
-            using var sha256 = SHA256.Create();
-            // Cần OpenReadStream để tính Hash
-            using var stream = file.OpenReadStream(); 
-            var hashBytes = await sha256.ComputeHashAsync(stream);
-            stream.Position = 0; // Đặt lại vị trí để hàm gọi có thể đọc lại file
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-        }
-
-        private async Task<bool> IdentityNumberExists(string identityNumber)
-        {
-            if (string.IsNullOrWhiteSpace(identityNumber)) return false; 
-            var cleanedId = identityNumber.Trim().ToLower();
-            
-            // Kiểm tra trùng lặp CCCD/IdentityNumber
-            return await _context.Employee.AnyAsync(e => 
-                !string.IsNullOrEmpty(e.IdentityNumber) && 
-                e.IdentityNumber.ToLower() == cleanedId);
-        }
-
-
-        // --- HÀM IMPORT ĐÃ CẬP NHẬT LOGIC ---
-
-        [HttpPost("import-employees")]
+        // ---------------------------------------------------------------------
+        // IMPORT EMPLOYEE FROM EXCEL
+        // ---------------------------------------------------------------------
+        [HttpPost("import")]
         public async Task<ActionResult> ImportEmployees(IFormFile file)
         {
             if (file == null || file.Length == 0)
-            {
                 return BadRequest("File is required");
-            }
 
-            var allowedExtensions = new[] { ".xlsx", ".xls" };
-            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!allowedExtensions.Contains(fileExtension))
-            {
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (ext != ".xlsx" && ext != ".xls")
                 return BadRequest("Only Excel files (.xlsx, .xls) are allowed");
-            }
-            
-            var errorMessages = new List<string>();
-            string fileHash = string.Empty;
 
-            try
+            var errors = new List<string>();
+            var employeesToImport = new List<Employee>();
+            var identityNumbersInFile = new HashSet<string>();
+
+            // Compute file hash
+            var fileHash = await CalculateHash(file);
+            if (await _context.FileHistory.AnyAsync(f => f.FileHash == fileHash))
+                return BadRequest("This file has been previously uploaded");
+
+            // Read Excel
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            stream.Position = 0;
+
+            using var package = new ExcelPackage(stream);
+            var ws = package.Workbook.Worksheets[0];
+
+            if (ws.Dimension == null)
+                return BadRequest("Excel file is empty");
+
+            int rows = ws.Dimension.Rows;
+            int cols = ws.Dimension.Columns;
+
+            // Build header dictionary
+            var headers = new Dictionary<string, int>();
+            for (int col = 1; col <= cols; col++)
             {
-                // **BƯỚC 1: Xử lý và kiểm tra Hash File**
-                using var fileStream = new MemoryStream();
-                await file.CopyToAsync(fileStream);
-                
-                // Tính Hash từ stream (sẽ được đặt lại vị trí 0 sau khi tính)
-                fileHash = await CalculateHash(new FormFile(fileStream, 0, fileStream.Length, file.Name, file.FileName)); 
-
-                // Kiểm tra file có bị trùng lặp không
-                if (await _context.FileHistory.AnyAsync(f => f.FileHash == fileHash))
-                {
-                    return BadRequest("Lỗi: File Excel này đã được tải lên và xử lý trước đó.");
-                }
-
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                fileStream.Position = 0; // Đặt lại vị trí đầu stream để đọc Excel
-                
-                using var package = new ExcelPackage(fileStream);
-                var worksheet = package.Workbook.Worksheets[0];
-
-                if (worksheet.Dimension == null)
-                {
-                    return BadRequest("Excel file is empty");
-                }
-
-                var rowCount = worksheet.Dimension.Rows;
-                var colCount = worksheet.Dimension.Columns;
-
-                if (rowCount < 2)
-                {
-                    return BadRequest("Excel file must have at least a header row and one data row");
-                }
-
-                // Read header row to map columns
-                var headers = new Dictionary<string, int>();
-                for (int col = 1; col <= colCount; col++)
-                {
-                    var headerValue = worksheet.Cells[1, col].Value?.ToString()?.Trim();
-                    if (!string.IsNullOrEmpty(headerValue))
-                    {
-                        headers[headerValue.ToLowerInvariant()] = col;
-                    }
-                }
-
-                var employeesToImport = new List<Employee>();
-                var importedCount = 0;
-                var identityNumbersInFile = new HashSet<string>(); // Chặn trùng lặp ID nội bộ file
-
-                // **BƯỚC 2: Xử lý và kiểm tra từng dòng dữ liệu**
-                for (int row = 2; row <= rowCount; row++)
-                {
-                    try
-                    {
-                        var employee = new Employee();
-
-                        // Map IdentityNumber
-                        MapExcelCell(worksheet, row, headers, "identitynumber", "identity number", "cccd", value => employee.IdentityNumber = value);
-
-                        // Map EmployeeName (Required)
-                        var nameSet = false;
-                        if (headers.ContainsKey("employeename") || headers.ContainsKey("employee name") || headers.ContainsKey("name"))
-                        {
-                            var col = headers.ContainsKey("employeename") ? headers["employeename"] :
-                                       headers.ContainsKey("employee name") ? headers["employee name"] : headers["name"];
-                            var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                            if (string.IsNullOrEmpty(value))
-                            {
-                                errorMessages.Add($"Row {row}: EmployeeName is required");
-                                continue;
-                            }
-                            employee.EmployeeName = value.Trim().ToLower();
-                            nameSet = true;
-                        }
-                        if (!nameSet)
-                        {
-                            errorMessages.Add($"Row {row}: EmployeeName column not found");
-                            continue;
-                        }
-
-                        // **Kiểm tra trùng lặp CCCD/IdentityNumber (Database và Nội bộ File)** ⚠️
-                        if (!string.IsNullOrWhiteSpace(employee.IdentityNumber))
-                        {
-                            var cleanedId = employee.IdentityNumber.Trim().ToLower();
-                            
-                            // Kiểm tra trùng lặp nội bộ
-                            if (identityNumbersInFile.Contains(cleanedId))
-                            {
-                                errorMessages.Add($"Row {row}: IdentityNumber '{employee.IdentityNumber}' bị trùng lặp trong file Excel này.");
-                                continue;
-                            }
-                            
-                            // Kiểm tra trùng lặp trong DB
-                            if (await IdentityNumberExists(employee.IdentityNumber))
-                            {
-                                errorMessages.Add($"Row {row}: IdentityNumber '{employee.IdentityNumber}' đã tồn tại trong hệ thống (DB).");
-                                continue;
-                            }
-                            
-                            identityNumbersInFile.Add(cleanedId);
-                        }
-
-                        // Kiểm tra trùng lặp Employee Name (Nếu bạn vẫn muốn kiểm tra)
-                        if (await EmployeeExists(employee.EmployeeName))
-                        {
-                            errorMessages.Add($"Row {row}: Employee Name '{employee.EmployeeName}' đã tồn tại");
-                            continue;
-                        }
-
-                        // Map DepartmentId
-                        bool departmentIdSet = false;
-                        // ... (Code Map DepartmentId và kiểm tra Department như cũ) ...
-                        if (headers.ContainsKey("departmentid") || headers.ContainsKey("department id") || headers.ContainsKey("department"))
-                        {
-                            var col = headers.ContainsKey("departmentid") ? headers["departmentid"] :
-                                       headers.ContainsKey("department id") ? headers["department id"] : headers["department"];
-                            var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                            if (!string.IsNullOrEmpty(value))
-                            {
-                                if (int.TryParse(value, out int deptId))
-                                {
-                                    employee.DepartmentId = deptId;
-                                    departmentIdSet = true;
-                                }
-                                else
-                                {
-                                    var department = await _context.Department
-                                        .FirstOrDefaultAsync(d => d.Name.ToLower() == value.ToLower());
-                                    if (department != null)
-                                    {
-                                        employee.DepartmentId = department.DepartmentId;
-                                        departmentIdSet = true;
-                                    }
-                                    else
-                                    {
-                                        errorMessages.Add($"Row {row}: Department '{value}' not found");
-                                        continue;
-                                    }
-                                }
-                            }
-                        }
-                        
-                         if (!departmentIdSet || employee.DepartmentId == 0)
-                         {
-                             errorMessages.Add($"Row {row}: DepartmentId or Department is required");
-                             continue;
-                         }
-                        
-                        var departmentExists = await _context.Department.AnyAsync(d => d.DepartmentId == employee.DepartmentId);
-                        if (!departmentExists)
-                        {
-                            errorMessages.Add($"Row {row}: DepartmentId {employee.DepartmentId} does not exist");
-                            continue;
-                        }
-
-                        // Map other fields
-                        MapExcelCell(worksheet, row, headers, "employeeemail", "employee email", "email", value => employee.EmployeeEmail = value);
-                        MapExcelCell(worksheet, row, headers, "employeephone", "employee phone", "phone", value => employee.EmployeePhone = value);
-                        MapExcelCell(worksheet, row, headers, "employeeaddress", "employee address", "address", value => employee.EmployeeAddress = value);
-                        MapExcelCell(worksheet, row, headers, "employeeinformation", "employee information", "information", value => employee.EmployeeInformation = value);
-                        MapExcelCell(worksheet, row, headers, "birthdate", "birth date", "birthdate", value => 
-                        {
-                            if (DateTime.TryParse(value, out DateTime date)) employee.BirthDate = date;
-                        });
-                        MapExcelCell(worksheet, row, headers, "placeofbirth", "place of birth", "placeofbirth", value => employee.PlaceOfBirth = value);
-                        MapExcelCell(worksheet, row, headers, "gender", "", value => employee.Gender = value);
-                        MapExcelCell(worksheet, row, headers, "maritalstatus", "marital status", value => employee.MaritalStatus = value);
-                        MapExcelCell(worksheet, row, headers, "identityissueddate", "identity issued date", value =>
-                        {
-                            if (DateTime.TryParse(value, out DateTime date)) employee.IdentityIssuedDate = date;
-                        });
-                        MapExcelCell(worksheet, row, headers, "identityissuedplace", "identity issued place", value => employee.IdentityIssuedPlace = value);
-                        MapExcelCell(worksheet, row, headers, "religion", "", value => employee.Religion = value);
-                        MapExcelCell(worksheet, row, headers, "ethnicity", "", value => employee.Ethnicity = value);
-                        MapExcelCell(worksheet, row, headers, "nationality", "", value => employee.Nationality = value);
-                        MapExcelCell(worksheet, row, headers, "educationlevel", "education level", value => employee.EducationLevel = value);
-                        MapExcelCell(worksheet, row, headers, "specialization", "", value => employee.Specialization = value);
-
-                        employeesToImport.Add(employee);
-                    }
-                    catch (Exception ex)
-                    {
-                        errorMessages.Add($"Row {row}: Error - {ex.Message}");
-                    }
-                }
-
-                // **BƯỚC 3: Lưu dữ liệu và lịch sử file**
-                _context.Employee.AddRange(employeesToImport);
-                importedCount = employeesToImport.Count;
-                
-                // Lưu lịch sử file
-                var history = new FileHistory
-                {
-                    FileName = file.FileName,
-                    FileHash = fileHash,
-                    UploadedDate = DateTime.UtcNow,
-                    Status = errorMessages.Count == 0 ? "SUCCESS" : "PARTIAL"
-                };
-                _context.FileHistory.Add(history);
-
-                await _context.SaveChangesAsync();
-                
-                // **BƯỚC 4: Phản hồi kết quả**
-                var response = new
-                {
-                    success = errorMessages.Count == 0,
-                    importedCount = importedCount,
-                    totalRows = rowCount - 1,
-                    errors = errorMessages
-                };
-
-                return Ok(response);
+                var value = ws.Cells[1, col].Value?.ToString()?.Trim();
+                if (!string.IsNullOrEmpty(value))
+                    headers[value.ToLower()] = col;
             }
-            catch (Exception ex)
+
+            // Read rows
+            for (int row = 2; row <= rows; row++)
             {
-                return BadRequest($"Error processing Excel file: {ex.Message}");
+                try
+                {
+                    var emp = new Employee();
+
+                    // EmployeeName REQUIRED
+                    if (!TryGet(ws, headers, row, ["employeename", "employee name", "name"], out string name))
+                    {
+                        errors.Add($"Row {row}: EmployeeName is required");
+                        continue;
+                    }
+
+                    emp.EmployeeName = name.ToLower();
+
+                    if (await EmployeeExists(emp.EmployeeName))
+                    {
+                        errors.Add($"Row {row}: Employee name '{name}' already exists");
+                        continue;
+                    }
+
+                    // IdentityNumber
+                    if (TryGet(ws, headers, row, ["identitynumber", "identity number", "cccd"], out string cccd))
+                    {
+                        cccd = cccd.ToLower();
+                        if (identityNumbersInFile.Contains(cccd))
+                        {
+                            errors.Add($"Row {row}: Duplicate IdentityNumber in file");
+                            continue;
+                        }
+
+                        if (await IdentityNumberExists(cccd))
+                        {
+                            errors.Add($"Row {row}: IdentityNumber '{cccd}' already exists in DB");
+                            continue;
+                        }
+
+                        identityNumbersInFile.Add(cccd);
+                        emp.IdentityNumber = cccd;
+                    }
+
+                    // DepartmentId
+                    if (!TryGet(ws, headers, row, ["departmentid", "department id", "department"], out string deptValue))
+                    {
+                        errors.Add($"Row {row}: DepartmentId/Department is required");
+                        continue;
+                    }
+
+                    if (int.TryParse(deptValue, out int deptId))
+                    {
+                        emp.DepartmentId = deptId;
+                    }
+                    else
+                    {
+                        var dept = await _context.Department
+                            .FirstOrDefaultAsync(d => d.Name.ToLower() == deptValue.ToLower());
+
+                        if (dept == null)
+                        {
+                            errors.Add($"Row {row}: Department '{deptValue}' not found");
+                            continue;
+                        }
+
+                        emp.DepartmentId = dept.DepartmentId;
+                    }
+
+                    employeesToImport.Add(emp);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Row {row}: {ex.Message}");
+                }
             }
+
+            // Save employees + history
+            _context.Employee.AddRange(employeesToImport);
+
+            _context.FileHistory.Add(new FileHistory
+            {
+                FileName = file.FileName,
+                FileHash = fileHash,
+                UploadedDate = DateTime.UtcNow,
+                Status = errors.Count == 0 ? "SUCCESS" : "PARTIAL"
+            });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                total = rows - 1,
+                imported = employeesToImport.Count,
+                errors
+            });
         }
 
-        // --- CÁC HÀM HỖ TRỢ MAP CELL (Giữ nguyên) ---
-        private void MapExcelCell(ExcelWorksheet worksheet, int row, Dictionary<string, int> headers, string key1, string key2, Action<string> setValue)
-
+        // ---------------------------------------------------------------------
+        // HELPERS
+        // ---------------------------------------------------------------------
+        private async Task<string> CalculateHash(IFormFile file)
         {
-
-            if (headers.ContainsKey(key1))
-
-            {
-
-                var value = worksheet.Cells[row, headers[key1]].Value?.ToString()?.Trim();
-
-                if (!string.IsNullOrEmpty(value))
-
-                    setValue(value);
-
-            }
-
-            else if (headers.ContainsKey(key2))
-
-            {
-
-                var value = worksheet.Cells[row, headers[key2]].Value?.ToString()?.Trim();
-
-                if (!string.IsNullOrEmpty(value))
-
-                    setValue(value);
-
-            }
-
+            using var sha = SHA256.Create();
+            using var stream = file.OpenReadStream();
+            var hash = await sha.ComputeHashAsync(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
 
-
-
-        private void MapExcelCell(ExcelWorksheet worksheet, int row, Dictionary<string, int> headers, string key1, string key2, string key3, Action<string> setValue)
-
+        private async Task<bool> IdentityNumberExists(string identity)
         {
+            if (string.IsNullOrWhiteSpace(identity)) return false;
+            var clean = identity.Trim().ToLower();
+            return await _context.Employee
+                .AnyAsync(e => e.IdentityNumber.ToLower() == clean);
+        }
 
-            if (headers.ContainsKey(key1))
-
+        private bool TryGet(ExcelWorksheet ws, Dictionary<string, int> headers, int row, IEnumerable<string> keys, out string result)
+        {
+            foreach (var key in keys)
             {
-
-                var value = worksheet.Cells[row, headers[key1]].Value?.ToString()?.Trim();
-
-                if (!string.IsNullOrEmpty(value))
-
-                    setValue(value);
-
+                if (headers.TryGetValue(key, out int col))
+                {
+                    result = ws.Cells[row, col].Value?.ToString()?.Trim();
+                    return !string.IsNullOrEmpty(result);
+                }
             }
-
-            else if (headers.ContainsKey(key2))
-
-            {
-
-                var value = worksheet.Cells[row, headers[key2]].Value?.ToString()?.Trim();
-
-                if (!string.IsNullOrEmpty(value))
-
-                    setValue(value);
-
-            }
-
-            else if (headers.ContainsKey(key3))
-
-            {
-
-                var value = worksheet.Cells[row, headers[key3]].Value?.ToString()?.Trim();
-
-                if (!string.IsNullOrEmpty(value))
-
-                    setValue(value);
-
-            }
-
+            result = null;
+            return false;
         }
     }
 }

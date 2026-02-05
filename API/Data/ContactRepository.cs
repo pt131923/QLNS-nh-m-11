@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class ContactRepository(DataContext _context) : IContactRepository
+    public class ContactRepository(DataContext _context, IDashboardService _dashboardService) : IContactRepository
     {
         public async Task<IEnumerable<Contact>> GetAllContactsAsync()
         {
@@ -65,12 +66,28 @@ namespace API.Data
 
         public async Task<bool> SaveAllAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu contact
+            if (result)
+            {
+                await _dashboardService.NotifyDataChangedWithCheckAsync();
+            }
+
+            return result;
         }
 
         public async Task<bool> SaveChangesAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            var result = await _context.SaveChangesAsync() > 0;
+
+            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu contact
+            if (result)
+            {
+                await _dashboardService.NotifyDataChangedWithCheckAsync();
+            }
+
+            return result;
         }
 
         public async Task<bool> SaveContactAsync(string contactName)

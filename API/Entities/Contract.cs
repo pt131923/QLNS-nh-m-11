@@ -33,5 +33,7 @@ namespace API.Entities
         public DateTime EndDate { get; set; }
         public string WorkLocation { get; set; }
         public string Leaveofabsence { get; set; }
+
+        public string Status { get; set; }
     }
 }

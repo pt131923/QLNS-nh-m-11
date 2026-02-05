@@ -43,6 +43,8 @@ import { ContactHistoryComponent } from './history/contact-history/contact-histo
 import { JobDetailComponent } from './recruitment/job-detail/job-detail.component';
 import { CourseDetailComponent } from './training/course-detail/course-detail.component';
 import { HistoryComponent } from './history/history.component';
+import { AuthInterceptor } from './_interceptors/auth.interceptor';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 
 export function HttpLoaderFactory(http: HttpClient) {
@@ -103,7 +105,13 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     }),
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

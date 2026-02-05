@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Employee } from '../_model/employee';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmployeeService {
   [x: string]: any;
-  private baseUrl = 'http://localhost:5002/api/employees'; // Địa chỉ API của bạn
+  private baseUrl = `${environment.apiUrl}/employees`; // Địa chỉ API của bạn
 
   constructor(private http: HttpClient) {  }
 
@@ -55,5 +56,9 @@ export class EmployeeService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<any>(`${this.baseUrl}/import-employees`, formData);
+  }
+
+  getDepartment(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/departments`);
   }
 }

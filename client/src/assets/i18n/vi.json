@@ -24,7 +24,9 @@
     "selectEmployee": "Chọn nhân viên",
     "required": "Bắt buộc",
     "yes": "Có",
-    "no": "Không"
+    "no": "Không",
+    "backToDashboard": "Quay lại Bảng điều khiển",
+    "backToContracts": "Quay lại Hợp đồng"
   },
   "login": {
     "title": "Đăng nhập",
@@ -187,11 +189,28 @@
   },
   "dashboard": {
     "title": "Hệ thống quản lý nhân sự",
+    "systemOverview": "Tổng quan Hệ thống Quản lý Nhân sự",
+    "overview": "Tổng quan",
     "welcome": "Chào mừng đến với Hệ thống quản lý nhân sự — quản lý nhân viên, hợp đồng, phòng ban và nhiều hơn nữa ở một nơi!",
     "register": "Đăng ký",
     "learnMore": "Tìm hiểu thêm",
     "alreadyHaveAccount": "Đã có tài khoản? Chỉ cần đăng nhập!",
-    "login": "Đăng nhập"
+    "login": "Đăng nhập",
+    "viewProfile": "Xem hồ sơ",
+    "clickToView": "Nhấp để xem",
+    "pleaseLoginFirst": "Vui lòng đăng nhập trước",
+    "employees": "Nhân viên",
+    "departments": "Phòng ban",
+    "contracts": "Hợp đồng",
+    "salaries": "Lương",
+    "timekeeping": "Chấm công",
+    "recruitments": "Tuyển dụng",
+    "benefits": "Phúc lợi",
+    "trainings": "Đào tạo",
+    "leaves": "Nghỉ phép",
+    "settings": "Cài đặt",
+    "help": "Trợ giúp",
+    "contact": "Liên hệ"
   },
   "nav": {
     "dashboard": "Bảng điều khiển",
@@ -218,7 +237,9 @@
     "language": "Ngôn ngữ",
     "save": "Lưu thay đổi",
     "saveSuccess": "Đã lưu thành công!",
-    "logout": "Đăng xuất"
+    "logout": "Đăng xuất",
+    "passwordUpdateSuccess": "Cập nhật mật khẩu thành công!",
+    "updateError": "Lỗi cập nhật"
   },
   "training": {
     "title": "Khóa học đào tạo",

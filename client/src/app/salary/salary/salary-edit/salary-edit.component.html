@@ -1,4 +1,9 @@
 <div class="col-8">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/salaries']">
+      <i class="bi bi-arrow-left-short me-1"></i> Back to Salary
+    </button>
+  </div>
   <form #editSalaryForm="ngForm" id="editSalaryForm" (ngSubmit)="UpdateSalary()">
     <h4 class="mt-2">Employee ID:</h4>
     <input type="number" class="form-control" [(ngModel)]="salary.EmployeeId" name="EmployeeId" required />

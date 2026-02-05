@@ -1,4 +1,9 @@
 <div class="col-8">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/departments']">
+      <i class="bi bi-arrow-left-short me-1"></i> Back to Departments
+    </button>
+  </div>
     <form #addForm2="ngForm" id="addForm2" (ngSubmit)="AddDepartment()">
         <h4 class="mt-2">{{ 'department.name' | translate }}:</h4>
         <textarea class="form-control"

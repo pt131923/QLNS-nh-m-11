@@ -45,7 +45,8 @@ export class UserLoginComponent implements OnInit {
     }
     setTimeout(() => {
       localStorage.setItem('token', 'Api');
-      this.router.navigate(['/employees']);
+      // Luôn redirect về dashboard sau khi đăng nhập
+      window.location.href = '/dashboard';
     }, 1000);
   }
 

@@ -1,6 +1,28 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  Validators,
+  FormGroup
+} from '@angular/forms';
 import { Router } from '@angular/router';
+
+// Custom validator kiểm tra password và confirmPassword
+export function MustMatch(controlName: string, matchingControlName: string) {
+  return (formGroup: FormGroup) => {
+    const control = formGroup.controls[controlName];
+    const matchingControl = formGroup.controls[matchingControlName];
+
+    if (matchingControl.errors && !matchingControl.errors['mustMatch']) {
+      return;
+    }
+
+    if (control.value !== matchingControl.value) {
+      matchingControl.setErrors({ mustMatch: true });
+    } else {
+      matchingControl.setErrors(null);
+    }
+  };
+}
 
 @Component({
   selector: 'app-register',
@@ -8,64 +30,92 @@ import { Router } from '@angular/router';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
+
   @Output() cancelRegister = new EventEmitter<boolean>();
-  registerForm: any; // Define the type according to your form structure
+
+  registerForm!: FormGroup;
   submitted = false;
+
   errorMessage = '';
   successMessage = '';
 
-  constructor( private router: Router, private fb: FormBuilder ) {}
+  constructor(private router: Router, private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.initializeForm();
   }
 
   initializeForm() {
-    // Initialize your form here, e.g., using FormBuilder
-    this.registerForm = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
-      confirmPassword: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]]
-    });
+    this.registerForm = this.fb.group(
+      {
+        username: ['', Validators.required],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]]
+      },
+      {
+        validator: MustMatch('password', 'confirmPassword')
+      }
+    );
+  }
+
+  // Getter để dùng f['username'] trong HTML
+  get f() {
+    return this.registerForm.controls;
   }
 
   onSubmit() {
     this.submitted = true;
-
-    // Check if the form is valid
-    if (!this.registerForm.valid) {
-      this.errorMessage = 'Please fill in all required fields.';
-      this.successMessage = '';
-      return;
-    }
-
-    // Check if passwords match
-    if (this.registerForm.password !== this.registerForm.confirmPassword) {
-      this.errorMessage = 'Passwords do not match.';
-      this.successMessage = '';
-      return;
-    }
-
-    // Fake registration logic
-    console.log('Register successful:', this.registerForm);
     this.errorMessage = '';
-    this.successMessage = 'Registration successful!';
+    this.successMessage = '';
+
+    // 🔥 Đánh dấu tất cả field là touched để hiển thị lỗi ngay
+    Object.values(this.registerForm.controls).forEach(control => {
+      control.markAsTouched();
+      control.markAsDirty();
+    });
+
+    // Nếu form invalid → hiển thị thông báo lỗi chung
+    if (this.registerForm.invalid) {
+      // Kiểm tra từng trường để hiển thị thông báo lỗi phù hợp
+      if (this.registerForm.controls['username'].errors?.['required']) {
+        this.errorMessage = 'Vui lòng nhập tên người dùng.';
+      } else if (this.registerForm.controls['password'].errors?.['required']) {
+        this.errorMessage = 'Vui lòng nhập mật khẩu.';
+      } else if (this.registerForm.controls['password'].errors?.['minlength']) {
+        this.errorMessage = 'Mật khẩu phải có ít nhất 6 ký tự.';
+      } else if (this.registerForm.controls['confirmPassword'].errors?.['required']) {
+        this.errorMessage = 'Vui lòng xác nhận mật khẩu.';
+      } else if (this.registerForm.controls['confirmPassword'].errors?.['mustMatch']) {
+        this.errorMessage = 'Mật khẩu xác nhận không khớp.';
+      } else if (this.registerForm.controls['email'].errors?.['required']) {
+        this.errorMessage = 'Vui lòng nhập email.';
+      } else if (this.registerForm.controls['email'].errors?.['email']) {
+        this.errorMessage = 'Email không hợp lệ.';
+      } else {
+        this.errorMessage = 'Vui lòng điền đầy đủ thông tin.';
+      }
+      return;
+    }
+
+    // Thành công
+    console.log('Register successful:', this.registerForm.value);
+
+    this.successMessage = 'Registration successful! Redirecting...';
 
     setTimeout(() => {
-      this.router.navigate(['/login']); // Redirect to login page after successful registration
-    }
-    , 1000); // Redirect after 1 seconds
+      this.router.navigate(['/login']);
+    }, 1000);
   }
 
   onReset() {
-    this.registerForm = {};
+    this.registerForm.reset();
     this.submitted = false;
     this.errorMessage = '';
     this.successMessage = '';
   }
 
-  cancel(){
+  cancel() {
     this.cancelRegister.emit(false);
   }
 
@@ -73,4 +123,3 @@ export class RegisterComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 }
-

@@ -24,7 +24,9 @@
     "selectEmployee": "Select employee",
     "required": "Required",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "backToDashboard": "Back to Dashboard",
+    "backToContracts": "Back to Contracts"
   },
   "login": {
     "title": "Login",
@@ -187,11 +189,28 @@
   },
   "dashboard": {
     "title": "HR Management System",
+    "systemOverview": "HR Dashboard System Overview",
+    "overview": "Overview",
     "welcome": "Welcome to the HR Management System — manage employees, contracts, departments and more in one place!",
     "register": "Register",
     "learnMore": "Learn more",
     "alreadyHaveAccount": "Already have an account? Just log in!",
-    "login": "Login"
+    "login": "Login",
+    "viewProfile": "View Profile",
+    "clickToView": "Click to view",
+    "pleaseLoginFirst": "Please login first",
+    "employees": "Employees",
+    "departments": "Departments",
+    "contracts": "Contracts",
+    "salaries": "Salaries",
+    "timekeeping": "Timekeeping",
+    "recruitments": "Recruitments",
+    "benefits": "Benefits",
+    "trainings": "Trainings",
+    "leaves": "Leaves",
+    "settings": "Settings",
+    "help": "Help",
+    "contact": "Contact"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -219,7 +238,9 @@
     "language": "Language",
     "save": "Save Changes",
     "saveSuccess": "Saved successfully!",
-    "logout": "Logout"
+    "logout": "Logout",
+    "passwordUpdateSuccess": "Password updated successfully!",
+    "updateError": "Update error"
   },
   "training": {
     "title": "Training Courses",

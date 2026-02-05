@@ -4,6 +4,7 @@ import { ContactService } from '../_services/contact.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-contact',
@@ -77,7 +78,7 @@ export class ContactComponent {
  sendContact() {
   const contact = this.contactForm.value;
 
-  this.http.post('http://localhost:5002/api/contact', contact).subscribe({
+  this.http.post(`${environment.apiUrl}/contact`, contact).subscribe({
     next: () => this.toastr.success('Contact sent successfully!'),
     error: () => this.toastr.error('Failed to send contact.')
   });

@@ -1,47 +1,102 @@
-.dashboard-sidebar {
-  width: 250px;
-  background: #2c3e50;
-  color: white;
-  height: 100vh;
-  padding: 20px 0;
+/*
+ * Styles for Dashboard Component
+ * Áp dụng cho file src/app/dashboard/dashboard.component.html
+ */
+
+/* 1. Tổng thể Dashboard */
+.container {
+  padding-top: 0 !important; /* Loại bỏ padding trên */
+  padding-bottom: 0 !important; /* ĐÃ SỬA: Loại bỏ khoảng trắng 50px phía dưới */
+  
+  /* Loại bỏ khoảng trắng hai bên */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  max-width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng có thể */
+  width: 100%; 
 }
 
-.sidebar-title {
+/* Bổ sung: Xử lý Grid System để loại bỏ margin âm */
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Bổ sung: Điều chỉnh padding giữa các cột và loại bỏ khoảng cách dưới hàng cuối cùng */
+.row > [class*='col'] {
+    padding-left: 8px; 
+    padding-right: 8px;
+    margin-bottom: 0; /* Đảm bảo không có margin dưới cột */
+}
+
+/* 2. Style cho các thẻ chỉ số (Metric Cards) */
+.card {
+  border: none;
+  border-radius: 12px; /* Góc bo tròn */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-align: center;
-  padding: 15px 0;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #34495e;
-  font-size: 1.2rem;
 }
 
-.sidebar-menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.menu-item {
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
+/* 3. Style đặc biệt cho các thẻ có thể nhấp (hover-link) */
+.hover-link {
   cursor: pointer;
-  transition: all 0.3s;
+  /* Hiệu ứng khi rê chuột vào */
 }
 
-.menu-item:hover {
-  background: #34495e;
+.hover-link:hover {
+  transform: translateY(-5px); /* Nâng thẻ lên một chút */
+  box-shadow: 0 8px 20px rgba(237, 236, 236, 0.1); /* Bóng đổ đậm hơn */
 }
 
-.menu-item.active {
-  background: #3498db;
+/* 4. Tiêu đề và nội dung thẻ */
+.card h4 {
+  font-size: 2.5rem; /* Kích thước icon lớn hơn */
+  margin-bottom: 10px;
 }
 
-.menu-item.completed {
-  color: #2ecc71;
+.card h5 {
+  font-size: 1.8rem; /* Kích thước số liệu lớn */
+  font-weight: 700;
+  margin-bottom: 5px;
 }
 
-.menu-item i {
-  margin-right: 10px;
-  width: 20px;
-  text-align: center;
+.card p {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* 5. Phân phối xếp hạng (Rating Distribution) */
+.list-group {
+  border-radius: 12px;
+}
+
+.list-group-item {
+  border-left: 5px solid transparent;
+  transition: background-color 0.3s;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa; /* Thay đổi màu nền khi hover */
+}
+
+.rating-stars span {
+  display: inline-block;
+  color: #ffc107; /* Màu vàng của sao */
+}
+
+/* 6. Nút bấm */
+.btn-primary, .btn-info {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 10px 30px;
+}
+
+.btn-primary {
+  background-color: #4a5568; /* Màu tối hơn cho primary button */
+  border-color: #4a5568;
+}
+
+.btn-primary:hover {
+  background-color: #2d3748;
+  border-color: #2d3748;
 }
