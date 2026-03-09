@@ -1,11 +1,15 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace API.Entities
 {
     public class FileHistory
     {
         [Key]
+        [BsonId]
+        [BsonRepresentation(BsonType.Int32)]
         public int Id { get; set; }
 
         [Required]

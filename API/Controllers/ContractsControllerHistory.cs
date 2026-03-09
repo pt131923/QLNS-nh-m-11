@@ -1,24 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using API.Entities;
+using MongoDB.Driver;
+using API.Services;
+using System;
 
 namespace API.Controllers
 {
     
     [Route("api/[controller]")]
     [ApiController]
-    public class ContactHistoryController(DbContext _context) : ControllerBase
+    public class ContactHistoryController : ControllerBase
     {
+        private readonly IMongoCollection<ContactHistory> _history;
+        private readonly IMongoIdGenerator _idGenerator;
+
+        public ContactHistoryController(IMongoDatabase db, IMongoIdGenerator idGenerator)
+        {
+            _history = db.GetCollection<ContactHistory>("ContactHistory");
+            _idGenerator = idGenerator;
+        }
 
 
         // GET: api/ContactHistory
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var list = await _context.Set<ContactHistory>()
-                .OrderByDescending(x => x.CreatedAt)
+            var list = await _history.Find(_ => true)
+                .SortByDescending(x => x.CreatedAt)
                 .ToListAsync();
-
             return Ok(list);
         }
 
@@ -26,7 +35,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var history = await _context.Set<ContactHistory>().FindAsync(id);
+            var history = await _history.Find(x => x.Id == id).FirstOrDefaultAsync();
 
             if (history == null)
                 return NotFound();
@@ -42,9 +51,10 @@ namespace API.Controllers
                 return BadRequest(ModelState);
 
             model.CreatedAt = DateTime.UtcNow;
+            if (model.Id == 0)
+                model.Id = await _idGenerator.NextAsync("ContactHistory");
 
-            _context.Set<ContactHistory>().Add(model);
-            await _context.SaveChangesAsync();
+            await _history.InsertOneAsync(model);
 
             return Ok(model);
         }

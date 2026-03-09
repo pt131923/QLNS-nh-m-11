@@ -31,6 +31,10 @@ export class SettingComponent implements OnInit {
   // Lưu thông tin user hiện tại
   currentUser: any = null;
 
+  avatarPreviewUrl: string = 'assets/default-avatar.png';
+  selectedAvatarFile: File | null = null;
+  uploadingAvatar = false;
+
  constructor(
     private router: Router,
     private translate: TranslateService,
@@ -75,6 +79,7 @@ export class SettingComponent implements OnInit {
             this.currentUser = user; // Lưu thông tin user hiện tại
             this.profile.username = user.username || user.userName || user.UserName || '';
             this.profile.email = user.email || user.Email || '';
+            this.avatarPreviewUrl = user.avatarUrl || user.avatar || 'assets/default-avatar.png';
           }
         },
         error: (error: any) => {
@@ -91,6 +96,7 @@ export class SettingComponent implements OnInit {
           if (storedUser) {
             try {
               this.currentUser = JSON.parse(storedUser);
+              this.avatarPreviewUrl = this.currentUser?.avatarUrl || this.currentUser?.avatar || 'assets/default-avatar.png';
             } catch (e) {
               console.error('Error parsing stored user:', e);
             }
@@ -109,12 +115,51 @@ export class SettingComponent implements OnInit {
       if (storedUser) {
         try {
           this.currentUser = JSON.parse(storedUser);
+          this.avatarPreviewUrl = this.currentUser?.avatarUrl || this.currentUser?.avatar || 'assets/default-avatar.png';
         } catch (e) {
           console.error('Error parsing stored user:', e);
         }
       }
     }
  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.selectedAvatarFile = file;
+    this.avatarPreviewUrl = URL.createObjectURL(file);
+  }
+
+  uploadAvatar(): void {
+    if (!this.selectedAvatarFile || this.uploadingAvatar) return;
+    this.uploadingAvatar = true;
+
+    this.userService.uploadMyAvatar(this.selectedAvatarFile).subscribe({
+      next: (res: any) => {
+        const avatarUrl = res?.AvatarUrl || res?.avatarUrl || res?.url;
+        if (avatarUrl) {
+          this.avatarPreviewUrl = avatarUrl;
+          if (!this.currentUser) this.currentUser = {};
+          this.currentUser.avatarUrl = avatarUrl;
+          localStorage.setItem('user', JSON.stringify(this.currentUser));
+        }
+
+        this.selectedAvatarFile = null;
+        this.uploadingAvatar = false;
+        this.translate.get('settings.avatarUpdated').subscribe(msg => {
+          this.toastr.success(msg || 'Đã cập nhật ảnh đại diện!');
+        });
+      },
+      error: (error: any) => {
+        this.uploadingAvatar = false;
+        const errorMsg = error?.error?.message || error?.message || 'Lỗi upload avatar.';
+        this.translate.get('settings.updateError').subscribe(msg => {
+          this.toastr.error(`${msg}: ${errorMsg}`);
+        });
+      }
+    });
+  }
 
  // ==============================
  //          SAVE ALL
@@ -270,7 +315,6 @@ export class SettingComponent implements OnInit {
 //           LOGOUT
 // ==============================
  onLogout() {
-    this.authService.logout();
-    this.router.navigate(['/dashboard']);
+    this.authService.logout('/dashboard');
  }
 }

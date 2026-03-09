@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace API.Entities
 {
     public class Employee
     {
         [Key]
+        [BsonId]
+        [BsonRepresentation(BsonType.Int32)]
         public int EmployeeId { get; set; }
 
         [Required]

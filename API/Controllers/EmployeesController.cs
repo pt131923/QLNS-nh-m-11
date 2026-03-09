@@ -1,11 +1,12 @@
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using System.Security.Cryptography;
+using MongoDB.Driver;
+using API.Services;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -13,18 +14,28 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class EmployeesController : BaseApiController
     {
-        private readonly DataContext _context;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly AutoMapper.IMapper _mapper;
+        private readonly IMongoCollection<Employee> _employees;
+        private readonly IMongoCollection<AppDepartment> _departments;
+        private readonly IMongoCollection<FileHistory> _fileHistory;
+        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IDashboardService _dashboardService;
 
         public EmployeesController(
-            DataContext context,
             IEmployeeRepository employeeRepository,
-            AutoMapper.IMapper mapper)
+            AutoMapper.IMapper mapper,
+            IMongoDatabase database,
+            IMongoIdGenerator idGenerator,
+            IDashboardService dashboardService)
         {
-            _context = context;
             _employeeRepository = employeeRepository;
             _mapper = mapper;
+            _employees = database.GetCollection<Employee>("Employees");
+            _departments = database.GetCollection<AppDepartment>("Departments");
+            _fileHistory = database.GetCollection<FileHistory>("FileHistory");
+            _idGenerator = idGenerator;
+            _dashboardService = dashboardService;
         }
 
         // ---------------------------------------------------------------------
@@ -40,8 +51,8 @@ namespace API.Controllers
         [HttpGet("count")]
         public async Task<IActionResult> GetCount()
         {
-            var count = await _context.Employee.CountAsync();
-            return Ok(count);
+            var count = await _employees.CountDocumentsAsync(_ => true);
+            return Ok((int)count);
         }
         // ---------------------------------------------------------------------
         // GET EMPLOYEE BY ID
@@ -85,8 +96,7 @@ namespace API.Controllers
             if (await EmployeeExists(employeeDto.EmployeeName))
                 return BadRequest("Employee name already exists");
 
-            var departmentExists = await _context.Department
-                .AnyAsync(d => d.DepartmentId == employeeDto.DepartmentId);
+            var departmentExists = await _departments.CountDocumentsAsync(d => d.DepartmentId == employeeDto.DepartmentId) > 0;
 
             if (!departmentExists)
                 return BadRequest("Department does not exist");
@@ -94,8 +104,8 @@ namespace API.Controllers
             var employee = _mapper.Map<Employee>(employeeDto);
             employee.EmployeeName = employee.EmployeeName.Trim().ToLower();
 
-            _context.Employee.Add(employee);
-            await _context.SaveChangesAsync();
+            _employeeRepository.Add(employee);
+            await _employeeRepository.SaveAllAsync();
 
             return CreatedAtAction(nameof(GetEmployeeById),
                 new { id = employee.EmployeeId },
@@ -106,8 +116,8 @@ namespace API.Controllers
         {
             if (string.IsNullOrWhiteSpace(name)) return false;
             var cleaned = name.Trim().ToLower();
-            return await _context.Employee
-                .AnyAsync(e => e.EmployeeName.ToLower() == cleaned);
+            var filter = Builders<Employee>.Filter.Regex(x => x.EmployeeName, new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(cleaned)}$", "i"));
+            return await _employees.CountDocumentsAsync(filter) > 0;
         }
 
         // ---------------------------------------------------------------------
@@ -135,12 +145,15 @@ namespace API.Controllers
         [HttpGet("with-departments")]
         public async Task<ActionResult<IEnumerable<EmployeeWithDepartmentDto>>> GetEmployeesWithDepartments()
         {
-            var employees = await _context.Employee
-                .Include(e => e.Department)
-                .Select(e => _mapper.Map<EmployeeWithDepartmentDto>(e))
-                .ToListAsync();
+            var employees = await _employees.Find(_ => true).ToListAsync();
+            var departments = await _departments.Find(_ => true).ToListAsync();
+            var deptMap = departments.ToDictionary(d => d.DepartmentId, d => d);
 
-            return Ok(employees);
+            foreach (var e in employees)
+                if (deptMap.TryGetValue(e.DepartmentId, out var dept))
+                    e.Department = dept;
+
+            return Ok(employees.Select(e => _mapper.Map<EmployeeWithDepartmentDto>(e)).ToList());
         }
 
         // ---------------------------------------------------------------------
@@ -151,16 +164,15 @@ namespace API.Controllers
             string name = null,
             int? departmentId = null)
         {
-            var query = _context.Employee.AsQueryable();
+            var filter = Builders<Employee>.Filter.Empty;
 
             if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(e => e.EmployeeName.ToLower().Contains(name.ToLower()));
+                filter &= Builders<Employee>.Filter.Regex(x => x.EmployeeName, new MongoDB.Bson.BsonRegularExpression(System.Text.RegularExpressions.Regex.Escape(name.Trim()), "i"));
 
             if (departmentId.HasValue)
-                query = query.Where(e => e.DepartmentId == departmentId);
+                filter &= Builders<Employee>.Filter.Eq(x => x.DepartmentId, departmentId.Value);
 
-            var employees = await query.ToListAsync();
-
+            var employees = await _employees.Find(filter).ToListAsync();
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
 
@@ -183,7 +195,7 @@ namespace API.Controllers
 
             // Compute file hash
             var fileHash = await CalculateHash(file);
-            if (await _context.FileHistory.AnyAsync(f => f.FileHash == fileHash))
+            if (await _fileHistory.CountDocumentsAsync(f => f.FileHash == fileHash) > 0)
                 return BadRequest("This file has been previously uploaded");
 
             // Read Excel
@@ -262,12 +274,21 @@ namespace API.Controllers
 
                     if (int.TryParse(deptValue, out int deptId))
                     {
+                        var exists = await _departments.CountDocumentsAsync(d => d.DepartmentId == deptId) > 0;
+                        if (!exists)
+                        {
+                            errors.Add($"Row {row}: DepartmentId '{deptId}' not found");
+                            continue;
+                        }
                         emp.DepartmentId = deptId;
                     }
                     else
                     {
-                        var dept = await _context.Department
-                            .FirstOrDefaultAsync(d => d.Name.ToLower() == deptValue.ToLower());
+                        var dept = await _departments.Find(
+                                Builders<AppDepartment>.Filter.Regex(
+                                    x => x.Name,
+                                    new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(deptValue.Trim())}$", "i")))
+                            .FirstOrDefaultAsync();
 
                         if (dept == null)
                         {
@@ -278,6 +299,8 @@ namespace API.Controllers
                         emp.DepartmentId = dept.DepartmentId;
                     }
 
+                    emp.EmployeeId = await _idGenerator.NextAsync("Employees");
+                    emp.CreatedAt = DateTime.UtcNow;
                     employeesToImport.Add(emp);
                 }
                 catch (Exception ex)
@@ -287,17 +310,19 @@ namespace API.Controllers
             }
 
             // Save employees + history
-            _context.Employee.AddRange(employeesToImport);
+            if (employeesToImport.Count > 0)
+                await _employees.InsertManyAsync(employeesToImport);
 
-            _context.FileHistory.Add(new FileHistory
+            await _fileHistory.InsertOneAsync(new FileHistory
             {
+                Id = await _idGenerator.NextAsync("FileHistory"),
                 FileName = file.FileName,
                 FileHash = fileHash,
                 UploadedDate = DateTime.UtcNow,
                 Status = errors.Count == 0 ? "SUCCESS" : "PARTIAL"
             });
 
-            await _context.SaveChangesAsync();
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
 
             return Ok(new
             {
@@ -322,8 +347,8 @@ namespace API.Controllers
         {
             if (string.IsNullOrWhiteSpace(identity)) return false;
             var clean = identity.Trim().ToLower();
-            return await _context.Employee
-                .AnyAsync(e => e.IdentityNumber.ToLower() == clean);
+            var filter = Builders<Employee>.Filter.Eq(x => x.IdentityNumber, clean);
+            return await _employees.CountDocumentsAsync(filter) > 0;
         }
 
         private bool TryGet(ExcelWorksheet ws, Dictionary<string, int> headers, int row, IEnumerable<string> keys, out string result)

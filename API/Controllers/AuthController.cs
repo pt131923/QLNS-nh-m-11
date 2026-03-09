@@ -55,6 +55,19 @@ namespace API.Controllers
 
             var token = _tokenService.CreateToken(user);
 
+            string BuildAvatarUrl(User u)
+            {
+                if (string.IsNullOrEmpty(u.Image) || u.Image == "default.png")
+                    return "/assets/default-avatar.png";
+
+                // Seed avatars (đã có trong Angular assets)
+                if (u.Image == "admin-avatar.png" || u.Image == "manager-avatar.png" || u.Image == "employee-avatar.png")
+                    return $"/assets/avatars/{u.Image}";
+
+                // Uploaded avatars (lưu dưới wwwroot/uploads/avatars trên API)
+                return $"{Request.Scheme}://{Request.Host}/uploads/avatars/{u.Image}";
+            }
+
             // Trả về đầy đủ thông tin user để frontend cập nhật UI
             return Ok(new
             {
@@ -67,9 +80,7 @@ namespace API.Controllers
                     phoneNumber = user.PhoneNumber,
                     address = user.Address,
                     // Sử dụng trường Image cho avatar
-                    avatarUrl = string.IsNullOrEmpty(user.Image) || user.Image == "default.png"
-                        ? "/assets/default-avatar.png"
-                        : $"/assets/avatars/{user.Image}",
+                    avatarUrl = BuildAvatarUrl(user),
                     displayName = user.UserName, // Sử dụng username làm display name
                     role = user.Role ?? "user" // Sử dụng role từ database
                 }

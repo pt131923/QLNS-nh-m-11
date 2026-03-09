@@ -118,8 +118,7 @@ onSubmit(): void {
   }
 
   onLogout(): void {
-    this.authService.logout();
-    this.router.navigate(['/dashboard']);
+    this.authService.logout('/dashboard');
   }
 
   cancel() {

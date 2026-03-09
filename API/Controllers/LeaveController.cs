@@ -19,27 +19,27 @@ namespace API.Controllers
             _leaveRepository = leaveRepository;
         }
         [HttpGet("list")]
-        public IActionResult GetLeaveList()
+        public async Task<IActionResult> GetLeaveList()
         {
-            var leaves = _leaveRepository.GetAllLeavesAsync();
+            var leaves = await _leaveRepository.GetAllLeavesAsync();
             return Ok(leaves);
         }
 
         [HttpGet("by id")]
-        public IActionResult GetLeaveById(int id)
+        public async Task<IActionResult> GetLeaveById(int id)
         {
-            var leave = _leaveRepository.GetLeaveByUserId(id);
+            var leave = await _leaveRepository.GetLeaveByUserId(id);
             return Ok(leave);
         }
 
         [HttpPost]
-        public IActionResult CreateLeave([FromBody] Leave leave)
+        public async Task<IActionResult> CreateLeave([FromBody] Leave leave)
         {
             if (leave == null)
             {
                 return BadRequest("Leave data is null");
             }
-            _leaveRepository.AddLeave(leave);
+            await _leaveRepository.AddLeave(leave);
             return CreatedAtAction(nameof(GetLeaveById), new { id = leave.LeaveId }, leave);
         }
     }

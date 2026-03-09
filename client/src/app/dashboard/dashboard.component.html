@@ -1,157 +1,238 @@
-<div class="dashboard-container container-fluid bg-light min-vh-100 d-flex flex-column p-0">
+<div class="dashboard-container container-fluid min-vh-100 d-flex flex-column p-0">
 
   <!-- ========================= -->
-  <!-- 🔵 HEADER / TOP BAR -->
+  <!-- HEADER / TOP BAR -->
   <!-- ========================= -->
-  <header class="d-flex justify-content-between align-items-center py-3 px-4 bg-white shadow-sm mb-4">
-    <div>
-      <h4 class="mb-0 fw-bold text-primary">
+  <header class="dashboard-header d-flex justify-content-between align-items-center">
+    <div class="dashboard-title-wrap">
+      <h1 class="dashboard-title">
         <i class="bi bi-speedometer2 me-2"></i>{{ 'dashboard.systemOverview' | translate }}
-      </h4>
-      <small class="text-muted">{{ 'dashboard.overview' | translate }}</small>
+      </h1>
+      <p class="dashboard-subtitle">{{ 'dashboard.overview' | translate }}</p>
     </div>
 
     <div class="d-flex align-items-center gap-3">
-      <ng-container *ngIf="user; else notLoggedIn">
-        <!-- Actions -->
-        <div class="d-none d-md-flex gap-2 me-2">
-             <button class="btn btn-outline-warning btn-sm" (click)="testAPI()" title="Test API">
-              <i class="bi bi-bug"></i> Test API
-            </button>
-            <button class="btn btn-outline-info btn-sm" (click)="forceLoadSummary()" title="Reload Data">
-              <i class="bi bi-arrow-clockwise"></i> Load Data
-            </button>
-        </div>
+      <ng-container *ngIf="authService.isLoggedIn(); else notLoggedIn">
 
         <!-- User Profile -->
-        <div class="d-flex align-items-center" style="cursor: pointer;" (click)="goToProfile()" [title]="'dashboard.viewProfile' | translate">
-            <img [src]="user.avatar || 'assets/default-avatar.png'"
-                 width="40" height="40"
-                 class="rounded-circle border me-2 object-fit-cover">
-            <div class="d-none d-sm-block text-end me-2">
-                <div class="fw-semibold text-dark" style="font-size: 0.9rem;">{{ user.fullName }}</div>
-                <div class="text-muted" style="font-size: 0.75rem;">User</div>
-            </div>
+        <div class="user-pill" (click)="goToProfile()" [title]="'dashboard.viewProfile' | translate">
+          <img [src]="user?.avatarUrl || user?.avatar || 'assets/default-avatar.png'"
+               width="40" height="40"
+               class="user-avatar rounded-circle object-fit-cover"
+               (error)="$any($event.target).src='assets/default-avatar.png'">
+          <div class="d-none d-sm-block user-info">
+            <span class="user-name">{{ user?.displayName || user?.fullName || user?.username || user?.userName || 'User' }}</span>
+            <span class="user-role">User</span>
+          </div>
         </div>
-        
-        <button class="btn btn-light text-danger btn-sm ms-1" (click)="logout()" [title]="'common.logout' | translate">
-            <i class="bi bi-box-arrow-right fs-5"></i>
+
+        <button class="btn btn-logout" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-1"></i>{{ 'dashboard.logout' | translate }}
         </button>
       </ng-container>
 
       <ng-template #notLoggedIn>
-        <button class="btn btn-outline-primary btn-sm me-2" (click)="loginNavigate()">
-          <i class="bi bi-box-arrow-in-right me-1"></i> {{ 'dashboard.login' | translate }}
+        <button class="btn btn-ghost me-2" (click)="loginNavigate()">
+          <i class="bi bi-box-arrow-in-right me-1"></i>{{ 'dashboard.login' | translate }}
         </button>
-        <button class="btn btn-primary btn-sm" (click)="registerNavigate()">
-          <i class="bi bi-person-plus me-1"></i> {{ 'dashboard.register' | translate }}
+        <button class="btn btn-primary btn-pill" (click)="registerNavigate()">
+          <i class="bi bi-person-plus me-1"></i>{{ 'dashboard.register' | translate }}
         </button>
       </ng-template>
     </div>
   </header>
 
   <!-- ========================= -->
-  <!-- 🔵 MAIN CONTENT -->
+  <!-- MAIN CONTENT -->
   <!-- ========================= -->
-  <div class="flex-grow-1 px-4 pb-4">
+  <div class="dashboard-main flex-grow-1">
     
     <!-- Stats Grid -->
-    <div class="row g-4 mb-4">
+    <div class="stats-grid row g-4 mb-4">
       <div class="col-12 col-sm-6 col-xl-3" *ngFor="let item of sidebarStats">
-        <div class="card border-0 shadow-sm h-100 overflow-hidden stat-card-hover"
-               [style.cursor]="(user || authService.isLoggedIn()) ? 'pointer' : 'default'"
-               (click)="(user || authService.isLoggedIn()) ? navigateTo(item.link) : null"
-               [class.opacity-50]="!(user || authService.isLoggedIn())"
-               [title]="(user || authService.isLoggedIn()) ? ('dashboard.clickToView' | translate) : ('dashboard.pleaseLoginFirst' | translate)">
-          
-          <div class="card-body p-4 position-relative">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <p class="text-muted text-uppercase fw-semibold mb-1" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                        {{ item.label }}
-                    </p>
-                    <h3 class="fw-bold mb-0 text-dark">{{ item.value | number }}</h3>
-                </div>
-                <div class="stat-icon-wrapper bg-opacity-10 rounded-3 p-2 d-flex align-items-center justify-content-center" [ngClass]="item.colorClass ? item.colorClass.replace('text-', 'bg-') : 'bg-primary'" style="width: 48px; height: 48px;">
-                    <i [class]="'bi ' + item.icon + ' fs-4 ' + (item.colorClass || 'text-primary')"></i>
-                </div>
+        <div class="stat-card"
+               [class.stat-card--disabled]="!authService.isLoggedIn()"
+               [style.cursor]="authService.isLoggedIn() ? 'pointer' : 'default'"
+               (click)="authService.isLoggedIn() ? navigateTo(item.link) : null"
+               [title]="authService.isLoggedIn() ? ('dashboard.clickToView' | translate) : ('dashboard.pleaseLoginFirst' | translate)">
+          <div class="stat-card__accent" [ngClass]="'stat-card__accent--' + (item.colorClass || 'primary').replace('text-', '')"></div>
+          <div class="stat-card__body">
+            <div class="stat-card__icon-wrap" [ngClass]="(item.colorClass || 'text-primary').replace('text-', 'bg-')">
+              <i [class]="'bi ' + item.icon + ' stat-card__icon'"></i>
+            </div>
+            <div class="stat-card__content">
+              <span class="stat-card__label">{{ item.label }}</span>
+              <span class="stat-card__value">{{ item.value | number }}</span>
             </div>
           </div>
-          <div class="card-footer bg-transparent border-0 py-2 px-4" *ngIf="user || authService.isLoggedIn()">
-              <small class="text-primary fw-semibold" style="font-size: 0.8rem;">
-                  {{ 'dashboard.clickToView' | translate }} <i class="bi bi-arrow-right ms-1"></i>
-              </small>
+          <div class="stat-card__footer" *ngIf="authService.isLoggedIn()">
+            <span class="stat-card__link">{{ 'dashboard.clickToView' | translate }}</span>
+            <i class="bi bi-arrow-right-short stat-card__arrow"></i>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Mock Content for Realism (Charts/Tables) -->
+    <!-- Quick Actions (chỉ khi đăng nhập) -->
+    <div class="quick-actions-row row g-3 mb-4" *ngIf="authService.isLoggedIn()">
+      <div class="col-12">
+        <div class="quick-actions">
+          <span class="quick-actions__label">{{ 'dashboard.quickActions' | translate }}</span>
+          <a class="quick-action-btn" routerLink="/employees">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>{{ 'dashboard.addEmployee' | translate }}</span>
+          </a>
+          <a class="quick-action-btn" routerLink="/contracts">
+            <i class="bi bi-file-earmark-plus-fill"></i>
+            <span>{{ 'dashboard.addContract' | translate }}</span>
+          </a>
+          <a class="quick-action-btn" routerLink="/recruitments">
+            <i class="bi bi-briefcase-fill"></i>
+            <span>{{ 'dashboard.addRecruitment' | translate }}</span>
+          </a>
+          <a class="quick-action-btn" routerLink="/trainings">
+            <i class="bi bi-journal-plus"></i>
+            <span>{{ 'dashboard.addTraining' | translate }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart & Activity Section -->
     <div class="row g-4">
-        <!-- Main Chart Section -->
+        <!-- Chart Card - Thống kê theo danh mục -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 fw-bold text-dark">Analytics Overview</h6>
-                    <button class="btn btn-light btn-sm"><i class="bi bi-three-dots"></i></button>
+            <div class="panel-card panel-card--chart">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title"><i class="bi bi-bar-chart-fill me-2"></i>{{ 'dashboard.analyticsByCategory' | translate }}</h2>
+                    <button class="panel-card__menu btn btn-sm" type="button" [title]="'dashboard.options' | translate"><i class="bi bi-three-dots"></i></button>
                 </div>
-                <div class="card-body">
-                    <!-- Mock Chart Visual -->
-                    <div class="d-flex align-items-end justify-content-around h-100 py-4" style="min-height: 300px;">
-                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 40%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
-                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 65%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
-                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 50%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
-                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 85%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
-                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 60%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
-                        <div class="w-100 mx-2 bg-light rounded-top position-relative" style="height: 75%;"><div class="position-absolute bottom-0 w-100 bg-primary rounded-top" style="height: 100%; opacity: 0.7;"></div></div>
+                <div class="panel-card__body">
+                    <div class="chart-bars" *ngIf="chartStats.length">
+                        <div class="chart-bar-wrap" *ngFor="let bar of chartStats">
+                            <div class="chart-bar" [style.--h]="bar.heightPct + '%'">
+                                <span class="chart-bar__fill" [ngClass]="'chart-bar__fill--' + bar.colorClass"></span>
+                                <span class="chart-bar__value">{{ bar.value }}</span>
+                            </div>
+                            <span class="chart-bar__label">{{ bar.label }}</span>
+                        </div>
                     </div>
-                    <div class="text-center text-muted small mt-2">Monthly Performance Data (Mockup)</div>
+                    <div class="chart-empty" *ngIf="!chartStats.length">
+                        <i class="bi bi-bar-chart"></i>
+                        <p>{{ 'dashboard.loadingStats' | translate }}</p>
+                    </div>
+                    <p class="chart-caption">{{ 'dashboard.analyticsCaption' | translate }}</p>
+                </div>
+                <!-- Bảng tóm tắt số liệu -->
+                <div class="panel-card__summary">
+                    <div class="summary-head">
+                        <h3 class="summary-title"><i class="bi bi-table me-2"></i>{{ 'dashboard.summaryTable' | translate }}</h3>
+                        <span class="summary-updated" *ngIf="lastUpdated">{{ 'dashboard.lastUpdated' | translate }}: {{ lastUpdated | date:'short' }}</span>
+                    </div>
+                    <div class="summary-grid">
+                        <div class="summary-item" *ngFor="let item of sidebarStats" [class.summary-item--clickable]="authService.isLoggedIn()" (click)="authService.isLoggedIn() ? navigateTo(item.link) : null">
+                            <span class="summary-item__label">{{ item.label }}</span>
+                            <span class="summary-item__value">{{ item.value | number }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Side Panel / Recent Activity -->
+        <!-- Recent Activity -->
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white py-3">
-                    <h6 class="m-0 fw-bold text-dark">Recent Activities</h6>
+            <div class="panel-card panel-card--activity h-100">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title"><i class="bi bi-activity me-2"></i>{{ 'dashboard.recentActivities' | translate }}</h2>
                 </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item border-0 px-4 py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;"><i class="bi bi-person-plus"></i></div>
-                                <div>
-                                    <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">New Employee Onboarded</h6>
-                                    <small class="text-muted">Sarah Jenkins joined the Design Team</small>
-                                </div>
-                                <small class="text-muted ms-auto">2h</small>
+                <div class="panel-card__body p-0">
+                    <ul class="activity-list">
+                        <li class="activity-item">
+                            <span class="activity-item__icon activity-item__icon--success"><i class="bi bi-person-plus"></i></span>
+                            <div class="activity-item__content">
+                                <strong>{{ 'dashboard.activityNewEmployee' | translate }}</strong>
+                                <span>{{ 'dashboard.activityNewEmployeeDesc' | translate }}</span>
                             </div>
-                        </div>
-                        <div class="list-group-item border-0 px-4 py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;"><i class="bi bi-file-earmark-text"></i></div>
-                                <div>
-                                    <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">Contract Expiring</h6>
-                                    <small class="text-muted">3 contracts expiring soon</small>
-                                </div>
-                                <small class="text-muted ms-auto">5h</small>
+                            <span class="activity-item__time">2h</span>
+                        </li>
+                        <li class="activity-item">
+                            <span class="activity-item__icon activity-item__icon--warning"><i class="bi bi-file-earmark-text"></i></span>
+                            <div class="activity-item__content">
+                                <strong>{{ 'dashboard.activityContractExpiring' | translate }}</strong>
+                                <span>{{ 'dashboard.activityContractExpiringDesc' | translate }}</span>
                             </div>
-                        </div>
-                        <div class="list-group-item border-0 px-4 py-3">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;"><i class="bi bi-calendar-check"></i></div>
-                                <div>
-                                    <h6 class="mb-0 text-dark" style="font-size: 0.9rem;">Team Meeting</h6>
-                                    <small class="text-muted">Scheduled for tomorrow at 10 AM</small>
-                                </div>
-                                <small class="text-muted ms-auto">1d</small>
+                            <span class="activity-item__time">5h</span>
+                        </li>
+                        <li class="activity-item">
+                            <span class="activity-item__icon activity-item__icon--info"><i class="bi bi-calendar-check"></i></span>
+                            <div class="activity-item__content">
+                                <strong>{{ 'dashboard.activityTeamMeeting' | translate }}</strong>
+                                <span>{{ 'dashboard.activityTeamMeetingDesc' | translate }}</span>
                             </div>
-                        </div>
+                            <span class="activity-item__time">1d</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel-card__footer">
+                    <a href="javascript:void(0)" class="panel-card__link">{{ 'dashboard.viewAllActivity' | translate }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Nhân viên mới + Sắp tới / Hết hạn -->
+    <div class="row g-4 mt-2">
+        <!-- Nhân viên mới -->
+        <div class="col-lg-6">
+            <div class="panel-card panel-card--employees h-100">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title"><i class="bi bi-people-fill me-2"></i>{{ 'dashboard.newEmployees' | translate }}</h2>
+                    <a class="panel-card__header-link" (click)="navigateTo('/employees')" *ngIf="authService.isLoggedIn()">{{ 'dashboard.viewAll' | translate }}</a>
+                </div>
+                <div class="panel-card__body">
+                    <div class="employee-list-loading" *ngIf="loadingEmployees">
+                        <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                        <span>{{ 'dashboard.loadingStats' | translate }}</span>
+                    </div>
+                    <ul class="employee-list" *ngIf="!loadingEmployees && recentEmployees.length">
+                        <li class="employee-item" *ngFor="let emp of recentEmployees" (click)="authService.isLoggedIn() && navigateTo('/employees')">
+                            <img [src]="'assets/default-avatar.png'" alt="" class="employee-avatar" (error)="$any($event.target).src='assets/default-avatar.png'">
+                            <div class="employee-item__info">
+                                <strong class="employee-item__name">{{ emp.name }}</strong>
+                                <span class="employee-item__dept">{{ emp.departmentName }}</span>
+                            </div>
+                            <i class="bi bi-chevron-right employee-item__arrow" *ngIf="authService.isLoggedIn()"></i>
+                        </li>
+                    </ul>
+                    <div class="employee-list-empty" *ngIf="!loadingEmployees && !recentEmployees.length">
+                        <i class="bi bi-people"></i>
+                        <p>{{ 'dashboard.noEmployees' | translate }}</p>
                     </div>
                 </div>
-                <div class="card-footer bg-white text-center border-0 py-3">
-                    <a href="javascript:void(0)" class="text-decoration-none fw-semibold" style="font-size: 0.9rem;">View All Activity</a>
+            </div>
+        </div>
+
+        <!-- Sắp tới / Hết hạn -->
+        <div class="col-lg-6">
+            <div class="panel-card panel-card--upcoming h-100">
+                <div class="panel-card__header">
+                    <h2 class="panel-card__title"><i class="bi bi-calendar-event me-2"></i>{{ 'dashboard.upcomingAndExpiring' | translate }}</h2>
+                    <a class="panel-card__header-link" (click)="navigateTo('/contracts')" *ngIf="authService.isLoggedIn()">{{ 'dashboard.viewAll' | translate }}</a>
+                </div>
+                <div class="panel-card__body p-0">
+                    <ul class="upcoming-list">
+                        <li class="upcoming-item" *ngFor="let item of upcomingItems">
+                            <span class="upcoming-item__icon" [ngClass]="'upcoming-item__icon--' + item.type">
+                                <i class="bi" [ngClass]="item.type === 'contract' ? 'bi-file-earmark-text' : item.type === 'training' ? 'bi-book' : 'bi-calendar-x'"></i>
+                            </span>
+                            <div class="upcoming-item__content">
+                                <strong>{{ item.title }}</strong>
+                                <span>{{ item.subtitle }}</span>
+                            </div>
+                            <span class="upcoming-item__date">{{ item.dateLabel }}</span>
+                            <a class="upcoming-item__link" (click)="navigateTo(item.link)" *ngIf="authService.isLoggedIn()"><i class="bi bi-arrow-right"></i></a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

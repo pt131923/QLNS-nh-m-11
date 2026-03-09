@@ -16,6 +16,35 @@
       <div class="card-body">
         <h4 class="mb-3">👤 {{ 'settings.myProfile' | translate }}</h4>
 
+        <!-- Avatar -->
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <img [src]="avatarPreviewUrl || 'assets/default-avatar.png'"
+               width="72" height="72"
+               class="rounded-circle border object-fit-cover"
+               (error)="$any($event.target).src='assets/default-avatar.png'">
+          <div class="flex-grow-1">
+            <div class="fw-semibold mb-2">{{ 'settings.avatar' | translate }}</div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <label class="btn btn-outline-primary btn-sm mb-0">
+                <input type="file" hidden accept="image/*" (change)="onAvatarSelected($event)">
+                <i class="bi bi-image me-1"></i>{{ 'settings.changeAvatar' | translate }}
+              </label>
+              <button class="btn btn-primary btn-sm"
+                      type="button"
+                      (click)="uploadAvatar()"
+                      [disabled]="!selectedAvatarFile || uploadingAvatar">
+                <ng-container *ngIf="!uploadingAvatar">
+                  <i class="bi bi-cloud-arrow-up me-1"></i>{{ 'settings.uploadAvatar' | translate }}
+                </ng-container>
+                <ng-container *ngIf="uploadingAvatar">
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>{{ 'settings.uploading' | translate }}
+                </ng-container>
+              </button>
+            </div>
+            <small class="text-muted d-block mt-2" *ngIf="selectedAvatarFile">{{ selectedAvatarFile.name }}</small>
+          </div>
+        </div>
+
         <div class="mb-3">
           <label class="form-label">{{ 'settings.username' | translate }}</label>
           <input type="text" [(ngModel)]="profile.username" name="username" class="form-control" />

@@ -1,19 +1,39 @@
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
-using AutoMapper;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using OfficeOpenXml;
+using System.Linq;
 
 namespace API.Controllers
 {
-    
     [ApiController]
     [Route("api/[controller]")]
-    public class SalariesController(DataContext _context, ISalaryRepository _salaryRepository, AutoMapper.IMapper _mapper) : BaseApiController
+    public class SalariesController : BaseApiController
+    {
+        private readonly ISalaryRepository _salaryRepository;
+        private readonly AutoMapper.IMapper _mapper;
+        private readonly IMongoCollection<Employee> _employees;
+        private readonly IMongoCollection<Salary> _salaries;
+        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IDashboardService _dashboardService;
+
+        public SalariesController(
+            ISalaryRepository salaryRepository,
+            AutoMapper.IMapper mapper,
+            IMongoDatabase database,
+            IMongoIdGenerator idGenerator,
+            IDashboardService dashboardService)
         {
+            _salaryRepository = salaryRepository;
+            _mapper = mapper;
+            _employees = database.GetCollection<Employee>("Employees");
+            _salaries = database.GetCollection<Salary>("Salaries");
+            _idGenerator = idGenerator;
+            _dashboardService = dashboardService;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SalaryDto>>> GetSalaries()
@@ -34,14 +54,16 @@ namespace API.Controllers
         [HttpPost("add-salary")]
         public async Task<ActionResult<SalaryDto>> AddSalary(SalaryDto salaryDto)
         {
-            var employeeExists = await _context.Employee.AnyAsync(e => e.EmployeeId == salaryDto.EmployeeId);
+            var employeeExists = await _employees.CountDocumentsAsync(e => e.EmployeeId == salaryDto.EmployeeId) > 0;
             if (!employeeExists)
-                return BadRequest("Employee with SalaryId does not exist.");
+                return BadRequest("Employee does not exist.");
 
+            var employee = await _employees.Find(e => e.EmployeeId == salaryDto.EmployeeId).FirstOrDefaultAsync();
             var salary = _mapper.Map<Salary>(salaryDto);
+            salary.EmployeeName = employee?.EmployeeName ?? salary.EmployeeName;
 
-            _context.Salary.Add(salary);
-            await _context.SaveChangesAsync();
+            _salaryRepository.Add(salary);
+            await _salaryRepository.SaveAllAsync();
 
             return CreatedAtRoute("GetSalaryById", new { id = salary.SalaryId }, _mapper.Map<SalaryDto>(salary));
         }
@@ -55,28 +77,30 @@ namespace API.Controllers
 
             if (salaryDto.EmployeeId != existingSalary.EmployeeId)
             {
-                var employeeExists = await _context.Employee.AnyAsync(e => e.EmployeeId == salaryDto.EmployeeId);
+                var employeeExists = await _employees.CountDocumentsAsync(e => e.EmployeeId == salaryDto.EmployeeId) > 0;
                 if (!employeeExists)
                     return BadRequest($"New Employee with ID {salaryDto.EmployeeId} does not exist.");
             }
 
+            var employee = await _employees.Find(e => e.EmployeeId == salaryDto.EmployeeId).FirstOrDefaultAsync();
             _mapper.Map(salaryDto, existingSalary);
-            _salaryRepository.Update(existingSalary);
+            existingSalary.EmployeeName = employee?.EmployeeName ?? existingSalary.EmployeeName;
 
+            _salaryRepository.Update(existingSalary);
             if (await _salaryRepository.SaveAllAsync()) return NoContent();
 
             return BadRequest("Failed to update salary");
         }
 
         [HttpDelete("delete-salary/{id}")]
-        public IActionResult DeleteSalary(int id)
+        public async Task<IActionResult> DeleteSalary(int id)
         {
-            var salary = _context.Salary.Find(id);
+            var salary = await _salaryRepository.GetSalaryByIdAsync(id);
             if (salary == null)
                 return NotFound(new { message = "Salary not found." });
 
-            _context.Salary.Remove(salary);
-            _context.SaveChanges();
+            _salaryRepository.Delete(salary);
+            await _salaryRepository.SaveAllAsync();
 
             return Ok(new { message = "Salary deleted successfully." });
         }
@@ -85,285 +109,163 @@ namespace API.Controllers
         public async Task<ActionResult> ImportSalaries(IFormFile file)
         {
             if (file == null || file.Length == 0)
-            {
                 return BadRequest("File is required");
-            }
 
             var allowedExtensions = new[] { ".xlsx", ".xls" };
             var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(fileExtension))
-            {
                 return BadRequest("Only Excel files (.xlsx, .xls) are allowed");
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            stream.Position = 0;
+
+            using var package = new ExcelPackage(stream);
+            var worksheet = package.Workbook.Worksheets[0];
+            if (worksheet.Dimension == null)
+                return BadRequest("Excel file is empty");
+
+            var rowCount = worksheet.Dimension.Rows;
+            var colCount = worksheet.Dimension.Columns;
+            if (rowCount < 2)
+                return BadRequest("Excel file must have at least a header row and one data row");
+
+            var headers = new Dictionary<string, int>();
+            for (int col = 1; col <= colCount; col++)
+            {
+                var headerValue = worksheet.Cells[1, col].Value?.ToString()?.Trim();
+                if (!string.IsNullOrEmpty(headerValue))
+                    headers[headerValue.ToLowerInvariant()] = col;
             }
 
-            try
+            var importedCount = 0;
+            var errorMessages = new List<string>();
+            var salariesToInsert = new List<Salary>();
+
+            for (int row = 2; row <= rowCount; row++)
             {
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                using var stream = new MemoryStream();
-                await file.CopyToAsync(stream);
-                stream.Position = 0;
-
-                using var package = new ExcelPackage(stream);
-                var worksheet = package.Workbook.Worksheets[0];
-
-                if (worksheet.Dimension == null)
+                try
                 {
-                    return BadRequest("Excel file is empty");
-                }
+                    var salary = new Salary();
 
-                var rowCount = worksheet.Dimension.Rows;
-                var colCount = worksheet.Dimension.Columns;
-
-                if (rowCount < 2)
-                {
-                    return BadRequest("Excel file must have at least a header row and one data row");
-                }
-
-                // Read header row to map columns
-                var headers = new Dictionary<string, int>();
-                for (int col = 1; col <= colCount; col++)
-                {
-                    var headerValue = worksheet.Cells[1, col].Value?.ToString()?.Trim();
-                    if (!string.IsNullOrEmpty(headerValue))
+                    int? employeeId = null;
+                    if (TryGetCell(worksheet, row, headers, out var empValue, "employeeid", "employee id"))
                     {
-                        headers[headerValue.ToLowerInvariant()] = col;
-                    }
-                }
-
-                var importedCount = 0;
-                var errorMessages = new List<string>();
-
-                // Process data rows
-                for (int row = 2; row <= rowCount; row++)
-                {
-                    try
-                    {
-                        var salary = new Salary();
-
-                        // Map EmployeeId - can be employee name or ID
-                        int? employeeId = null;
-                        if (headers.ContainsKey("employeeid") || headers.ContainsKey("employee id"))
+                        if (int.TryParse(empValue, out var empId))
                         {
-                            var col = headers.ContainsKey("employeeid") ? headers["employeeid"] : headers["employee id"];
-                            var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                            if (!string.IsNullOrEmpty(value))
-                            {
-                                if (int.TryParse(value, out int empId))
-                                {
-                                    employeeId = empId;
-                                }
-                                else
-                                {
-                                    // Try to find employee by name
-                                    var employee = await _context.Employee
-                                        .FirstOrDefaultAsync(e => e.EmployeeName.ToLower() == value.ToLower());
-                                    if (employee != null)
-                                    {
-                                        employeeId = employee.EmployeeId;
-                                    }
-                                    else
-                                    {
-                                        errorMessages.Add($"Row {row}: Employee '{value}' not found");
-                                        continue;
-                                    }
-                                }
-                            }
-                        }
-                        else if (headers.ContainsKey("employeename") || headers.ContainsKey("employee name") || headers.ContainsKey("name"))
-                        {
-                            var col = headers.ContainsKey("employeename") ? headers["employeename"] :
-                                     headers.ContainsKey("employee name") ? headers["employee name"] : headers["name"];
-                            var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                            if (!string.IsNullOrEmpty(value))
-                            {
-                                var employee = await _context.Employee
-                                    .FirstOrDefaultAsync(e => e.EmployeeName.ToLower() == value.ToLower());
-                                if (employee != null)
-                                {
-                                    employeeId = employee.EmployeeId;
-                                    salary.EmployeeName = employee.EmployeeName;
-                                }
-                                else
-                                {
-                                    errorMessages.Add($"Row {row}: Employee '{value}' not found");
-                                    continue;
-                                }
-                            }
-                        }
-
-                        if (!employeeId.HasValue)
-                        {
-                            errorMessages.Add($"Row {row}: EmployeeId or EmployeeName is required");
-                            continue;
-                        }
-
-                        // Check if employee exists
-                        var employeeExists = await _context.Employee.AnyAsync(e => e.EmployeeId == employeeId.Value);
-                        if (!employeeExists)
-                        {
-                            errorMessages.Add($"Row {row}: Employee with ID {employeeId.Value} does not exist");
-                            continue;
-                        }
-
-                        salary.EmployeeId = employeeId.Value;
-
-                        // Get employee name if not already set
-                        if (string.IsNullOrEmpty(salary.EmployeeName))
-                        {
-                            var employee = await _context.Employee.FindAsync(employeeId.Value);
-                            if (employee != null)
-                            {
-                                salary.EmployeeName = employee.EmployeeName;
-                            }
-                        }
-
-                        // Map MonthlySalary
-                        if (headers.ContainsKey("monthlysalary") || headers.ContainsKey("monthly salary") || headers.ContainsKey("salary"))
-                        {
-                            var col = headers.ContainsKey("monthlysalary") ? headers["monthlysalary"] :
-                                     headers.ContainsKey("monthly salary") ? headers["monthly salary"] : headers["salary"];
-                            var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                            if (!string.IsNullOrEmpty(value))
-                            {
-                                if (decimal.TryParse(value, out decimal monthlySalary))
-                                {
-                                    salary.MonthlySalary = monthlySalary;
-                                }
-                                else
-                                {
-                                    errorMessages.Add($"Row {row}: Invalid MonthlySalary value");
-                                    continue;
-                                }
-                            }
-                        }
-
-                        // Map Bonus
-                        MapExcelCell(worksheet, row, headers, "bonus", "", value =>
-                        {
-                            if (decimal.TryParse(value, out decimal bonus))
-                            {
-                                salary.Bonus = bonus;
-                            }
-                        });
-
-                        // Map TotalSalary (if provided, otherwise calculate)
-                        if (headers.ContainsKey("totalsalary") || headers.ContainsKey("total salary") || headers.ContainsKey("total"))
-                        {
-                            var col = headers.ContainsKey("totalsalary") ? headers["totalsalary"] :
-                                     headers.ContainsKey("total salary") ? headers["total salary"] : headers["total"];
-                            var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                            if (!string.IsNullOrEmpty(value))
-                            {
-                                if (decimal.TryParse(value, out decimal totalSalary))
-                                {
-                                    salary.TotalSalary = totalSalary;
-                                }
-                            }
+                            employeeId = empId;
                         }
                         else
                         {
-                            // Calculate TotalSalary if not provided
-                            salary.TotalSalary = salary.MonthlySalary + salary.Bonus;
-                        }
-
-                        // Map SalaryNotes
-                        MapExcelCell(worksheet, row, headers, "salarynotes", "salary notes", "notes", value => salary.SalaryNotes = value);
-
-                        // Map Date
-                        if (headers.ContainsKey("date"))
-                        {
-                            var col = headers["date"];
-                            var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
-                            if (!string.IsNullOrEmpty(value))
+                            var employee = await _employees.Find(Builders<Employee>.Filter.Regex(x => x.EmployeeName,
+                                new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(empValue)}$", "i"))).FirstOrDefaultAsync();
+                            if (employee == null)
                             {
-                                if (DateTime.TryParse(value, out DateTime date))
-                                {
-                                    salary.Date = date;
-                                }
-                                else
-                                {
-                                    errorMessages.Add($"Row {row}: Invalid Date format");
-                                    continue;
-                                }
+                                errorMessages.Add($"Row {row}: Employee '{empValue}' not found");
+                                continue;
                             }
-                            else
-                            {
-                                salary.Date = DateTime.Now;
-                            }
+                            employeeId = employee.EmployeeId;
+                            salary.EmployeeName = employee.EmployeeName;
                         }
-                        else
-                        {
-                            salary.Date = DateTime.Now;
-                        }
-
-                        _context.Salary.Add(salary);
-                        importedCount++;
                     }
-                    catch (Exception ex)
+                    else if (TryGetCell(worksheet, row, headers, out var empName, "employeename", "employee name", "name"))
                     {
-                        errorMessages.Add($"Row {row}: Error - {ex.Message}");
+                        var employee = await _employees.Find(Builders<Employee>.Filter.Regex(x => x.EmployeeName,
+                            new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(empName)}$", "i"))).FirstOrDefaultAsync();
+                        if (employee == null)
+                        {
+                            errorMessages.Add($"Row {row}: Employee '{empName}' not found");
+                            continue;
+                        }
+                        employeeId = employee.EmployeeId;
+                        salary.EmployeeName = employee.EmployeeName;
                     }
+
+                    if (!employeeId.HasValue)
+                    {
+                        errorMessages.Add($"Row {row}: EmployeeId or EmployeeName is required");
+                        continue;
+                    }
+
+                    var employeeExists = await _employees.CountDocumentsAsync(e => e.EmployeeId == employeeId.Value) > 0;
+                    if (!employeeExists)
+                    {
+                        errorMessages.Add($"Row {row}: Employee with ID {employeeId.Value} does not exist");
+                        continue;
+                    }
+
+                    salary.EmployeeId = employeeId.Value;
+                    if (string.IsNullOrEmpty(salary.EmployeeName))
+                    {
+                        var employee = await _employees.Find(e => e.EmployeeId == employeeId.Value).FirstOrDefaultAsync();
+                        salary.EmployeeName = employee?.EmployeeName;
+                    }
+
+                    if (TryGetCell(worksheet, row, headers, out var monthlySalaryValue, "monthlysalary", "monthly salary", "salary"))
+                    {
+                        if (!decimal.TryParse(monthlySalaryValue, out var monthlySalary))
+                        {
+                            errorMessages.Add($"Row {row}: Invalid MonthlySalary value");
+                            continue;
+                        }
+                        salary.MonthlySalary = monthlySalary;
+                    }
+
+                    if (TryGetCell(worksheet, row, headers, out var bonusValue, "bonus"))
+                        if (decimal.TryParse(bonusValue, out var bonus))
+                            salary.Bonus = bonus;
+
+                    if (TryGetCell(worksheet, row, headers, out var totalValue, "totalsalary", "total salary", "total"))
+                        if (decimal.TryParse(totalValue, out var totalSalary))
+                            salary.TotalSalary = totalSalary;
+                    if (salary.TotalSalary == 0)
+                        salary.TotalSalary = salary.MonthlySalary + salary.Bonus;
+
+                    if (TryGetCell(worksheet, row, headers, out var notesValue, "salarynotes", "salary notes", "notes"))
+                        salary.SalaryNotes = notesValue;
+
+                    if (TryGetCell(worksheet, row, headers, out var dateValue, "date") && DateTime.TryParse(dateValue, out var date))
+                        salary.Date = date;
+                    if (salary.Date == default)
+                        salary.Date = DateTime.UtcNow;
+
+                    salary.SalaryId = await _idGenerator.NextAsync("Salaries");
+                    salariesToInsert.Add(salary);
+                    importedCount++;
                 }
-
-                await _context.SaveChangesAsync();
-
-                var response = new
+                catch (Exception ex)
                 {
-                    success = true,
-                    importedCount = importedCount,
-                    totalRows = rowCount - 1,
-                    errors = errorMessages
-                };
-
-                if (errorMessages.Count > 0)
-                {
-                    return Ok(response);
+                    errorMessages.Add($"Row {row}: Error - {ex.Message}");
                 }
-
-                return Ok(new { success = true, message = $"Successfully imported {importedCount} salaries", importedCount });
             }
-            catch (Exception ex)
+
+            if (salariesToInsert.Count > 0)
+                await _salaries.InsertManyAsync(salariesToInsert);
+
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+
+            return Ok(new
             {
-                return BadRequest($"Error processing Excel file: {ex.Message}");
-            }
+                success = errorMessages.Count == 0,
+                importedCount,
+                totalRows = rowCount - 1,
+                errors = errorMessages
+            });
         }
 
-        private void MapExcelCell(ExcelWorksheet worksheet, int row, Dictionary<string, int> headers, string key1, string key2, Action<string> setValue)
+        private static bool TryGetCell(ExcelWorksheet worksheet, int row, Dictionary<string, int> headers, out string value, params string[] keys)
         {
-            if (headers.ContainsKey(key1))
+            foreach (var key in keys)
             {
-                var value = worksheet.Cells[row, headers[key1]].Value?.ToString()?.Trim();
-                if (!string.IsNullOrEmpty(value))
-                    setValue(value);
+                if (headers.TryGetValue(key, out var col))
+                {
+                    value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
+                    if (!string.IsNullOrEmpty(value)) return true;
+                }
             }
-            else if (headers.ContainsKey(key2))
-            {
-                var value = worksheet.Cells[row, headers[key2]].Value?.ToString()?.Trim();
-                if (!string.IsNullOrEmpty(value))
-                    setValue(value);
-            }
-        }
-
-        private void MapExcelCell(ExcelWorksheet worksheet, int row, Dictionary<string, int> headers, string key1, string key2, string key3, Action<string> setValue)
-        {
-            if (headers.ContainsKey(key1))
-            {
-                var value = worksheet.Cells[row, headers[key1]].Value?.ToString()?.Trim();
-                if (!string.IsNullOrEmpty(value))
-                    setValue(value);
-            }
-            else if (headers.ContainsKey(key2))
-            {
-                var value = worksheet.Cells[row, headers[key2]].Value?.ToString()?.Trim();
-                if (!string.IsNullOrEmpty(value))
-                    setValue(value);
-            }
-            else if (headers.ContainsKey(key3))
-            {
-                var value = worksheet.Cells[row, headers[key3]].Value?.ToString()?.Trim();
-                if (!string.IsNullOrEmpty(value))
-                    setValue(value);
-            }
+            value = null;
+            return false;
         }
     }
 }

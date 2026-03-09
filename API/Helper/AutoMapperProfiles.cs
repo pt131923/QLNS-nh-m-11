@@ -36,10 +36,17 @@ namespace API.Helpers
 
             // ===== SALARY =====
             CreateMap<Salary, SalaryDto>()
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee.EmployeeName));
+                .ForMember(dest => dest.EmployeeName,
+                           opt => opt.MapFrom(src => src.Employee != null ? src.Employee.EmployeeName : src.EmployeeName));
             CreateMap<SalaryDto, Salary>()
                 .ForMember(dest => dest.Employee, opt => opt.Ignore());
             CreateMap<SalaryUpdateDto, Salary>();
+
+            // ===== USER =====
+            CreateMap<User, UserDto>();
+            CreateMap<UserDto, User>()
+                // Không ghi đè các field hiện tại bằng null (giúp UpdateUser không làm mất Role/Image)
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

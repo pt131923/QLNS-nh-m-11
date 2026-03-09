@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../_services/auth.service';
+import { DashboardService } from '../../_services/dashboard.service';
 
 @Component({
   selector: 'app-user-login',
@@ -12,8 +14,14 @@ export class UserLoginComponent implements OnInit {
   submitted = false;
   errorMessage = '';
   successMessage = '';
+  loading = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private authService: AuthService,
+    private dashboardService: DashboardService
+  ) {}
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -21,33 +29,55 @@ export class UserLoginComponent implements OnInit {
       password: ['', Validators.required],
       rememberMe: [false]
     });
+
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/dashboard'], { replaceUrl: true });
+    }
   }
 
   onSubmit(): void {
     this.submitted = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
     if (this.loginForm.invalid) {
       this.errorMessage = 'Vui lòng điền đầy đủ thông tin đăng nhập.';
-      this.successMessage = '';
       return;
     }
 
     const { username, password } = this.loginForm.value;
+    this.loading = true;
 
-    // Fake login logic
-    if (username === 'admin' && password === 'password') {
-      console.log('Đăng nhập thành công');
-      this.errorMessage = '';
-      this.successMessage = 'Đăng nhập thành công!';
-      // Có thể chuyển hướng tại đây nếu cần
-    } else {
-      this.errorMessage = 'Sai tên đăng nhập hoặc mật khẩu.';
-    }
-    setTimeout(() => {
-      localStorage.setItem('token', 'Api');
-      // Luôn redirect về dashboard sau khi đăng nhập
-      window.location.href = '/dashboard';
-    }, 1000);
+    this.authService.login({ username, password }).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+
+        if (!res || !res.token) {
+          this.errorMessage = 'Token không hợp lệ từ server.';
+          return;
+        }
+
+        this.authService.saveToken(res.token);
+
+        const userData = res.user || res;
+        if (userData && !userData.token) {
+          localStorage.setItem('user', JSON.stringify(userData));
+        } else if (res.user) {
+          localStorage.setItem('user', JSON.stringify(res.user));
+        }
+
+        this.successMessage = 'Đăng nhập thành công!';
+
+        setTimeout(() => {
+          this.dashboardService.startSignalRConnection();
+          this.router.navigate(['/dashboard'], { replaceUrl: true });
+        }, 100);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.errorMessage = err?.error?.message || 'Sai tên đăng nhập hoặc mật khẩu.';
+      }
+    });
   }
 
   onReset(): void {

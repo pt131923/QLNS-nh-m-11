@@ -1,9 +1,14 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using API.Entities;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
+namespace API.Entities
+{
 public class Salary
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.Int32)]
     public int SalaryId { get; set; }
 
     [ForeignKey("Employee")]
@@ -20,4 +25,5 @@ public class Salary
     public DateTime Date { get; set; }
     public long Amount { get; set; }
 
+}
 }

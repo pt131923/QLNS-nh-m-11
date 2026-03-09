@@ -1,13 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace API.DTOs
 {
     public class LogInDto
     {
-        public string UserName { get; set; }
+        [JsonPropertyName("username")]
+        public string UserName { get; set; } = "";
+
+        [JsonPropertyName("password")]
         public string Password { get; set; } = "";
     }
 }

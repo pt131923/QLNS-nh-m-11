@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,12 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    
     [Route("api/[controller]")]
     [ApiController]
     public class TimeKeepingController(ITimeKeepingRepository _timekeepingRepository) : ControllerBase
     {
-
         [HttpGet("{employeeId}")]
         public async Task<IActionResult> GetTimeEntriesForUser(string employeeId)
         {
@@ -21,7 +19,7 @@ namespace API.Controllers
             return Ok(timeEntries);
         }
 
-        [HttpPost("api/timekeeping")]
+        [HttpPost]
         public async Task<IActionResult> CreateTimeEntry([FromBody] TimeKeepingDto timeKeepingDto)
         {
             var createdEntry = await _timekeepingRepository.CreateTimeEntry(timeKeepingDto);

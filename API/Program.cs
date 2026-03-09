@@ -3,7 +3,6 @@ using API.Middleware;
 using AutoMapper;
 using API.Helpers;
 using API.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +14,12 @@ using API.Hubs;
 using API.Services;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Settings;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Driver;
+using API.Entities;
 
 internal class Program
 {
@@ -22,13 +27,47 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // MongoDB: ignore unknown fields when deserializing POCOs
+        ConventionRegistry.Register(
+            "IgnoreExtraElements",
+            new ConventionPack { new IgnoreExtraElementsConvention(true) },
+            _ => true);
+
+        // Map _id to custom Id properties (tránh lỗi "Element '_id' does not match any field")
+        if (!BsonClassMap.IsClassMapRegistered(typeof(AppDepartment)))
+            BsonClassMap.RegisterClassMap<AppDepartment>(cm => { cm.MapIdProperty(c => c.DepartmentId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Employee)))
+            BsonClassMap.RegisterClassMap<Employee>(cm => { cm.MapIdProperty(c => c.EmployeeId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(User)))
+            BsonClassMap.RegisterClassMap<User>(cm => { cm.MapIdProperty(c => c.UserId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Contract)))
+            BsonClassMap.RegisterClassMap<Contract>(cm => { cm.MapIdProperty(c => c.ContractId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Salary)))
+            BsonClassMap.RegisterClassMap<Salary>(cm => { cm.MapIdProperty(c => c.SalaryId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Leave)))
+            BsonClassMap.RegisterClassMap<Leave>(cm => { cm.MapIdProperty(c => c.LeaveId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Contact)))
+            BsonClassMap.RegisterClassMap<Contact>(cm => { cm.MapIdProperty(c => c.ContactId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(TimeKeeping)))
+            BsonClassMap.RegisterClassMap<TimeKeeping>(cm => { cm.MapIdProperty(c => c.TimeKeepingId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Training)))
+            BsonClassMap.RegisterClassMap<Training>(cm => { cm.MapIdProperty(c => c.TrainingId); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Recuiment)))
+            BsonClassMap.RegisterClassMap<Recuiment>(cm => { cm.MapIdProperty(c => c.Id); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(FileHistory)))
+            BsonClassMap.RegisterClassMap<FileHistory>(cm => { cm.MapIdProperty(c => c.Id); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(ContactHistory)))
+            BsonClassMap.RegisterClassMap<ContactHistory>(cm => { cm.MapIdProperty(c => c.Id); cm.AutoMap(); });
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Benefits)))
+            BsonClassMap.RegisterClassMap<Benefits>(cm => { cm.MapIdProperty(c => c.Id); cm.AutoMap(); });
+
         // ----------------------- CORS ------------------------------
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAngular", policy =>
             {
                 // Cho phép tất cả localhost ports để tương thích với Angular dev server
-                policy.WithOrigins("http://localhost:4300")
+                policy.WithOrigins("http://localhost:4300", "http://localhost:4200")
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials(); // RẤT QUAN TRỌNG cho SignalR và JWT
@@ -40,11 +79,32 @@ internal class Program
             .AddJsonOptions(opt =>
             {
                 opt.JsonSerializerOptions.PropertyNamingPolicy = null;
+                opt.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Cho phép username/UserName từ FE
             });
 
-        // ------------------- DB CONTEXT (FIX LỖI 500) ----------------
-        builder.Services.AddDbContextFactory<DataContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        // ------------------- MONGO DB (NEW) ----------------
+        // Đọc cấu hình MongoDB từ appsettings.json → "MongoSettings"
+        builder.Services.Configure<MongoSettings>(
+            builder.Configuration.GetSection("MongoSettings"));
+
+        // Đăng ký MongoClient (singleton)
+        builder.Services.AddSingleton<IMongoClient>(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+            return new MongoClient(settings.ConnectionString);
+        });
+
+        // Đăng ký IMongoDatabase (singleton) để inject vào repository/service
+        builder.Services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var mongoSettings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+            var client = sp.GetRequiredService<IMongoClient>();
+            return client.GetDatabase(mongoSettings.DatabaseName);
+        });
+
+        // ID generator + bootstrap (indexes + seed)
+        builder.Services.AddSingleton<IMongoIdGenerator, MongoIdGenerator>();
+        builder.Services.AddHostedService<MongoBootstrapHostedService>();
 
         // ----------------------- AUTOMAPPER -------------------------
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
@@ -61,7 +121,7 @@ internal class Program
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true, // Validate token expiration
-                    ClockSkew = TimeSpan.Zero // Không cho phép clock skew để tránh token hết hạn sớm
+                    ClockSkew = TimeSpan.FromMinutes(5) // Cho phép clock skew 5 phút để tránh lỗi do thời gian server/client khác nhau
                 };
 
                 // Cấu hình cho SignalR - xử lý token từ query string hoặc access token
@@ -83,18 +143,31 @@ internal class Program
                             return Task.CompletedTask;
                         }
                         
-                        // Nếu không có token trong query string, thử lấy từ Authorization header
-                        if (string.IsNullOrEmpty(context.Token))
+                        // Đối với HTTP requests, token sẽ được lấy tự động từ Authorization header
+                        // Nhưng chúng ta vẫn log để debug
+                        var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+                        if (!string.IsNullOrEmpty(authHeader))
                         {
-                            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-                            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+                            if (authHeader.StartsWith("Bearer "))
                             {
-                                context.Token = authHeader.Substring("Bearer ".Length).Trim();
-                                logger.LogInformation($"✅ Token extracted from Authorization header for {path}");
+                                var token = authHeader.Substring("Bearer ".Length).Trim();
+                                if (!string.IsNullOrEmpty(token))
+                                {
+                                    context.Token = token;
+                                    logger.LogInformation($"✅ Token extracted from Authorization header for {path} (Length: {token.Length})");
+                                }
                             }
                             else
                             {
-                                logger.LogWarning($"⚠️ No Authorization header found for {path}");
+                                logger.LogWarning($"⚠️ Authorization header doesn't start with 'Bearer ' for {path}");
+                            }
+                        }
+                        else
+                        {
+                            // Chỉ log warning cho protected routes
+                            if (path.Value.Contains("/api/") && !path.Value.Contains("/login") && !path.Value.Contains("/register"))
+                            {
+                                logger.LogWarning($"⚠️ No Authorization header found for protected route: {path}");
                             }
                         }
                         
@@ -103,11 +176,28 @@ internal class Program
                     OnAuthenticationFailed = context =>
                     {
                         var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                        logger.LogError(context.Exception, "❌ JWT Authentication failed");
+                        var path = context.Request.Path;
+                        var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
                         
-                        // Log thêm thông tin để debug
-                        logger.LogWarning("Token: {Token}", context.Request.Headers["Authorization"].FirstOrDefault());
-                        logger.LogWarning("Path: {Path}", context.Request.Path);
+                        logger.LogError(context.Exception, "❌ JWT Authentication failed");
+                        logger.LogWarning("Path: {Path}", path);
+                        logger.LogWarning("Authorization header: {Header}", authHeader ?? "None");
+                        
+                        // Log chi tiết exception
+                        if (context.Exception != null)
+                        {
+                            logger.LogError("Exception type: {Type}", context.Exception.GetType().Name);
+                            logger.LogError("Exception message: {Message}", context.Exception.Message);
+                            
+                            // Nếu là SecurityTokenExpiredException, log thêm thông tin
+                            if (context.Exception is Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException expiredEx)
+                            {
+                                logger.LogWarning("Token expired at: {Expired}", expiredEx.Expires);
+                            }
+                        }
+                        
+                        // KHÔNG set context.ErrorResult - để middleware xử lý tự nhiên
+                        // Chỉ log để debug
                         
                         return Task.CompletedTask;
                     },
@@ -117,19 +207,15 @@ internal class Program
                         logger.LogWarning("⛔ Authentication challenge triggered - 401 Unauthorized");
                         logger.LogWarning("Path: {Path}", context.Request.Path);
                         
-                        // Đảm bảo response là 401 với message rõ ràng
-                        context.HandleResponse();
-                        context.Response.StatusCode = 401;
-                        context.Response.ContentType = "application/json";
+                        // Log chi tiết để debug
+                        var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+                        logger.LogWarning("Authorization header: {Header}", authHeader ?? "None");
                         
-                        var errorResponse = new
-                        {
-                            statusCode = 401,
-                            message = "Unauthorized - Invalid or expired token",
-                            path = context.Request.Path
-                        };
+                        // KHÔNG handle response ở đây - để ASP.NET Core xử lý tự nhiên
+                        // Chỉ log thông tin để debug
+                        // context.HandleResponse() sẽ ngăn controller nhận được request
                         
-                        return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(errorResponse));
+                        return Task.CompletedTask;
                     }
                 };
             });
@@ -142,6 +228,10 @@ internal class Program
         builder.Services.AddScoped<IContractRepository, ContractRepository>();
         builder.Services.AddScoped<ISalaryRepository, SalaryRepository>();
         builder.Services.AddScoped<IContactRepository, ContactRepository>();
+        builder.Services.AddScoped<ITrainingRepository, TrainingRepository>();
+        builder.Services.AddScoped<IRecuimentRepository, RecuimentRepository>();
+        builder.Services.AddScoped<ITimeKeepingRepository, TimeKeepingRepository>();
+        builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 
         // ----------------------- SWAGGER -------------------------
         builder.Services.AddEndpointsApiExplorer();
@@ -182,36 +272,6 @@ internal class Program
         // Sử dụng MapControllers và MapHub trực tiếp (minimal API approach)
         app.MapControllers();
         app.MapHub<DashboardHub>("/dashboard-hub");
-
-
-        // ----------------------- MIGRATION + SEED -------------------
-        using (var scope = app.Services.CreateScope())
-        {
-            var services = scope.ServiceProvider;
-
-            try
-            {
-                // Sử dụng factory để lấy context cho Migration/Seeding
-                // (Vì DataContext không còn là Scoped service nữa)
-                var contextFactory = services.GetRequiredService<IDbContextFactory<DataContext>>();
-                using var context = contextFactory.CreateDbContext();
-
-                await context.Database.MigrateAsync();
-
-                await Seed.SeedDepartments(context);
-                await Seed.SeedEmployees(context);
-                await Seed.SeedContracts(context);
-                await Seed.SeedSalaries(context);
-                await Seed.SeedTraining(context);
-                await Seed.SeedRecuiment(context);
-                await Seed.SeedUsers(context);
-            }
-            catch (Exception ex)
-            {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "❌ Migration hoặc Seed thất bại");
-            }
-        }
 
         await app.RunAsync("http://localhost:5002");
     }

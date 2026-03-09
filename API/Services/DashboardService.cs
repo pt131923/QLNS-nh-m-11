@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using API.Data;
 using API.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using MongoDB.Driver;
+using API.Entities;
 using System.Linq;
 
 namespace API.Services
@@ -40,7 +40,7 @@ namespace API.Services
 
     public class DashboardService : IDashboardService
     {
-        private readonly IDbContextFactory<DataContext> _dbContextFactory;
+        private readonly IMongoDatabase _db;
         private readonly IHubContext<DashboardHub> _hubContext;
         private readonly IMemoryCache _cache;
         private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
@@ -50,11 +50,11 @@ namespace API.Services
         private DashboardSummary _previousSummary;
 
         public DashboardService(
-            IDbContextFactory<DataContext> dbContextFactory,
+            IMongoDatabase db,
             IHubContext<DashboardHub> hubContext,
             IMemoryCache cache)
         {
-            _dbContextFactory = dbContextFactory;
+            _db = db;
             _hubContext = hubContext;
             _cache = cache;
         }
@@ -76,51 +76,55 @@ namespace API.Services
 
         private async Task<DashboardSummary> CalculateDashboardSummaryAsync()
         {
-            // Hàm utility để tạo context mới cho mỗi truy vấn
-            async Task<T> ExecuteQuery<T>(Func<DataContext, Task<T>> queryFunc)
-            {
-                using var context = await _dbContextFactory.CreateDbContextAsync();
-                return await queryFunc(context);
-            }
+            var employees = _db.GetCollection<Employee>("Employees");
+            var departments = _db.GetCollection<AppDepartment>("Departments");
+            var contracts = _db.GetCollection<Contract>("Contracts");
+            var contacts = _db.GetCollection<Contact>("Contacts");
+            var salaries = _db.GetCollection<Salary>("Salaries");
+            var timeKeeping = _db.GetCollection<TimeKeeping>("TimeKeeping");
+            var trainings = _db.GetCollection<Training>("Trainings");
+            var benefits = _db.GetCollection<Benefits>("Benefits");
+            var leaves = _db.GetCollection<Leave>("Leaves");
+            var recuiments = _db.GetCollection<Recuiment>("Recuiments");
 
-            // Thực thi các truy vấn song song để tối ưu hiệu suất
-            var totalEmployeesTask = ExecuteQuery(c => c.Employee.CountAsync());
-            var totalDepartmentsTask = ExecuteQuery(c => c.Department.CountAsync());
-            var totalContractsTask = ExecuteQuery(c => c.Contract.CountAsync());
-            var totalContactsTask = ExecuteQuery(c => c.Contact.CountAsync());
+            // Query song song
+            var totalEmployeesTask = employees.CountDocumentsAsync(_ => true);
+            var totalDepartmentsTask = departments.CountDocumentsAsync(_ => true);
+            var totalContractsTask = contracts.CountDocumentsAsync(_ => true);
+            var totalContactsTask = contacts.CountDocumentsAsync(_ => true);
+            var totalTrainingCountTask = trainings.CountDocumentsAsync(_ => true);
+            var totalRecruitmentCountTask = recuiments.CountDocumentsAsync(_ => true);
+            var totalLeavesTask = leaves.CountDocumentsAsync(_ => true);
 
-            var totalSalariesTask = ExecuteQuery(c => c.Salary.SumAsync(s => (decimal?)s.TotalSalary));
-            var totalWorkingHoursTask = ExecuteQuery(c => c.TimeKeeping.SumAsync(t => (decimal?)t.TotalHours));
-            var totalTrainingCountTask = ExecuteQuery(c => c.Training.CountAsync());
-            var totalBenefitCostTask = ExecuteQuery(c => c.Benefits.SumAsync(b => (decimal?)b.Cost));
+            var contactsProcessedTask = contacts.CountDocumentsAsync(c => c.Status == "Processed");
+            var contactsPendingTask = contacts.CountDocumentsAsync(c => c.Status == "Pending");
 
-            var totalLeaveDaysTask = ExecuteQuery(c => c.LeaveRequest.SumAsync(l => (int?)l.Days));
-            var totalRecruitmentCountTask = ExecuteQuery(c => c.Recuiment.CountAsync());
-
-            var contactsProcessedTask = ExecuteQuery(c => c.Contact.CountAsync(contact => contact.Status == "Processed"));
-            var contactsPendingTask = ExecuteQuery(c => c.Contact.CountAsync(contact => contact.Status == "Pending"));
+            // Sum in-memory (đơn giản, đủ cho app nội bộ)
+            var salariesListTask = salaries.Find(_ => true).Project(s => s.TotalSalary).ToListAsync();
+            var timeKeepingListTask = timeKeeping.Find(_ => true).Project(t => t.TotalHours).ToListAsync();
+            var benefitsListTask = benefits.Find(_ => true).Project(b => b.Cost).ToListAsync();
 
             await Task.WhenAll(
                 totalEmployeesTask, totalDepartmentsTask, totalContractsTask, totalContactsTask,
-                totalSalariesTask, totalWorkingHoursTask, totalLeaveDaysTask,
-                totalRecruitmentCountTask, totalTrainingCountTask, totalBenefitCostTask,
-                contactsProcessedTask, contactsPendingTask
+                totalTrainingCountTask, totalRecruitmentCountTask, totalLeavesTask,
+                contactsProcessedTask, contactsPendingTask,
+                salariesListTask, timeKeepingListTask, benefitsListTask
             );
 
-            // Extract results and handle nulls
-            var totalEmployees = totalEmployeesTask.Result;
-            var totalDepartments = totalDepartmentsTask.Result;
-            var totalContracts = totalContractsTask.Result;
-            var totalContacts = totalContactsTask.Result;
-            var contactsProcessed = contactsProcessedTask.Result;
-            var contactsPending = contactsPendingTask.Result;
+            var totalEmployees = (int)totalEmployeesTask.Result;
+            var totalDepartments = (int)totalDepartmentsTask.Result;
+            var totalContracts = (int)totalContractsTask.Result;
+            var totalContacts = (int)totalContactsTask.Result;
+            var totalTrainingCount = (int)totalTrainingCountTask.Result;
+            var totalRecruitmentCount = (int)totalRecruitmentCountTask.Result;
+            var totalLeavesCount = (int)totalLeavesTask.Result;
 
-            var totalSalaries = totalSalariesTask.Result ?? 0m;
-            var totalWorkingHours = totalWorkingHoursTask.Result ?? 0m;
-            var totalTrainingCount = totalTrainingCountTask.Result;
-            var totalBenefitCost = totalBenefitCostTask.Result ?? 0m;
-            var totalLeaveDays = totalLeaveDaysTask.Result ?? 0;
-            var totalRecruitmentCount = totalRecruitmentCountTask.Result;
+            var contactsProcessed = (int)contactsProcessedTask.Result;
+            var contactsPending = (int)contactsPendingTask.Result;
+
+            var totalSalaries = salariesListTask.Result.Sum();
+            var totalWorkingHours = timeKeepingListTask.Result.Sum();
+            var totalBenefitCost = benefitsListTask.Result.Sum();
 
             return new DashboardSummary(
                 TotalEmployees: totalEmployees,
@@ -131,7 +135,7 @@ namespace API.Services
                 TotalRecruitments: totalRecruitmentCount,
                 TotalBenefits: totalBenefitCost,
                 TotalTrainings: totalTrainingCount,
-                TotalLeaves: totalLeaveDays,
+                TotalLeaves: totalLeavesCount,
 
                 TotalContacts: totalContacts,
                 ContactsProcessed: contactsProcessed,

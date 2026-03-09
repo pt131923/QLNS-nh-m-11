@@ -1,16 +1,17 @@
-using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 namespace API.Controllers
 {
     public class BuggyController : BaseApiController
     {
-        private readonly DataContext _context;
-        public BuggyController(DataContext context)
+        private readonly IMongoCollection<Employee> _employees;
+
+        public BuggyController(IMongoDatabase db)
         {
-            _context = context;
+            _employees = db.GetCollection<Employee>("Employees");
         }
 
         [Authorize]
@@ -21,9 +22,9 @@ namespace API.Controllers
         }
 
         [HttpGet("not-found")]
-        public ActionResult<Employee> GetNotFound()
+        public async Task<ActionResult<Employee>> GetNotFound()
         {
-            var thing = _context.Employee.Find(-1);
+            var thing = await _employees.Find(e => e.EmployeeId == -1).FirstOrDefaultAsync();
 
             if (thing == null) return NotFound();
 
@@ -31,9 +32,9 @@ namespace API.Controllers
         }
 
         [HttpGet("server-error")]
-        public ActionResult<string> GetServerError()
+        public async Task<ActionResult<string>> GetServerError()
         {
-            var thing = _context.Employee.Find(-1);
+            var thing = await _employees.Find(e => e.EmployeeId == -1).FirstOrDefaultAsync();
 
             var thingToReturn = thing.ToString();
 

@@ -8,7 +8,7 @@ import { Contact } from '../_model/contact';
   providedIn: 'root'
 })
 export class ContactService {
-  private baseUrl = environment.apiUrl7;
+  private baseUrl = `${environment.apiUrl}/contact`;
 
   constructor(private http: HttpClient) {}
 

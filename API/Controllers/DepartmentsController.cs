@@ -1,19 +1,17 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
     
     [ApiController]
     [Route("api/[controller]")]
-    public class DepartmentsController(DataContext _context, IDepartmentRepository _departmentRepository, AutoMapper.IMapper _mapper) : BaseApiController
+    public class DepartmentsController(IDepartmentRepository _departmentRepository, AutoMapper.IMapper _mapper) : BaseApiController
     {
 
         [HttpGet]
@@ -57,13 +55,13 @@ namespace API.Controllers
             if (departmentDto == null || string.IsNullOrWhiteSpace(departmentDto.Name))
                 return BadRequest("Department name is required");
 
-            if (await DepartmentExists(departmentDto.Name))
+            if (await _departmentRepository.DepartmentExists(departmentDto.Name))
                 return BadRequest("Department name is already taken");
 
             var department = _mapper.Map<AppDepartment>(departmentDto);
 
-            _context.Department.Add(department);
-            await _context.SaveChangesAsync();
+            _departmentRepository.Add(department);
+            await _departmentRepository.SaveAllAsync();
 
             return CreatedAtRoute(
                 "GetDepartmentById",
@@ -88,13 +86,7 @@ namespace API.Controllers
             return BadRequest("Failed to delete the Department");
         }
 
-        private async Task<bool> DepartmentExists(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return false;
-
-            return await _context.Department.AnyAsync(d => d.Name.ToLower() == name.ToLower());
-        }
+        // DepartmentExists đã được chuyển vào repository (Mongo index + query)
     }
 }
 

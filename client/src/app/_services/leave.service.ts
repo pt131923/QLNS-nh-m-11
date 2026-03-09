@@ -9,12 +9,12 @@ import { Leave } from '../_model/leave';
   providedIn: 'root'
 })
 export class LeaveService {
-  private baseUrl = environment.apiUrl6;
+  private baseUrl = `${environment.apiUrl}/leave`;
 
   constructor(private http: HttpClient) {}
 
   getLeaveRecords(): Observable<Leave[]> {
-    return this.http.get<Leave[]>(this.baseUrl);
+    return this.http.get<Leave[]>(`${this.baseUrl}/list`);
   }
 
   getLeaveWithEmployees(): Observable<any[]> {

@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, tap, shareReplay } from 'rxjs/operators';
 import * as signalR from '@microsoft/signalr';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 // Định nghĩa Interface dữ liệu trả về để đảm bảo tính an toàn kiểu (Type Safety)
 // Phải khớp CHÍNH XÁC với DashboardSummary Record trong C#
@@ -29,10 +29,34 @@ export interface DashboardSummary {
   lastUpdated: string; // DateTime trong C# sẽ là string trong JSON
 }
 
+export interface DashboardRecentEmployeeDto {
+  EmployeeId: number;
+  EmployeeName: string;
+  DepartmentName: string;
+}
+
+export interface DashboardUpcomingItemDto {
+  Type: 'contract' | 'training' | 'leave' | string;
+  Title: string;
+  Subtitle: string;
+  Date: string;
+  DaysLeft: number;
+  Link: string;
+}
+
+export interface DashboardFullResponseDto {
+  Summary: any;
+  RecentEmployees: DashboardRecentEmployeeDto[];
+  Upcoming: DashboardUpcomingItemDto[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
+  getDashboard() {
+    throw new Error('Method not implemented.');
+  }
 
   // Địa chỉ API và SignalR Hub
   private apiUrl = `${environment.apiUrl}/dashboard`;
@@ -47,6 +71,10 @@ export class DashboardService {
 
   constructor(private http: HttpClient, private authService: AuthService) {
     // Không tự động kết nối SignalR, chỉ kết nối sau login
+  }
+
+  getFullDashboard(): Observable<DashboardFullResponseDto> {
+    return this.http.get<DashboardFullResponseDto>(`${this.apiUrl}/full`);
   }
 
   // --- QUẢN LÝ KẾT NỐI SIGNALR ---
@@ -122,10 +150,19 @@ export class DashboardService {
           console.error("❌ Dashboard summary API error:", err);
           console.error("❌ Error status:", err.status, "Error message:", err.message);
           
-          // Nếu là lỗi 401, interceptor sẽ xử lý logout
-          // Chúng ta chỉ cần trả về null để không crash app
+          // Nếu là lỗi 401, kiểm tra lại token và thử lại một lần
           if (err.status === 401) {
-            console.warn("⚠️ 401 Unauthorized - token may be expired, interceptor will handle logout");
+            console.warn("⚠️ 401 Unauthorized - checking token...");
+            const currentToken = this.authService.getToken();
+            
+            if (!currentToken) {
+              console.warn("⚠️ Token was removed, cannot retry");
+              return of(null);
+            }
+            
+            // Nếu token vẫn còn, có thể là vấn đề timing
+            // Không retry ngay, để component quyết định
+            console.warn("⚠️ 401 but token still exists - may be timing issue or token invalid");
           }
           
           // Để tránh lỗi API làm crash, chúng ta trả về null và log lỗi

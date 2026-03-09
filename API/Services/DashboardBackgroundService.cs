@@ -45,7 +45,14 @@ namespace API.Services
                 }
 
                 // Đợi cho đến lần cập nhật tiếp theo hoặc bị cancel
-                await Task.Delay(_updateInterval, stoppingToken);
+                try
+                {
+                    await Task.Delay(_updateInterval, stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
             }
 
             _logger.LogInformation("Dashboard Background Service stopped");

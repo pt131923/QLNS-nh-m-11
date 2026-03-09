@@ -1,105 +1,72 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
 using API.Services;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class ContactRepository(DataContext _context, IDashboardService _dashboardService) : IContactRepository
+    public class ContactRepository : IContactRepository
     {
-        public async Task<IEnumerable<Contact>> GetAllContactsAsync()
+        private readonly IMongoCollection<Contact> _contacts;
+        private readonly IDashboardService _dashboardService;
+        private readonly IMongoIdGenerator _idGenerator;
+
+        public ContactRepository(
+            IMongoDatabase database,
+            IDashboardService dashboardService,
+            IMongoIdGenerator idGenerator)
         {
-            return await _context.Contact.ToListAsync();
+            _contacts = database.GetCollection<Contact>("Contacts");
+            _dashboardService = dashboardService;
+            _idGenerator = idGenerator;
         }
 
-        public async Task<Contact> GetContactByIdAsync(int id)
+        // Legacy interface methods (string-based) - giữ để không break compile
+        public Task<IEnumerable<string>> GetContactsAsync() =>
+            Task.FromResult<IEnumerable<string>>(new List<string>());
+
+        public Task<string> GetContactByIdAsync(int id) =>
+            Task.FromResult<string>(null);
+
+        public async Task<bool> SaveContactAsync(string contact)
         {
-            return await _context.Contact.FindAsync(id);
+            var c = new Contact { ContactId = await _idGenerator.NextAsync("Contacts"), Name = contact };
+            await _contacts.InsertOneAsync(c);
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+            return true;
         }
 
-        public async Task UpdateContact(Contact contact)
+        public async Task<bool> ContactExistsAsync(string contactName)
         {
-            _context.Contact.Update(contact);
-            await _context.SaveChangesAsync();
+            if (string.IsNullOrWhiteSpace(contactName)) return false;
+            var filter = Builders<Contact>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(contactName.Trim())}$", "i"));
+            var count = await _contacts.CountDocumentsAsync(filter);
+            return count > 0;
         }
 
-        public async Task DeleteContact(int id)
-        {
-            var contact = await _context.Contact.FindAsync(id);
-            if (contact != null)
-            {
-                _context.Contact.Remove(contact);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        public Task<IEnumerable<string>> GetContactsAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<string> IContactRepository.GetContactByIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> ContactExistsAsync(string contactName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddContact(string contact)
-        {
-            var newContact = new Contact { Name = contact };
-            _context.Contact.Add(newContact);
-            _context.SaveChanges();
-        }
         public async Task<bool> AddContactAsync(Contact contact)
         {
-            await _context.Contact.AddAsync(contact);
-            return await _context.SaveChangesAsync() > 0;
+            if (contact.ContactId == 0)
+                contact.ContactId = await _idGenerator.NextAsync("Contacts");
+            if (string.IsNullOrWhiteSpace(contact.Status))
+                contact.Status = "Pending";
+
+            await _contacts.InsertOneAsync(contact);
+            return true;
         }
 
         public async Task<bool> SaveAllAsync()
         {
-            var result = await _context.SaveChangesAsync() > 0;
-
-            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu contact
-            if (result)
-            {
-                await _dashboardService.NotifyDataChangedWithCheckAsync();
-            }
-
-            return result;
-        }
-
-        public async Task<bool> SaveChangesAsync()
-        {
-            var result = await _context.SaveChangesAsync() > 0;
-
-            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu contact
-            if (result)
-            {
-                await _dashboardService.NotifyDataChangedWithCheckAsync();
-            }
-
-            return result;
-        }
-
-        public async Task<bool> SaveContactAsync(string contactName)
-        {
-            var newContact = new Contact { Name = contactName };
-            await _context.Contact.AddAsync(newContact);
-            return await _context.SaveChangesAsync() > 0;
+            // Insert/Update/Delete đã thực hiện trực tiếp; ở đây chỉ trigger dashboard refresh
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+            return true;
         }
 
         public async Task<IEnumerable<Contact>> GetAllAsync()
         {
-            return await _context.Contact.ToListAsync();
+            return await _contacts.Find(_ => true).ToListAsync();
         }
     }
 }

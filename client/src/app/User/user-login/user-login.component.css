@@ -37,3 +37,19 @@
 .user-login button:hover {
   background-color: #0056b3;
 }
+
+.login-container .error {
+  color: #dc3545;
+  margin-bottom: 12px;
+}
+
+.login-container .success {
+  color: #28a745;
+  margin-bottom: 12px;
+}
+
+.login-container .login-hint {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #6c757d;
+}

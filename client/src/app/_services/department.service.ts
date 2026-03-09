@@ -11,7 +11,7 @@ import { Injectable } from '@angular/core';
 export class DepartmentService {
   [x: string]: any;
   departments: Department[] = [];
-  baseUrl1 = environment.apiUrl1;
+  baseUrl1 = `${environment.apiUrl}/departments`;
 
   private departmentData!: Department;
 

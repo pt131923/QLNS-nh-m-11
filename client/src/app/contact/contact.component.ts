@@ -4,7 +4,7 @@ import { ContactService } from '../_services/contact.service';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-contact',

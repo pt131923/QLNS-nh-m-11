@@ -2,46 +2,92 @@ using API.Data;
 using API.Entities;
 using API.Interfaces;
 using API.Services;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class ContractRepository(DataContext _context, IDashboardService _dashboardService) : IContractRepository
+    public class ContractRepository : IContractRepository
     {
+        private readonly IMongoCollection<Contract> _contracts;
+        private readonly IDashboardService _dashboardService;
+        private readonly IMongoIdGenerator _idGenerator;
+
+        private readonly List<Contract> _pendingInserts = new();
+        private readonly List<Contract> _pendingUpdates = new();
+        private readonly List<Contract> _pendingDeletes = new();
+
+        public ContractRepository(
+            IMongoDatabase database,
+            IDashboardService dashboardService,
+            IMongoIdGenerator idGenerator)
+        {
+            _contracts = database.GetCollection<Contract>("Contracts");
+            _dashboardService = dashboardService;
+            _idGenerator = idGenerator;
+        }
 
         public async Task<IEnumerable<Contract>> GetContractAsync()
         {
-            return await _context.Contract.Include(c => c.Employee).ToListAsync();
+            return await _contracts.Find(_ => true).ToListAsync();
         }
 
         public async Task<Contract> GetContractByIdAsync(int id)
         {
-            return await _context.Contract.Include(c => c.Employee).FirstOrDefaultAsync(c => c.ContractId == id);
+            return await _contracts.Find(c => c.ContractId == id).FirstOrDefaultAsync();
+        }
+
+        public void Add(Contract contract)
+        {
+            _pendingInserts.Add(contract);
         }
 
         public void Update(Contract contract)
         {
-            _context.Contract.Update(contract);
+            _pendingUpdates.Add(contract);
         }
 
         public void Delete(Contract contract)
         {
-            _context.Contract.Remove(contract);
+            _pendingDeletes.Add(contract);
         }
 
         public async Task<bool> SaveAllAsync()
         {
-            var result = await _context.SaveChangesAsync() > 0;
+            var anyChanges = _pendingInserts.Count > 0 || _pendingUpdates.Count > 0 || _pendingDeletes.Count > 0;
+            if (!anyChanges) return true;
 
-            // Trigger cập nhật dashboard nếu có thay đổi dữ liệu hợp đồng
-            if (result)
+            foreach (var d in _pendingDeletes)
             {
-                await _dashboardService.NotifyDataChangedWithCheckAsync();
+                await _contracts.DeleteOneAsync(x => x.ContractId == d.ContractId);
             }
 
-            return result;
+            foreach (var u in _pendingUpdates)
+            {
+                await _contracts.ReplaceOneAsync(x => x.ContractId == u.ContractId, u, new ReplaceOptions { IsUpsert = false });
+            }
+
+            if (_pendingInserts.Count > 0)
+            {
+                foreach (var i in _pendingInserts)
+                {
+                    if (i.ContractId == 0)
+                        i.ContractId = await _idGenerator.NextAsync("Contracts");
+                    if (i.CreateAt == default)
+                        i.CreateAt = DateTime.UtcNow;
+                    if (i.UpdateAt == default)
+                        i.UpdateAt = DateTime.UtcNow;
+                }
+                await _contracts.InsertManyAsync(_pendingInserts);
+            }
+
+            _pendingDeletes.Clear();
+            _pendingUpdates.Clear();
+            _pendingInserts.Clear();
+
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+            return true;
         }
     }
 }

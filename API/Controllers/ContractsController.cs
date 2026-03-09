@@ -3,15 +3,19 @@ using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using System.Linq;
 
 namespace API.Controllers
 {
     
     [ApiController]
     [Route("api/[controller]")]
-    public class ContractsController(DataContext _context, IContractRepository _contractRepository, AutoMapper.IMapper _mapper) : BaseApiController
+    public class ContractsController(IContractRepository _contractRepository, AutoMapper.IMapper _mapper, IMongoDatabase _db) : BaseApiController
     {
+        private readonly IMongoCollection<Contract> _contracts = _db.GetCollection<Contract>("Contracts");
+        private readonly IMongoCollection<Employee> _employees = _db.GetCollection<Employee>("Employees");
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ContractDto>>> GetContracts()
         {
@@ -57,14 +61,21 @@ namespace API.Controllers
         [HttpPost("add-contract")]
         public async Task<ActionResult<ContractDto>> AddContract([FromBody] ContractDto contractDto)
         {
-            if (await _context.Contract.AnyAsync(c => c.ContractName.ToLower() == contractDto.ContractName.ToLower()))
+            var contractExists = await _contracts.CountDocumentsAsync(
+                Builders<Contract>.Filter.Regex(
+                    x => x.ContractName,
+                    new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(contractDto.ContractName?.Trim() ?? string.Empty)}$", "i"))) > 0;
+
+            if (contractExists)
             {
                 return BadRequest("Contract name already exists");
             }
 
             // Kiểm tra employee có tồn tại không
-            var employeeExists = await _context.Employee
-                .AnyAsync(e => e.EmployeeName.ToLower() == contractDto.EmployeeName.ToLower());
+            var employeeExists = await _employees.CountDocumentsAsync(
+                Builders<Employee>.Filter.Regex(
+                    x => x.EmployeeName,
+                    new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(contractDto.EmployeeName?.Trim() ?? string.Empty)}$", "i"))) > 0;
 
             if (!employeeExists)
             {
@@ -74,9 +85,8 @@ namespace API.Controllers
             // Map DTO sang entity
             var contract = _mapper.Map<Contract>(contractDto);
 
-            // Add vào DB
-            _context.Contract.Add(contract);
-            await _context.SaveChangesAsync();
+            _contractRepository.Add(contract);
+            await _contractRepository.SaveAllAsync();
 
             // Trả về contract vừa tạo
             return CreatedAtRoute("GetContractById", new { id = contract.ContractId }, contract);
@@ -99,12 +109,9 @@ namespace API.Controllers
         [HttpGet("contracts-with-employees")]
         public async Task<ActionResult<IEnumerable<ContractWithEmployeeDto>>> GetContractsWithEmployees()
         {
-            var contracts = await _context.Contract
-                .Include(c => c.Employee)
-                .Select(c => _mapper.Map<ContractWithEmployeeDto>(c))
-                .ToListAsync();
-
-            return Ok(contracts);
+            var contracts = await _contractRepository.GetContractAsync();
+            var dtos = contracts.Select(c => _mapper.Map<ContractWithEmployeeDto>(c)).ToList();
+            return Ok(dtos);
         }
     }
 }

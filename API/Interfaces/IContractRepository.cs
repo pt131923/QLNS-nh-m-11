@@ -9,6 +9,7 @@ namespace API.Interfaces
         Task<IEnumerable<Contract>> GetContractAsync();
         Task<Contract> GetContractByIdAsync(int id);
         Task<bool> SaveAllAsync();
+        void Add(Contract contract);
         void Update(Contract contract);
         void Delete(Contract contract);
     }

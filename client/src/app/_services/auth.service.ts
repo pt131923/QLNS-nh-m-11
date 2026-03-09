@@ -1,6 +1,6 @@
 import { Injectable, Injector } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { DashboardService } from './dashboard.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { of } from 'rxjs';
@@ -25,12 +25,23 @@ export class AuthService {
   // ============================
   // 🔵 TOKEN
   // ============================
+  /** JWT has 3 parts separated by dots; reject stored values that are not JWT (e.g. old "Api" placeholder). */
+  private static isLikelyJwt(value: string): boolean {
+    return typeof value === 'string' && value.split('.').length === 3;
+  }
+
   saveToken(token: string): void {
     localStorage.setItem('token', token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    const raw = localStorage.getItem('token');
+    if (!raw) return null;
+    if (!AuthService.isLikelyJwt(raw)) {
+      localStorage.removeItem('token');
+      return null;
+    }
+    return raw;
   }
 
   // ============================
@@ -72,7 +83,7 @@ export class AuthService {
   // ============================
   // 🔵 LOGOUT
   // ============================
-  logout(): void {
+  logout(redirectTo: string = '/login'): void {
     // Stop SignalR connection trước khi logout (lazy injection to avoid circular dependency)
     try {
       const dashboardService = this.injector.get(DashboardService);
@@ -84,7 +95,7 @@ export class AuthService {
 
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    this.router.navigate(['/login']);
+    this.router.navigate([redirectTo]);
   }
 
 

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +39,13 @@ export class UserService {
   // 👉 API đổi mật khẩu
   updatePassword(userId: number, data: any) {
     return this.http.put(`${this.apiUrl}/${userId}/password`, data);
+  }
+
+  // 👉 Upload avatar cho user hiện tại
+  uploadMyAvatar(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${this.apiUrl}/me/avatar`, formData);
   }
 
 }

@@ -1,9 +1,13 @@
 using System;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace API.Entities
 {
     public class ContactHistory
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.Int32)]
         public int Id { get; set; }
 
         public int ContactId { get; set; }

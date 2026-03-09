@@ -41,7 +41,14 @@
       </label>
     </div>
 
-    <button type="submit" class="btn btn-primary">Login</button>
+    <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="success" *ngIf="successMessage">{{ successMessage }}</div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="loading">
+      {{ loading ? 'Đang đăng nhập...' : 'Login' }}
+    </button>
+
+    <p class="login-hint">Demo: admin / admin123</p>
   </form>
 </div>
 

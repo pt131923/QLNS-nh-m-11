@@ -8,11 +8,14 @@ namespace API.DTOs
         public string PhoneNumber { get; set; }
         
         // Sửa lỗi kiểu dữ liệu: Địa chỉ phải là chuỗi
-        public string Address { get; set; } 
+        public string Address { get; set; }
 
-        // Thêm các trường quan trọng khác (Tuỳ chọn)
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
+        public string Role { get; set; }
+        public string Image { get; set; }
+
+        // FE dùng trực tiếp để hiển thị (có thể là /assets/... hoặc http://host/uploads/...)
+        public string AvatarUrl { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Gán giá trị mặc định
     }
 }

@@ -4,76 +4,92 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
-using AutoMapper.QueryableExtensions;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
+using MongoDB.Driver;
+using IMapper = AutoMapper.IMapper;
 
 namespace API.Data
 {
-    public class UserRepository(DataContext _context, AutoMapper.IMapper _mapper) : IUserRepository
+    /// <summary>
+    /// UserRepository sử dụng MongoDB thay cho EF Core.
+    /// </summary>
+    public class UserRepository : IUserRepository
     {
+        private readonly IMongoCollection<User> _users;
+        private readonly IMapper _mapper;
+
+        public UserRepository(IMongoDatabase database, IMapper mapper)
+        {
+            _users = database.GetCollection<User>("Users");
+            _mapper = mapper;
+        }
+
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
-            return await _context.User
-                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+            var users = await _users.Find(_ => true).ToListAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        public Task<UserDto> GetUserByNameAsync(string userName)
+        public async Task<UserDto> GetUserByNameAsync(string userName)
         {
-            return _context.User
-                .Where(x => x.UserName == userName)
-                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
+            var user = await _users.Find(x => x.UserName == userName).FirstOrDefaultAsync();
+            return _mapper.Map<UserDto>(user);
         }
 
-        public Task<UserDto> GetUserByIdAsync(int userId)
+        public async Task<UserDto> GetUserByIdAsync(int userId)
         {
-            return _context.User
-                .Where(x => x.UserId == userId)
-                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
+            var user = await _users.Find(x => x.UserId == userId).FirstOrDefaultAsync();
+            return _mapper.Map<UserDto>(user);
         }
 
         // 🔥 Hàm quan trọng — dùng cho Login
         public async Task<User> GetUserEntityByUsernameAsync(string username)
         {
-            return await _context.User.SingleOrDefaultAsync(x => x.UserName == username);
+            return await _users.Find(x => x.UserName == username).FirstOrDefaultAsync();
         }
 
-        public Task<bool> UserExistsAsync(string userName)
+        public async Task<bool> UserExistsAsync(string userName)
         {
-            return _context.User.AnyAsync(x => x.UserName == userName);
+            var count = await _users.CountDocumentsAsync(x => x.UserName == userName);
+            return count > 0;
         }
 
         public async Task<bool> AddUserAsync(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
-            _context.User.Add(user);
-            return await SaveChangesAsync();
+
+            // Tự tăng UserId đơn giản (nếu bạn vẫn dùng int)
+            if (user.UserId == 0)
+            {
+                var lastUser = await _users.Find(_ => true)
+                    .SortByDescending(u => u.UserId)
+                    .FirstOrDefaultAsync();
+                user.UserId = lastUser != null ? lastUser.UserId + 1 : 1;
+            }
+
+            await _users.InsertOneAsync(user);
+            return true;
         }
 
         public async Task<bool> UpdateUserAsync(UserDto userDto)
         {
-            var user = await _context.User.FindAsync(userDto.UserId);
-            if (user == null) return false;
+            var existing = await _users.Find(u => u.UserId == userDto.UserId).FirstOrDefaultAsync();
+            if (existing == null) return false;
 
-            _mapper.Map(userDto, user);
-            return await SaveChangesAsync();
+            _mapper.Map(userDto, existing);
+            var result = await _users.ReplaceOneAsync(u => u.UserId == existing.UserId, existing);
+            return result.ModifiedCount > 0;
         }
 
         public async Task<bool> DeleteUserAsync(int userId)
         {
-            var user = await _context.User.FindAsync(userId);
-            if (user == null) return false;
-
-            _context.User.Remove(user);
-            return await SaveChangesAsync();
+            var result = await _users.DeleteOneAsync(u => u.UserId == userId);
+            return result.DeletedCount > 0;
         }
 
-        public async Task<bool> SaveChangesAsync()
+        public Task<bool> SaveChangesAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            // MongoDB không có SaveChanges, các thao tác đã ghi trực tiếp.
+            return Task.FromResult(true);
         }
     }
 }

@@ -79,10 +79,6 @@
               "target": "Package",
               "version": "[2.2.0, )"
             },
-            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.7, )"
-            },
             "Microsoft.AspNetCore.Mvc.Abstractions": {
               "target": "Package",
               "version": "[2.2.0, )"
@@ -111,30 +107,6 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.Data.SqlClient": {
-              "target": "Package",
-              "version": "[5.2.2, )"
-            },
-            "Microsoft.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.7, )"
-            },
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.7, )"
-            },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[8.0.7, )"
-            },
-            "Microsoft.EntityFrameworkCore.Tools": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.7, )"
-            },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
               "version": "[9.0.4, )"
@@ -151,13 +123,13 @@
               "target": "Package",
               "version": "[9.0.4, )"
             },
-            "Microsoft.SqlServer.Server": {
-              "target": "Package",
-              "version": "[1.0.0, )"
-            },
             "Microsoft.Win32.SystemEvents": {
               "target": "Package",
               "version": "[8.0.0, )"
+            },
+            "MongoDB.Driver": {
+              "target": "Package",
+              "version": "[2.27.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

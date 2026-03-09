@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 })
 export class ContractService {
   contracts: Contract[] = [];
-  baseUrl3 = environment.apiUrl3;
+  baseUrl3 = `${environment.apiUrl}/contracts`;
 
   private contractData!: Contract;
 

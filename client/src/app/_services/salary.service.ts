@@ -8,7 +8,7 @@ import { environment } from 'environments/environment';
   providedIn: 'root'
 })
 export class SalaryService {
-  private baseUrl = environment.apiUrl4; // Đổi theo API thực tế
+  private baseUrl = `${environment.apiUrl}/salaries`;
 
   constructor(private http: HttpClient) {}
 
