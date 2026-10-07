@@ -7,19 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace API.Services
 {
-    public class DashboardBackgroundService : BackgroundService
+    public class DashboardBackgroundService(
+        IServiceProvider serviceProvider,
+        ILogger<DashboardBackgroundService> logger) : BackgroundService
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<DashboardBackgroundService> _logger;
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
+        private readonly ILogger<DashboardBackgroundService> _logger = logger;
         private readonly TimeSpan _updateInterval = TimeSpan.FromSeconds(30); // Cập nhật mỗi 30 giây
-
-        public DashboardBackgroundService(
-            IServiceProvider serviceProvider,
-            ILogger<DashboardBackgroundService> logger)
-        {
-            _serviceProvider = serviceProvider;
-            _logger = logger;
-        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

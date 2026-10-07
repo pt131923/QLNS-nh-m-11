@@ -7,25 +7,18 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class TrainingRepository : ITrainingRepository
+    public class TrainingRepository(
+        IMongoDatabase database,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : ITrainingRepository
     {
-        private readonly IMongoCollection<Training> _trainings;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IMongoCollection<Training> _trainings = database.GetCollection<Training>("Trainings");
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         private readonly List<Training> _pendingInserts = new();
         private readonly List<Training> _pendingUpdates = new();
         private readonly List<Training> _pendingDeletes = new();
-
-        public TrainingRepository(
-            IMongoDatabase database,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _trainings = database.GetCollection<Training>("Trainings");
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
 
         // Lấy danh sách Training
         public async Task<IEnumerable<Training>> GetTrainingsAsync()

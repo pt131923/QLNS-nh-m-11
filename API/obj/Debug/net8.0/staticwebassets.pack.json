@@ -9,6 +9,18 @@
       "PackagePath": "staticwebassets\\assets\\user.png"
     },
     {
+      "Id": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\avatars\\79e02d87-7677-410e-9ef8-99a8a21fda27.jpg",
+      "PackagePath": "staticwebassets\\avatars\\79e02d87-7677-410e-9ef8-99a8a21fda27.jpg"
+    },
+    {
+      "Id": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\avatars\\7f5d0ce1-ea71-4c36-908b-feeca28269d2.jpg",
+      "PackagePath": "staticwebassets\\avatars\\7f5d0ce1-ea71-4c36-908b-feeca28269d2.jpg"
+    },
+    {
+      "Id": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\avatars\\8305e5e5-8621-48a2-a187-d2852efd6a09.jpg",
+      "PackagePath": "staticwebassets\\avatars\\8305e5e5-8621-48a2-a187-d2852efd6a09.jpg"
+    },
+    {
       "Id": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
     },
@@ -51,6 +63,14 @@
     {
       "Id": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\styles.45b7decdcfaba4f2.css",
       "PackagePath": "staticwebassets\\styles.45b7decdcfaba4f2.css"
+    },
+    {
+      "Id": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\uploads\\avatars\\user_1_9fbac3f839724795aefdeed61efa6256.jpg",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\user_1_9fbac3f839724795aefdeed61efa6256.jpg"
+    },
+    {
+      "Id": "C:\\Users\\admin\\source\\repos\\QLNS\\API\\wwwroot\\uploads\\avatars\\user_1_b693e1563add490bb8e1ba8990b8bbc1.jpg",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\user_1_b693e1563add490bb8e1ba8990b8bbc1.jpg"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",

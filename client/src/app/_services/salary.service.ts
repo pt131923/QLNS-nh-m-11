@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Salary } from '../_model/salary';
+import { PayrollCalculateRequest, Salary } from '../_model/salary';
 import { environment } from 'environments/environment';
 
 @Injectable({
@@ -44,6 +44,19 @@ export class SalaryService {
 
   getSalaryById(id: number): Observable<Salary> {
     return this.http.get<Salary>(`${this.baseUrl}/${id}`);
+  }
+
+  calculatePayroll(request: PayrollCalculateRequest): Observable<Salary> {
+    return this.http.post<Salary>(`${this.baseUrl}/calculate`, request);
+  }
+
+  generateMonth(year: number, month: number, dependentCount = 0, deductUnionFee = false): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/generate-month`, {
+      Year: year,
+      Month: month,
+      DependentCount: dependentCount,
+      DeductUnionFee: deductUnionFee
+    });
   }
 
   uploadExcel(file: File, departmentId?: number): Observable<void> {

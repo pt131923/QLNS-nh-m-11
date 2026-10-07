@@ -12,21 +12,14 @@ namespace API.Services
     /// <summary>
     /// Tạo index và seed dữ liệu khởi tạo vào MongoDB (thay thế EF migrations + Seed).
     /// </summary>
-    public class MongoBootstrapHostedService : IHostedService
+    public class MongoBootstrapHostedService(
+        IMongoDatabase db,
+        IMongoIdGenerator idGenerator,
+        ILogger<MongoBootstrapHostedService> logger) : IHostedService
     {
-        private readonly IMongoDatabase _db;
-        private readonly IMongoIdGenerator _idGenerator;
-        private readonly ILogger<MongoBootstrapHostedService> _logger;
-
-        public MongoBootstrapHostedService(
-            IMongoDatabase db,
-            IMongoIdGenerator idGenerator,
-            ILogger<MongoBootstrapHostedService> logger)
-        {
-            _db = db;
-            _idGenerator = idGenerator;
-            _logger = logger;
-        }
+        private readonly IMongoDatabase _db = db;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
+        private readonly ILogger<MongoBootstrapHostedService> _logger = logger;
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {

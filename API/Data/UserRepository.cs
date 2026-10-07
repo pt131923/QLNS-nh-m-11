@@ -12,16 +12,10 @@ namespace API.Data
     /// <summary>
     /// UserRepository sử dụng MongoDB thay cho EF Core.
     /// </summary>
-    public class UserRepository : IUserRepository
+    public class UserRepository(IMongoDatabase database, IMapper mapper) : IUserRepository
     {
-        private readonly IMongoCollection<User> _users;
-        private readonly IMapper _mapper;
-
-        public UserRepository(IMongoDatabase database, IMapper mapper)
-        {
-            _users = database.GetCollection<User>("Users");
-            _mapper = mapper;
-        }
+        private readonly IMongoCollection<User> _users = database.GetCollection<User>("Users");
+        private readonly IMapper _mapper = mapper;
 
         public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {

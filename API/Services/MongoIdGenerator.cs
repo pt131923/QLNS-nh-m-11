@@ -12,14 +12,9 @@ namespace API.Services
         Task<int> NextAsync(string name, CancellationToken cancellationToken = default);
     }
 
-    public class MongoIdGenerator : IMongoIdGenerator
+    public class MongoIdGenerator(IMongoDatabase database) : IMongoIdGenerator
     {
-        private readonly IMongoCollection<BsonDocument> _counters;
-
-        public MongoIdGenerator(IMongoDatabase database)
-        {
-            _counters = database.GetCollection<BsonDocument>("Counters");
-        }
+        private readonly IMongoCollection<BsonDocument> _counters = database.GetCollection<BsonDocument>("Counters");
 
         public async Task<int> NextAsync(string name, CancellationToken cancellationToken = default)
         {

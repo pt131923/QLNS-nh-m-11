@@ -1,0 +1,36 @@
+<div class="container mt-4">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/dashboard']">
+      <i class="bi bi-arrow-left-short me-1"></i> {{ 'common.backToDashboard' | translate }}
+    </button>
+  </div>
+
+  <h2 class="mb-3">{{ 'timekeeping.historyPageTitle' | translate }}</h2>
+
+  <div *ngIf="isLoading">{{ 'common.loading' | translate }}</div>
+
+  <div class="table-responsive" *ngIf="!isLoading">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{{ 'timekeeping.date' | translate }}</th>
+          <th>{{ 'timekeeping.employeeId' | translate }}</th>
+          <th>{{ 'timekeeping.newCheckIn' | translate }}</th>
+          <th>{{ 'timekeeping.newCheckOut' | translate }}</th>
+          <th>{{ 'timekeeping.status' | translate }}</th>
+          <th>{{ 'timekeeping.result' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of history">
+          <td>{{ h.Date | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ h.EmployeeId }}</td>
+          <td>{{ h.NewCheckInTime }}</td>
+          <td>{{ h.NewCheckOutTime }}</td>
+          <td>{{ h.Status }}</td>
+          <td>{{ h.Result }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

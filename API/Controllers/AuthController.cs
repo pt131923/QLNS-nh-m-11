@@ -15,22 +15,15 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
-    {
-        private readonly IUserRepository _userRepository;
-        private readonly TokenService _tokenService;
-        private readonly ILogger<AuthController> _logger;
-        private readonly IConfiguration _configuration;
-
-        public AuthController(IUserRepository userRepository, TokenService tokenService, ILogger<AuthController> logger, IConfiguration configuration)
-        {
-            _userRepository = userRepository;
-            _tokenService = tokenService;
-            _logger = logger;
-            _configuration = configuration;
-        }
-
+    public class AuthController(IUserRepository _userRepository, TokenService _tokenService, ILogger<AuthController> _logger, IConfiguration _configuration) : BaseApiController
+    {   
+        private readonly IUserRepository _userRepository = _userRepository;
+        private readonly TokenService _tokenService = _tokenService;
+        private readonly ILogger<AuthController> _logger = _logger;
+        private readonly IConfiguration _configuration = _configuration;
+        
         // ---------------- LOGIN ---------------------
+
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LogInDto loginDto)
         {

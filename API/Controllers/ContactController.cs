@@ -13,6 +13,8 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ContactController(IContactRepository _contactRepository, AutoMapper.IMapper _mapper) : ControllerBase
     {
+        private readonly IContactRepository _contactRepository = _contactRepository;
+        private readonly AutoMapper.IMapper _mapper = _mapper;
 
         // GET api/contact
         [HttpGet]

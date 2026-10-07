@@ -7,25 +7,18 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class RecuimentRepository : IRecuimentRepository
+    public class RecuimentRepository(
+        IMongoDatabase database,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : IRecuimentRepository
     {
-        private readonly IMongoCollection<Recuiment> _recuiments;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IMongoCollection<Recuiment> _recuiments = database.GetCollection<Recuiment>("Recuiments");
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         private readonly List<Recuiment> _pendingInserts = new();
         private readonly List<Recuiment> _pendingUpdates = new();
         private readonly List<Recuiment> _pendingDeletes = new();
-
-        public RecuimentRepository(
-            IMongoDatabase database,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _recuiments = database.GetCollection<Recuiment>("Recuiments");
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
 
         // Lấy danh sách Recuiment
         public async Task<IEnumerable<Recuiment>> GetRecuimentsAsync()

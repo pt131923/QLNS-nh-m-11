@@ -7,21 +7,14 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class ContactRepository : IContactRepository
+    public class ContactRepository(
+        IMongoDatabase database,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : IContactRepository
     {
-        private readonly IMongoCollection<Contact> _contacts;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
-
-        public ContactRepository(
-            IMongoDatabase database,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _contacts = database.GetCollection<Contact>("Contacts");
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
+        private readonly IMongoCollection<Contact> _contacts = database.GetCollection<Contact>("Contacts");
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         // Legacy interface methods (string-based) - giữ để không break compile
         public Task<IEnumerable<string>> GetContactsAsync() =>

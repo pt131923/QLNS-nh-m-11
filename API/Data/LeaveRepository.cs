@@ -7,21 +7,14 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class LeaveRepository : ILeaveRepository
+    public class LeaveRepository(
+        IMongoDatabase database,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : ILeaveRepository
     {
-        private readonly IMongoCollection<Leave> _leaves;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
-
-        public LeaveRepository(
-            IMongoDatabase database,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _leaves = database.GetCollection<Leave>("Leaves");
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
+        private readonly IMongoCollection<Leave> _leaves = database.GetCollection<Leave>("Leaves");
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         public async Task<IEnumerable<Leave>> GetAllLeavesAsync()
         {

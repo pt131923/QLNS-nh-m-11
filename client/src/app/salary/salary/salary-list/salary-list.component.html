@@ -4,6 +4,21 @@
       <i class="bi bi-arrow-left-short me-1"></i> Back to Dashboard
     </button>
   </div>
+
+  <div class="card mb-3">
+    <div class="card-body d-flex flex-wrap align-items-end gap-3">
+      <div>
+        <label class="form-label fw-semibold mb-1">{{ 'salary.payrollPeriod' | translate }}</label>
+        <input type="month" class="form-control" [(ngModel)]="payrollPeriod">
+      </div>
+      <button class="btn btn-warning" (click)="generatePayroll()" [disabled]="generating">
+        <span class="spinner-border spinner-border-sm me-2" *ngIf="generating"></span>
+        {{ 'salary.generateMonth' | translate }}
+      </button>
+      <small class="text-muted">{{ 'salary.generateHint' | translate }}</small>
+    </div>
+  </div>
+
   <div class="mb-3">
     <button class="btn btn-success me-2" [routerLink]="['/salary-add']">{{ 'common.addNew' | translate }}</button>
     <button class="btn btn-primary me-2" (click)="onEditRow()">{{ 'common.edit' | translate }}</button>
@@ -16,7 +31,7 @@
   </div>
 
   <ag-grid-angular
-    style="width: 100%; height: 500px;"
+    style="width: 100%; height: 520px;"
     class="ag-theme-alpine"
     [columnDefs]="columnDefs"
     [rowData]="rowData"
@@ -28,17 +43,4 @@
     [defaultColDef]="defaultColDef"
     [rowSelection]="rowSelection"
   ></ag-grid-angular>
-
-  <ng-template #loadListDepartment>
-    <div class="modal-header">
-      <h4 class="modal-title pull-left">{{ 'salary.loading' | translate }}</h4>
-    </div>
-    <div class="modal-body">
-      <p>{{ 'salary.loadingData' | translate }}</p>
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
-      </div>
-    </div>
-  </ng-template>
 </div>
-

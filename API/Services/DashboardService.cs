@@ -38,26 +38,19 @@ namespace API.Services
         DateTime LastUpdated
     );
 
-    public class DashboardService : IDashboardService
+    public class DashboardService(
+        IMongoDatabase db,
+        IHubContext<DashboardHub> hubContext,
+        IMemoryCache cache) : IDashboardService
     {
-        private readonly IMongoDatabase _db;
-        private readonly IHubContext<DashboardHub> _hubContext;
-        private readonly IMemoryCache _cache;
+        private readonly IMongoDatabase _db = db;
+        private readonly IHubContext<DashboardHub> _hubContext = hubContext;
+        private readonly IMemoryCache _cache = cache;
         private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
         private const string DASHBOARD_CACHE_KEY = "DashboardSummary";
 
         // Lưu trữ giá trị trước đó để so sánh
         private DashboardSummary _previousSummary;
-
-        public DashboardService(
-            IMongoDatabase db,
-            IHubContext<DashboardHub> hubContext,
-            IMemoryCache cache)
-        {
-            _db = db;
-            _hubContext = hubContext;
-            _cache = cache;
-        }
 
         public async Task<DashboardSummary> GetDashboardSummaryAsync(bool forceRefresh = false)
         {

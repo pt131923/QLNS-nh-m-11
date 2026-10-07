@@ -9,18 +9,12 @@ namespace API.Controllers
     
     [Route("api/[controller]")]
     [ApiController]
-    public class ContactHistoryController : ControllerBase
+    public class 
+    ContactHistoryController(IMongoCollection<ContactHistory> _history, IMongoIdGenerator _idGenerator) : BaseApiController
     {
-        private readonly IMongoCollection<ContactHistory> _history;
-        private readonly IMongoIdGenerator _idGenerator;
-
-        public ContactHistoryController(IMongoDatabase db, IMongoIdGenerator idGenerator)
-        {
-            _history = db.GetCollection<ContactHistory>("ContactHistory");
-            _idGenerator = idGenerator;
-        }
-
-
+        private readonly IMongoCollection<ContactHistory> _history = _history;
+        private readonly IMongoIdGenerator _idGenerator = _idGenerator;
+        
         // GET: api/ContactHistory
         [HttpGet]
         public async Task<IActionResult> GetAll()

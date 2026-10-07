@@ -5,14 +5,8 @@ using MongoDB.Driver;
 
 namespace API.Controllers
 {
-    public class BuggyController : BaseApiController
+    public class BuggyController(IMongoCollection<Employee> _employees) : BaseApiController
     {
-        private readonly IMongoCollection<Employee> _employees;
-
-        public BuggyController(IMongoDatabase db)
-        {
-            _employees = db.GetCollection<Employee>("Employees");
-        }
 
         [Authorize]
         [HttpGet("auth")]

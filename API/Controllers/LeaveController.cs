@@ -11,13 +11,9 @@ namespace API.Controllers
     
     [ApiController]
     [Route("api/[controller]")]
-    public class LeaveController : ControllerBase
-    {
-        private readonly ILeaveRepository _leaveRepository;
-        public LeaveController(ILeaveRepository leaveRepository)
+    public class LeaveController(ILeaveRepository _leaveRepository) : BaseApiController
         {
-            _leaveRepository = leaveRepository;
-        }
+
         [HttpGet("list")]
         public async Task<IActionResult> GetLeaveList()
         {

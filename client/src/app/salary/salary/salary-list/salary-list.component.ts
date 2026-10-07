@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GridApi, GridReadyEvent, GridOptions, ColDef } from 'ag-grid-community';
+import { GridApi, GridReadyEvent, GridOptions, ColDef, ValueFormatterParams } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Salary } from 'src/app/_model/salary';
@@ -15,26 +15,39 @@ export class SalaryListComponent implements OnInit {
   salaries: Salary[] = [];
   rowData: Salary[] = [];
   searchText: string = '';
+  payrollPeriod = this.currentPeriod();
+  generating = false;
 
   public rowSelection: 'single' | 'multiple' = 'multiple';
 
   public columnDefs: ColDef<Salary>[] = [
     {
-    headerName: '',
-    checkboxSelection: true,
-    width: 40,
-    headerCheckboxSelection: true, // chọn tất cả
-    headerCheckboxSelectionFilteredOnly: true,
-    pinned: 'left'
-  },
-    { field: 'SalaryId', headerName: 'Salary ID' },
-    { field: 'EmployeeId', headerName: 'Employee Id' },
-    { field: 'EmployeeName', headerName: 'Employee Name', filter: true },
-    { field: 'Date', headerName: 'Date' },
-    { field: 'MonthlySalary', headerName: 'Monthly Salary' },
-    { field: 'Bonus', headerName: 'Bonus' },
-    { field: 'TotalSalary', headerName: 'Total Salary' },
-    { field: 'SalaryNotes', headerName: 'Salary Notes' }
+      headerName: '',
+      checkboxSelection: true,
+      width: 40,
+      headerCheckboxSelection: true,
+      headerCheckboxSelectionFilteredOnly: true,
+      pinned: 'left'
+    },
+    { field: 'EmployeeName', headerName: 'Nhân viên', filter: true, minWidth: 160, pinned: 'left' },
+    {
+      headerName: 'Kỳ lương',
+      minWidth: 100,
+      valueGetter: (p) => this.periodLabel(p.data)
+    },
+    { field: 'WorkedDays', headerName: 'Ngày công', minWidth: 110 },
+    { field: 'BasicSalary', headerName: 'Lương CB', minWidth: 130, valueFormatter: this.vnd },
+    { field: 'Allowance', headerName: 'Phụ cấp', minWidth: 120, valueFormatter: this.vnd },
+    { field: 'OvertimePay', headerName: 'OT', minWidth: 110, valueFormatter: this.vnd },
+    { field: 'Bonus', headerName: 'Thưởng', minWidth: 120, valueFormatter: this.vnd },
+    { field: 'GrossSalary', headerName: 'Tổng thu nhập', minWidth: 140, valueFormatter: this.vnd },
+    { field: 'BhxhEmployee', headerName: 'BHXH NLĐ', minWidth: 120, valueFormatter: this.vnd },
+    { field: 'BhytEmployee', headerName: 'BHYT NLĐ', minWidth: 120, valueFormatter: this.vnd },
+    { field: 'BhtnEmployee', headerName: 'BHTN NLĐ', minWidth: 120, valueFormatter: this.vnd },
+    { field: 'PersonalIncomeTax', headerName: 'Thuế TNCN', minWidth: 130, valueFormatter: this.vnd },
+    { field: 'NetSalary', headerName: 'Thực lĩnh', minWidth: 140, valueFormatter: this.vnd },
+    { field: 'CompanyCost', headerName: 'Chi phí CTY', minWidth: 140, valueFormatter: this.vnd },
+    { field: 'SalaryNotes', headerName: 'Ghi chú', minWidth: 140 }
   ];
 
   public gridOptions: GridOptions<Salary> = {
@@ -50,7 +63,7 @@ export class SalaryListComponent implements OnInit {
   };
 
   pagination = true;
-  paginationPageSize = 5;
+  paginationPageSize = 10;
   paginationPageSizeSelector = [5, 10, 15, 20, 25, 30];
 
   constructor(
@@ -70,8 +83,7 @@ export class SalaryListComponent implements OnInit {
   onBtExport() {
     if (this.gridApi) {
       this.gridApi.exportDataAsCsv({
-        fileName: 'Bảng lương.csv',
-        columnKeys: ['SalaryId', 'EmployeeId', 'EmployeeName', 'Date', 'MonthlySalary', 'Bonus', 'TotalSalary', 'SalaryNotes']
+        fileName: 'Bang-luong.csv'
       });
     } else {
       this.toastr.error('Grid API is not initialized');
@@ -82,12 +94,31 @@ export class SalaryListComponent implements OnInit {
     this.salaryService.getSalaries().subscribe({
       next: (salaries: Salary[]) => {
         this.salaries = salaries;
-        this.rowData = [...salaries]; // clone để dùng cho search
-        console.log('Salaries loaded: ', this.salaries);
+        this.rowData = [...salaries];
+      },
+      error: () => {
+        this.toastr.error('Failed to load salary data');
+      }
+    });
+  }
+
+  generatePayroll(): void {
+    const [year, month] = this.parsePeriod(this.payrollPeriod);
+    if (!year || !month) {
+      this.toastr.warning('Vui lòng chọn kỳ lương.');
+      return;
+    }
+
+    this.generating = true;
+    this.salaryService.generateMonth(year, month).subscribe({
+      next: (res) => {
+        this.generating = false;
+        this.toastr.success(`Đã lập ${res.generatedCount || 0} phiếu lương kỳ ${res.period}`);
+        this.loadSalaries();
       },
       error: (err) => {
-        console.error('Error loading salaries:', err);
-        this.toastr.error('Failed to load salary data');
+        this.generating = false;
+        this.toastr.error(err?.error?.message || 'Không lập được bảng lương tháng');
       }
     });
   }
@@ -115,8 +146,7 @@ export class SalaryListComponent implements OnInit {
           this.toastr.success('Salary deleted successfully');
           this.loadSalaries();
         },
-        error: (err) => {
-          console.error('Error deleting salary:', err);
+        error: () => {
           this.toastr.error('Failed to delete salary');
         }
       });
@@ -137,5 +167,30 @@ export class SalaryListComponent implements OnInit {
     } else {
       this.rowData = [...this.salaries];
     }
+  }
+
+  private vnd(params: ValueFormatterParams<Salary>): string {
+    if (params.value === null || params.value === undefined || params.value === '') {
+      return '';
+    }
+    return Number(params.value).toLocaleString('vi-VN') + ' ₫';
+  }
+
+  private periodLabel(row?: Salary): string {
+    if (!row) return '';
+    const year = row.PeriodYear || (row.Date ? new Date(row.Date).getFullYear() : 0);
+    const month = row.PeriodMonth || (row.Date ? new Date(row.Date).getMonth() + 1 : 0);
+    if (!year || !month) return '';
+    return `${month.toString().padStart(2, '0')}/${year}`;
+  }
+
+  private currentPeriod(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+  }
+
+  private parsePeriod(value: string): [number, number] {
+    const parts = (value || '').split('-');
+    return [Number(parts[0]), Number(parts[1])];
   }
 }

@@ -6,14 +6,9 @@ using System.Text;
 
 namespace API.Services
 {
-    public class TokenService
+    public class TokenService(IConfiguration config)
     {
-        private readonly SymmetricSecurityKey _key;
-
-        public TokenService(IConfiguration config)
-        {
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
-        }
+        private readonly SymmetricSecurityKey _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
 
         public string CreateToken(User user)
         {

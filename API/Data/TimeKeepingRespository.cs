@@ -8,26 +8,17 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class TimeKeepingRepository : ITimeKeepingRepository
+    public class TimeKeepingRepository(
+        IMongoDatabase database,
+        AutoMapper.IMapper mapper,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : ITimeKeepingRepository
     {
-        private readonly IMongoCollection<TimeKeeping> _timeKeeping;
-        private readonly IMongoCollection<Employee> _employees;
-        private readonly AutoMapper.IMapper _mapper;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
-
-        public TimeKeepingRepository(
-            IMongoDatabase database,
-            AutoMapper.IMapper mapper,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _timeKeeping = database.GetCollection<TimeKeeping>("TimeKeeping");
-            _employees = database.GetCollection<Employee>("Employees");
-            _mapper = mapper;
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
+        private readonly IMongoCollection<TimeKeeping> _timeKeeping = database.GetCollection<TimeKeeping>("TimeKeeping");
+        private readonly IMongoCollection<Employee> _employees = database.GetCollection<Employee>("Employees");
+        private readonly AutoMapper.IMapper _mapper = mapper;
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         public async Task<TimeKeeping> CreateTimeEntry(TimeKeepingDto timeKeepingDto)
         {

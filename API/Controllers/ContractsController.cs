@@ -11,11 +11,13 @@ namespace API.Controllers
     
     [ApiController]
     [Route("api/[controller]")]
-    public class ContractsController(IContractRepository _contractRepository, AutoMapper.IMapper _mapper, IMongoDatabase _db) : BaseApiController
+    public class ContractsController(IContractRepository _contractRepository, AutoMapper.IMapper _mapper, IMongoCollection<Contract> _contracts, IMongoCollection<Employee> _employees) : BaseApiController
     {
-        private readonly IMongoCollection<Contract> _contracts = _db.GetCollection<Contract>("Contracts");
-        private readonly IMongoCollection<Employee> _employees = _db.GetCollection<Employee>("Employees");
-
+        private readonly IMongoCollection<Contract> _contracts = _contracts;
+        private readonly IMongoCollection<Employee> _employees = _employees;
+        private readonly IContractRepository _contractRepository = _contractRepository;
+        private readonly AutoMapper.IMapper _mapper = _mapper;
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ContractDto>>> GetContracts()
         {

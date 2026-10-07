@@ -8,25 +8,18 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class ContractRepository : IContractRepository
+    public class ContractRepository(
+        IMongoDatabase database,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : IContractRepository
     {
-        private readonly IMongoCollection<Contract> _contracts;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IMongoCollection<Contract> _contracts = database.GetCollection<Contract>("Contracts");
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         private readonly List<Contract> _pendingInserts = new();
         private readonly List<Contract> _pendingUpdates = new();
         private readonly List<Contract> _pendingDeletes = new();
-
-        public ContractRepository(
-            IMongoDatabase database,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _contracts = database.GetCollection<Contract>("Contracts");
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
 
         public async Task<IEnumerable<Contract>> GetContractAsync()
         {

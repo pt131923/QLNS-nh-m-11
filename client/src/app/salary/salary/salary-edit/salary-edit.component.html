@@ -1,34 +1,104 @@
-<div class="col-8">
+<div class="salary-page">
   <div class="mb-3">
     <button class="btn btn-secondary" [routerLink]="['/salaries']">
       <i class="bi bi-arrow-left-short me-1"></i> Back to Salary
     </button>
   </div>
-  <form #editSalaryForm="ngForm" id="editSalaryForm" (ngSubmit)="UpdateSalary()">
-    <h4 class="mt-2">Employee ID:</h4>
-    <input type="number" class="form-control" [(ngModel)]="salary.EmployeeId" name="EmployeeId" required />
 
-    <h4 class="mt-2">Employee Name:</h4>
-    <input type="text" class="form-control" [(ngModel)]="salary.EmployeeName" name="EmployeeName" required />
-
-    <h4 class="mt-2">Date:</h4>
-    <input type="date" class="form-control" [(ngModel)]="salary.Date" name="Date" required />
-
-    <h4 class="mt-2">Monthly Salary:</h4>
-    <input type="number" class="form-control" [(ngModel)]="salary.MonthlySalary" name="MonthlySalary" (input)="updateTotalSalary()" required />
-
-    <h4 class="mt-2">Bonus:</h4>
-    <input type="number" class="form-control" [(ngModel)]="salary.Bonus" name="Bonus" (input)="updateTotalSalary()" required />
-
-    <h4 class="mt-2">Total Salary:</h4>
-    <input type="number" class="form-control" [(ngModel)]="salary.TotalSalary" name="TotalSalary" readonly />
-
-    <h4 class="mt-2">Notes:</h4>
-    <textarea class="form-control" [(ngModel)]="salary.SalaryNotes" name="SalaryNotes" rows="3"></textarea>
-
-    <div class="card-footer mt-2">
-      <button type="submit" form="editSalaryForm" class="btn btn-success col-4">Save changes</button>
-      <button type="button" class="btn btn-secondary col-4 ms-5" (click)="cancel()">Cancel</button>
+  <form #editSalaryForm="ngForm" id="editSalaryForm" (ngSubmit)="UpdateSalary()" class="salary-form">
+    <h5>{{ 'salary.payslipTitle' | translate }}</h5>
+    <div class="row">
+      <div class="col-md-6">
+        <label>{{ 'salary.employee' | translate }}</label>
+        <input class="form-control" [value]="salary.EmployeeName" disabled>
+      </div>
+      <div class="col-md-6">
+        <label>{{ 'salary.payrollPeriod' | translate }}</label>
+        <input type="month" class="form-control" [(ngModel)]="period" name="period" required (ngModelChange)="onPeriodChange()">
+      </div>
+      <div class="col-md-4">
+        <label>{{ 'salary.basicSalary' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.BasicSalary" name="basicSalary" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-4">
+        <label>{{ 'salary.allowance' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.Allowance" name="allowance" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-4">
+        <label>{{ 'salary.insuranceSalary' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.InsuranceSalary" name="insuranceSalary" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-3">
+        <label>{{ 'salary.workedDays' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.WorkedDays" name="workedDays" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-3">
+        <label>{{ 'salary.standardDays' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.StandardDays" name="standardDays" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-3">
+        <label>{{ 'salary.overtimeHours' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.OvertimeHours" name="overtimeHours" (ngModelChange)="normalizeNumber('OvertimeHours', $event)" (input)="removeLeadingZero('OvertimeHours')">
+      </div>
+      <div class="col-md-3">
+        <label>{{ 'salary.dependentCount' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.DependentCount" name="dependentCount" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-4">
+        <label>{{ 'salary.bonus' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.Bonus" name="bonus" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-4">
+        <label>{{ 'salary.otherDeductions' | translate }}</label>
+        <input type="number" class="form-control" [(ngModel)]="salary.OtherDeductions" name="otherDeductions" (ngModelChange)="queuePreview()">
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="salary.DeductUnionFee" name="deductUnionFee" (ngModelChange)="queuePreview()">
+          <label class="form-check-label">{{ 'salary.deductUnionFee' | translate }}</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <label>{{ 'salary.notes' | translate }}</label>
+        <textarea class="form-control" [(ngModel)]="salary.SalaryNotes" name="SalaryNotes" rows="2"></textarea>
+      </div>
     </div>
   </form>
+
+  <div class="payslip mt-4">
+    <div class="d-flex justify-content-between">
+      <h5>{{ 'salary.breakdown' | translate }}</h5>
+      <span class="small text-muted" *ngIf="previewing">{{ 'salary.calculating' | translate }}</span>
+    </div>
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <table class="table table-sm table-bordered">
+          <tr><th>{{ 'salary.grossSalary' | translate }}</th><td>{{ money(salary.GrossSalary) }}</td></tr>
+          <tr><th>{{ 'salary.overtimePay' | translate }}</th><td>{{ money(salary.OvertimePay) }}</td></tr>
+          <tr><th>{{ 'salary.bhxhEmployee' | translate }}</th><td>{{ money(salary.BhxhEmployee) }}</td></tr>
+          <tr><th>{{ 'salary.bhytEmployee' | translate }}</th><td>{{ money(salary.BhytEmployee) }}</td></tr>
+          <tr><th>{{ 'salary.bhtnEmployee' | translate }}</th><td>{{ money(salary.BhtnEmployee) }}</td></tr>
+          <tr><th>{{ 'salary.unionFee' | translate }}</th><td>{{ money(salary.UnionFeeEmployee) }}</td></tr>
+          <tr><th>{{ 'salary.personalIncomeTax' | translate }}</th><td>{{ money(salary.PersonalIncomeTax) }}</td></tr>
+          <tr class="table-success"><th>{{ 'salary.netSalary' | translate }}</th><td>{{ money(salary.NetSalary || salary.TotalSalary) }}</td></tr>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <table class="table table-sm table-bordered">
+          <tr><th>{{ 'salary.taxableIncome' | translate }}</th><td>{{ money(salary.TaxableIncome) }}</td></tr>
+          <tr><th>{{ 'salary.employerBhxh' | translate }}</th><td>{{ money(salary.EmployerBhxh) }}</td></tr>
+          <tr><th>{{ 'salary.employerBhyt' | translate }}</th><td>{{ money(salary.EmployerBhyt) }}</td></tr>
+          <tr><th>{{ 'salary.employerBhtn' | translate }}</th><td>{{ money(salary.EmployerBhtn) }}</td></tr>
+          <tr><th>{{ 'salary.employerUnion' | translate }}</th><td>{{ money(salary.EmployerUnion) }}</td></tr>
+          <tr class="table-info"><th>{{ 'salary.companyCost' | translate }}</th><td>{{ money(salary.CompanyCost) }}</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="small text-muted" *ngIf="formulaNotes">{{ formulaNotes }}</p>
+  </div>
+
+  <div class="card-footer mt-2">
+    <button type="submit" form="editSalaryForm" class="btn btn-success col-4">Save changes</button>
+    <button type="button" class="btn btn-secondary col-4 ms-5" (click)="cancel()">Cancel</button>
+  </div>
 </div>

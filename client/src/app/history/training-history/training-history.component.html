@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <div class="mb-3">
+    <button class="btn btn-secondary" [routerLink]="['/dashboard']">
+      <i class="bi bi-arrow-left-short me-1"></i> {{ 'common.backToDashboard' | translate }}
+    </button>
+  </div>
+
+  <h2 class="mb-3">{{ 'training.historyPageTitle' | translate }}</h2>
+
+  <div *ngIf="isLoading">{{ 'common.loading' | translate }}</div>
+
+  <div class="table-responsive" *ngIf="!isLoading">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{{ 'training.historyTraining' | translate }}</th>
+          <th>{{ 'training.historyDate' | translate }}</th>
+          <th>{{ 'training.historyStatus' | translate }}</th>
+          <th>{{ 'training.historyRegisteredAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of history">
+          <td>{{ h.TrainingTitle }}</td>
+          <td>{{ h.TrainingDate | date:'short' }}</td>
+          <td>{{ h.Status }}</td>
+          <td>{{ h.RegisteredAt | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

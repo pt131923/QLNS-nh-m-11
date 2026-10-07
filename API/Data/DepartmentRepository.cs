@@ -7,28 +7,20 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class DepartmentRepository : IDepartmentRepository
+    public class DepartmentRepository(
+        IMongoDatabase database,
+        AutoMapper.IMapper mapper,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : IDepartmentRepository
     {
-        private readonly IMongoCollection<AppDepartment> _departments;
-        private readonly AutoMapper.IMapper _mapper;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IMongoCollection<AppDepartment> _departments = database.GetCollection<AppDepartment>("Departments");
+        private readonly AutoMapper.IMapper _mapper = mapper;
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         private readonly List<AppDepartment> _pendingInserts = new();
         private readonly List<AppDepartment> _pendingUpdates = new();
         private readonly List<AppDepartment> _pendingDeletes = new();
-
-        public DepartmentRepository(
-            IMongoDatabase database,
-            AutoMapper.IMapper mapper,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _departments = database.GetCollection<AppDepartment>("Departments");
-            _mapper = mapper;
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
 
         public async Task<IEnumerable<AppDepartment>> GetDepartmentsAsync()
         {

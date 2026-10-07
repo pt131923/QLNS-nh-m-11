@@ -6,28 +6,20 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class EmployeeRepository : IEmployeeRepository
+    public class EmployeeRepository(
+        IMongoDatabase database,
+        AutoMapper.IMapper mapper,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : IEmployeeRepository
     {
-        private readonly IMongoCollection<Employee> _employees;
-        private readonly AutoMapper.IMapper _mapper;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IMongoCollection<Employee> _employees = database.GetCollection<Employee>("Employees");
+        private readonly AutoMapper.IMapper _mapper = mapper;
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         private readonly List<Employee> _pendingInserts = new();
         private readonly List<Employee> _pendingUpdates = new();
         private readonly List<Employee> _pendingDeletes = new();
-
-        public EmployeeRepository(
-            IMongoDatabase database,
-            AutoMapper.IMapper mapper,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _employees = database.GetCollection<Employee>("Employees");
-            _mapper = mapper;
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
 
         public async Task<IEnumerable<Employee>> GetEmployeesAsync()
         {

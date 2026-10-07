@@ -1,4 +1,4 @@
-using API.Data;
+﻿using API.Data;
 using API.Middleware;
 using AutoMapper;
 using API.Helpers;
@@ -20,6 +20,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using API.Entities;
+using OfficeOpenXml;
 
 internal class Program
 {
@@ -27,13 +28,13 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // MongoDB: ignore unknown fields when deserializing POCOs
+        // === MongoDB: Configure conventions & class mappings ===
         ConventionRegistry.Register(
             "IgnoreExtraElements",
             new ConventionPack { new IgnoreExtraElementsConvention(true) },
             _ => true);
 
-        // Map _id to custom Id properties (tránh lỗi "Element '_id' does not match any field")
+        // Map _id to custom Id properties
         if (!BsonClassMap.IsClassMapRegistered(typeof(AppDepartment)))
             BsonClassMap.RegisterClassMap<AppDepartment>(cm => { cm.MapIdProperty(c => c.DepartmentId); cm.AutoMap(); });
         if (!BsonClassMap.IsClassMapRegistered(typeof(Employee)))
@@ -61,40 +62,39 @@ internal class Program
         if (!BsonClassMap.IsClassMapRegistered(typeof(Benefits)))
             BsonClassMap.RegisterClassMap<Benefits>(cm => { cm.MapIdProperty(c => c.Id); cm.AutoMap(); });
 
-        // ----------------------- CORS ------------------------------
+        // === EPPlus License ===
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+        // === CORS Policy ===
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowAngular", policy =>
             {
-                // Cho phép tất cả localhost ports để tương thích với Angular dev server
                 policy.WithOrigins("http://localhost:4300", "http://localhost:4200")
                       .AllowAnyHeader()
                       .AllowAnyMethod()
-                      .AllowCredentials(); // RẤT QUAN TRỌNG cho SignalR và JWT
+                      .AllowCredentials();
             });
         });
 
-        // ----------------------- CONTROLLERS ------------------------
+        // === Controllers ===
         builder.Services.AddControllers()
             .AddJsonOptions(opt =>
             {
                 opt.JsonSerializerOptions.PropertyNamingPolicy = null;
-                opt.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Cho phép username/UserName từ FE
+                opt.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
             });
 
-        // ------------------- MONGO DB (NEW) ----------------
-        // Đọc cấu hình MongoDB từ appsettings.json → "MongoSettings"
+        // === MongoDB Configuration ===
         builder.Services.Configure<MongoSettings>(
             builder.Configuration.GetSection("MongoSettings"));
 
-        // Đăng ký MongoClient (singleton)
         builder.Services.AddSingleton<IMongoClient>(sp =>
         {
             var settings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
             return new MongoClient(settings.ConnectionString);
         });
 
-        // Đăng ký IMongoDatabase (singleton) để inject vào repository/service
         builder.Services.AddSingleton<IMongoDatabase>(sp =>
         {
             var mongoSettings = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
@@ -102,14 +102,81 @@ internal class Program
             return client.GetDatabase(mongoSettings.DatabaseName);
         });
 
-        // ID generator + bootstrap (indexes + seed)
+        // === ✅ ĐĂNG KÝ ĐẦY ĐỦ TẤT CẢ COLLECTION ===
+        builder.Services.AddScoped<IMongoCollection<Employee>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Employee>("Employees");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<AppDepartment>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<AppDepartment>("Departments");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<FileHistory>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<FileHistory>("FileHistory");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<Contract>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Contract>("Contracts");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<Salary>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Salary>("Salaries");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<Leave>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Leave>("Leaves");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<User>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<User>("Users");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<Training>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Training>("Trainings");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<Recuiment>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Recuiment>("Recuiments");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<Contact>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Contact>("Contacts");
+        });
+
+        builder.Services.AddScoped<IMongoCollection<TimeKeeping>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<TimeKeeping>("TimeKeepings");
+        });
+
+        // === Helpers & Background Services ===
         builder.Services.AddSingleton<IMongoIdGenerator, MongoIdGenerator>();
         builder.Services.AddHostedService<MongoBootstrapHostedService>();
 
-        // ----------------------- AUTOMAPPER -------------------------
+        // === AutoMapper ===
         builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-        // ----------------------- JWT AUTH ---------------------------
+        // === JWT Authentication ===
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -117,34 +184,27 @@ internal class Program
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"])),
+                        Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"]!)),
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    ValidateLifetime = true, // Validate token expiration
-                    ClockSkew = TimeSpan.FromMinutes(5) // Cho phép clock skew 5 phút để tránh lỗi do thời gian server/client khác nhau
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(5)
                 };
 
-                // Cấu hình cho SignalR - xử lý token từ query string hoặc access token
-                options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+                options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
                         var path = context.HttpContext.Request.Path;
-                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                        
-                        // Lấy token từ query string cho SignalR
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILogger<Program>>();
                         var accessToken = context.Request.Query["access_token"];
-                        
-                        // Nếu là request đến SignalR hub và có token trong query string
                         if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/dashboard-hub"))
                         {
                             context.Token = accessToken;
                             logger.LogInformation("📡 SignalR token from query string");
                             return Task.CompletedTask;
                         }
-                        
-                        // Đối với HTTP requests, token sẽ được lấy tự động từ Authorization header
-                        // Nhưng chúng ta vẫn log để debug
                         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
                         if (!string.IsNullOrEmpty(authHeader))
                         {
@@ -164,93 +224,77 @@ internal class Program
                         }
                         else
                         {
-                            // Chỉ log warning cho protected routes
                             if (path.Value.Contains("/api/") && !path.Value.Contains("/login") && !path.Value.Contains("/register"))
                             {
                                 logger.LogWarning($"⚠️ No Authorization header found for protected route: {path}");
                             }
                         }
-                        
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = context =>
                     {
-                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILogger<Program>>();
                         var path = context.Request.Path;
                         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-                        
                         logger.LogError(context.Exception, "❌ JWT Authentication failed");
                         logger.LogWarning("Path: {Path}", path);
                         logger.LogWarning("Authorization header: {Header}", authHeader ?? "None");
-                        
-                        // Log chi tiết exception
                         if (context.Exception != null)
                         {
                             logger.LogError("Exception type: {Type}", context.Exception.GetType().Name);
                             logger.LogError("Exception message: {Message}", context.Exception.Message);
-                            
-                            // Nếu là SecurityTokenExpiredException, log thêm thông tin
-                            if (context.Exception is Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException expiredEx)
+                            if (context.Exception is SecurityTokenExpiredException expiredEx)
                             {
                                 logger.LogWarning("Token expired at: {Expired}", expiredEx.Expires);
                             }
                         }
-                        
-                        // KHÔNG set context.ErrorResult - để middleware xử lý tự nhiên
-                        // Chỉ log để debug
-                        
                         return Task.CompletedTask;
                     },
                     OnChallenge = context =>
                     {
-                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILogger<Program>>();
                         logger.LogWarning("⛔ Authentication challenge triggered - 401 Unauthorized");
                         logger.LogWarning("Path: {Path}", context.Request.Path);
-                        
-                        // Log chi tiết để debug
                         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
                         logger.LogWarning("Authorization header: {Header}", authHeader ?? "None");
-                        
-                        // KHÔNG handle response ở đây - để ASP.NET Core xử lý tự nhiên
-                        // Chỉ log thông tin để debug
-                        // context.HandleResponse() sẽ ngăn controller nhận được request
-                        
                         return Task.CompletedTask;
                     }
                 };
             });
 
-        // ----------------------- REPOSITORIES & SERVICES ----------------
+        // === Repositories & Services ===
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<TokenService>();
         builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         builder.Services.AddScoped<IContractRepository, ContractRepository>();
         builder.Services.AddScoped<ISalaryRepository, SalaryRepository>();
-        builder.Services.AddScoped<IContactRepository, ContactRepository>();
+        builder.Services.AddScoped<IPayrollService, PayrollService>();
         builder.Services.AddScoped<ITrainingRepository, TrainingRepository>();
         builder.Services.AddScoped<IRecuimentRepository, RecuimentRepository>();
         builder.Services.AddScoped<ITimeKeepingRepository, TimeKeepingRepository>();
         builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
+        builder.Services.AddScoped<IContactRepository, ContactRepository>();
+        builder.Services.AddScoped<IDashboardService, DashboardService>();
 
-        // ----------------------- SWAGGER -------------------------
+        // === Swagger ===
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        // ----------------------- SIGNALR --------------------------
+        // === SignalR ===
         builder.Services.AddSignalR();
 
-        // ----------------------- DASHBOARD SERVICE -----------------
+        // === Dashboard Service ===
         builder.Services.AddMemoryCache();
-        builder.Services.AddScoped<IDashboardService, DashboardService>();
-        builder.Services.AddHostedService<DashboardBackgroundService>();                    
+        builder.Services.AddHostedService<DashboardBackgroundService>();
 
-        var app = builder.Build(); 
+        var app = builder.Build();
 
-        // ----------------------- EXCEPTION MIDDLEWARE --------------
+        // === Middleware Pipeline ===
         app.UseMiddleware<ExceptionMiddleware>();
 
-        // ----------------------- DEV SWAGGER ------------------------
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -258,18 +302,11 @@ internal class Program
         }
 
         app.UseStaticFiles();
-
-        // Bắt đầu định tuyến
         app.UseRouting();
-
-        // Đảm bảo CORS được gọi trước MapHub và MapControllers
         app.UseCors("AllowAngular");
-
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // ------------------ MAPPING CONTROLLERS & HUB -----------------
-        // Sử dụng MapControllers và MapHub trực tiếp (minimal API approach)
         app.MapControllers();
         app.MapHub<DashboardHub>("/dashboard-hub");
 

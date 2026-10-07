@@ -7,28 +7,20 @@ using MongoDB.Driver;
 
 namespace API.Data
 {
-    public class SalaryRepository : ISalaryRepository
+    public class SalaryRepository(
+        IMongoDatabase database,
+        AutoMapper.IMapper mapper,
+        IDashboardService dashboardService,
+        IMongoIdGenerator idGenerator) : ISalaryRepository
     {
-        private readonly IMongoCollection<Salary> _salaries;
-        private readonly AutoMapper.IMapper _mapper;
-        private readonly IDashboardService _dashboardService;
-        private readonly IMongoIdGenerator _idGenerator;
+        private readonly IMongoCollection<Salary> _salaries = database.GetCollection<Salary>("Salaries");
+        private readonly AutoMapper.IMapper _mapper = mapper;
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
 
         private readonly List<Salary> _pendingInserts = new();
         private readonly List<Salary> _pendingUpdates = new();
         private readonly List<Salary> _pendingDeletes = new();
-
-        public SalaryRepository(
-            IMongoDatabase database,
-            AutoMapper.IMapper mapper,
-            IDashboardService dashboardService,
-            IMongoIdGenerator idGenerator)
-        {
-            _salaries = database.GetCollection<Salary>("Salaries");
-            _mapper = mapper;
-            _dashboardService = dashboardService;
-            _idGenerator = idGenerator;
-        }
 
         public async Task<IEnumerable<Salary>> GetSalariesAsync()
         {

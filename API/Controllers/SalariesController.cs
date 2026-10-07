@@ -11,35 +11,43 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SalariesController : BaseApiController
+    public class SalariesController(ISalaryRepository _salaryRepository, AutoMapper.IMapper _mapper, IMongoCollection<Employee> _employees, IMongoCollection<Salary> _salaries, IMongoIdGenerator _idGenerator, IDashboardService _dashboardService, IPayrollService _payrollService) : BaseApiController
     {
-        private readonly ISalaryRepository _salaryRepository;
-        private readonly AutoMapper.IMapper _mapper;
-        private readonly IMongoCollection<Employee> _employees;
-        private readonly IMongoCollection<Salary> _salaries;
-        private readonly IMongoIdGenerator _idGenerator;
-        private readonly IDashboardService _dashboardService;
-
-        public SalariesController(
-            ISalaryRepository salaryRepository,
-            AutoMapper.IMapper mapper,
-            IMongoDatabase database,
-            IMongoIdGenerator idGenerator,
-            IDashboardService dashboardService)
-        {
-            _salaryRepository = salaryRepository;
-            _mapper = mapper;
-            _employees = database.GetCollection<Employee>("Employees");
-            _salaries = database.GetCollection<Salary>("Salaries");
-            _idGenerator = idGenerator;
-            _dashboardService = dashboardService;
-        }
-
+        private readonly IMongoCollection<Employee> _employees = _employees;
+        private readonly IMongoCollection<Salary> _salaries = _salaries;
+        private readonly IMongoIdGenerator _idGenerator = _idGenerator;
+        private readonly IDashboardService _dashboardService = _dashboardService;
+        private readonly IPayrollService _payrollService = _payrollService;
+        private readonly ISalaryRepository _salaryRepository = _salaryRepository;
+        private readonly AutoMapper.IMapper _mapper = _mapper;
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SalaryDto>>> GetSalaries()
         {
             var salaries = await _salaryRepository.GetSalariesAsync();
             return Ok(_mapper.Map<IEnumerable<SalaryDto>>(salaries));
+        }
+
+        [HttpGet("payroll-rates")]
+        public ActionResult GetPayrollRates()
+        {
+            return Ok(new
+            {
+                BhxhEmployeeRate = PayrollCalculator.BhxhEmployeeRate,
+                BhytEmployeeRate = PayrollCalculator.BhytEmployeeRate,
+                BhtnEmployeeRate = PayrollCalculator.BhtnEmployeeRate,
+                UnionEmployeeRate = PayrollCalculator.UnionEmployeeRate,
+                BhxhEmployerRate = PayrollCalculator.BhxhEmployerRate,
+                BhytEmployerRate = PayrollCalculator.BhytEmployerRate,
+                BhtnEmployerRate = PayrollCalculator.BhtnEmployerRate,
+                UnionEmployerRate = PayrollCalculator.UnionEmployerRate,
+                BaseWage = PayrollCalculator.BaseWage,
+                RegionalMinimumWageRegion1 = PayrollCalculator.RegionalMinimumWageRegion1,
+                BhxhBhytCeiling = PayrollCalculator.BhxhBhytCeiling,
+                BhtnCeiling = PayrollCalculator.BhtnCeiling,
+                PersonalDeduction = PayrollCalculator.PersonalDeduction,
+                DependentDeduction = PayrollCalculator.DependentDeduction
+            });
         }
 
         [HttpGet("{id}", Name = "GetSalaryById")]
@@ -51,21 +59,60 @@ namespace API.Controllers
             return Ok(_mapper.Map<SalaryDto>(salary));
         }
 
+        [HttpPost("calculate")]
+        public async Task<ActionResult<PayrollResult>> CalculatePayroll(PayrollCalculateRequest request)
+        {
+            try
+            {
+                var result = await _payrollService.BuildAsync(request);
+                if (request.Save)
+                {
+                    var saved = await _payrollService.UpsertFromResultAsync(result, $"Bảng lương {result.Month:00}/{result.Year}");
+                    return Ok(_mapper.Map<SalaryDto>(saved));
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("generate-month")]
+        public async Task<ActionResult> GenerateMonth(PayrollGenerateMonthRequest request)
+        {
+            if (request.Year <= 0 || request.Month is < 1 or > 12)
+                return BadRequest(new { message = "Năm/tháng không hợp lệ." });
+
+            try
+            {
+                var saved = await _payrollService.GenerateMonthAsync(request);
+                return Ok(new
+                {
+                    generatedCount = saved.Count,
+                    period = $"{request.Month:00}/{request.Year}",
+                    items = _mapper.Map<IEnumerable<SalaryDto>>(saved)
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("add-salary")]
         public async Task<ActionResult<SalaryDto>> AddSalary(SalaryDto salaryDto)
         {
-            var employeeExists = await _employees.CountDocumentsAsync(e => e.EmployeeId == salaryDto.EmployeeId) > 0;
-            if (!employeeExists)
-                return BadRequest("Employee does not exist.");
-
-            var employee = await _employees.Find(e => e.EmployeeId == salaryDto.EmployeeId).FirstOrDefaultAsync();
-            var salary = _mapper.Map<Salary>(salaryDto);
-            salary.EmployeeName = employee?.EmployeeName ?? salary.EmployeeName;
-
-            _salaryRepository.Add(salary);
-            await _salaryRepository.SaveAllAsync();
-
-            return CreatedAtRoute("GetSalaryById", new { id = salary.SalaryId }, _mapper.Map<SalaryDto>(salary));
+            try
+            {
+                var result = await _payrollService.BuildAsync(ToPayrollRequest(salaryDto));
+                var salary = await _payrollService.UpsertFromResultAsync(result, salaryDto.SalaryNotes);
+                return CreatedAtRoute("GetSalaryById", new { id = salary.SalaryId }, _mapper.Map<SalaryDto>(salary));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -75,21 +122,18 @@ namespace API.Controllers
             if (existingSalary == null)
                 return NotFound("Salary not found.");
 
-            if (salaryDto.EmployeeId != existingSalary.EmployeeId)
+            try
             {
-                var employeeExists = await _employees.CountDocumentsAsync(e => e.EmployeeId == salaryDto.EmployeeId) > 0;
-                if (!employeeExists)
-                    return BadRequest($"New Employee with ID {salaryDto.EmployeeId} does not exist.");
+                salaryDto.EmployeeId = salaryDto.EmployeeId > 0 ? salaryDto.EmployeeId : existingSalary.EmployeeId;
+                var result = await _payrollService.BuildAsync(ToPayrollRequest(salaryDto));
+                result.EmployeeId = salaryDto.EmployeeId;
+                var updated = await _payrollService.UpsertFromResultAsync(result, salaryDto.SalaryNotes);
+                return Ok(_mapper.Map<SalaryDto>(updated));
             }
-
-            var employee = await _employees.Find(e => e.EmployeeId == salaryDto.EmployeeId).FirstOrDefaultAsync();
-            _mapper.Map(salaryDto, existingSalary);
-            existingSalary.EmployeeName = employee?.EmployeeName ?? existingSalary.EmployeeName;
-
-            _salaryRepository.Update(existingSalary);
-            if (await _salaryRepository.SaveAllAsync()) return NoContent();
-
-            return BadRequest("Failed to update salary");
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("delete-salary/{id}")]
@@ -230,6 +274,55 @@ namespace API.Controllers
                     if (salary.Date == default)
                         salary.Date = DateTime.UtcNow;
 
+                    try
+                    {
+                        var computed = await _payrollService.BuildAsync(new PayrollCalculateRequest
+                        {
+                            EmployeeId = salary.EmployeeId,
+                            Year = salary.Date.Year,
+                            Month = salary.Date.Month,
+                            BasicSalary = salary.MonthlySalary > 0 ? salary.MonthlySalary : null,
+                            Bonus = salary.Bonus,
+                            DependentCount = 0
+                        });
+                        salary.PeriodYear = computed.Year;
+                        salary.PeriodMonth = computed.Month;
+                        salary.BasicSalary = computed.BasicSalary;
+                        salary.Allowance = computed.Allowance;
+                        salary.InsuranceSalary = computed.InsuranceSalary;
+                        salary.StandardDays = computed.StandardDays;
+                        salary.WorkedDays = computed.WorkedDays;
+                        salary.UnpaidLeaveDays = computed.UnpaidLeaveDays;
+                        salary.OvertimeHours = computed.OvertimeHours;
+                        salary.OvertimePay = computed.OvertimePay;
+                        salary.Bonus = computed.Bonus;
+                        salary.GrossSalary = computed.GrossSalary;
+                        salary.BhxhEmployee = computed.BhxhEmployee;
+                        salary.BhytEmployee = computed.BhytEmployee;
+                        salary.BhtnEmployee = computed.BhtnEmployee;
+                        salary.UnionFeeEmployee = computed.UnionFeeEmployee;
+                        salary.TotalInsuranceEmployee = computed.TotalInsuranceEmployee;
+                        salary.PersonalDeductionAmount = computed.PersonalDeductionAmount;
+                        salary.DependentDeduction = computed.DependentDeduction;
+                        salary.TaxableIncome = computed.TaxableIncome;
+                        salary.PersonalIncomeTax = computed.PersonalIncomeTax;
+                        salary.EmployerBhxh = computed.EmployerBhxh;
+                        salary.EmployerBhyt = computed.EmployerBhyt;
+                        salary.EmployerBhtn = computed.EmployerBhtn;
+                        salary.EmployerUnion = computed.EmployerUnion;
+                        salary.TotalEmployerInsurance = computed.TotalEmployerInsurance;
+                        salary.CompanyCost = computed.CompanyCost;
+                        salary.NetSalary = computed.NetSalary;
+                        salary.MonthlySalary = computed.GrossSalary;
+                        salary.TotalSalary = computed.NetSalary;
+                        salary.Amount = (long)computed.NetSalary;
+                        salary.FormulaNotes = computed.FormulaNotes;
+                    }
+                    catch
+                    {
+                        salary.TotalSalary = salary.MonthlySalary + salary.Bonus;
+                    }
+
                     salary.SalaryId = await _idGenerator.NextAsync("Salaries");
                     salariesToInsert.Add(salary);
                     importedCount++;
@@ -266,6 +359,32 @@ namespace API.Controllers
             }
             value = null;
             return false;
+        }
+
+        private static PayrollCalculateRequest ToPayrollRequest(SalaryDto dto)
+        {
+            var date = dto.Date == default ? DateTime.UtcNow : dto.Date;
+            var year = dto.PeriodYear > 0 ? dto.PeriodYear : date.Year;
+            var month = dto.PeriodMonth > 0 ? dto.PeriodMonth : date.Month;
+            var basic = dto.BasicSalary > 0 ? dto.BasicSalary : dto.MonthlySalary;
+
+            return new PayrollCalculateRequest
+            {
+                EmployeeId = dto.EmployeeId,
+                Year = year,
+                Month = month,
+                BasicSalary = basic > 0 ? basic : null,
+                Allowance = dto.Allowance > 0 ? dto.Allowance : null,
+                InsuranceSalary = dto.InsuranceSalary > 0 ? dto.InsuranceSalary : null,
+                WorkedDays = dto.WorkedDays > 0 ? dto.WorkedDays : null,
+                StandardDays = dto.StandardDays > 0 ? dto.StandardDays : null,
+                UnpaidLeaveDays = dto.UnpaidLeaveDays,
+                OvertimeHours = dto.OvertimeHours,
+                Bonus = dto.Bonus,
+                OtherDeductions = dto.OtherDeductions,
+                DependentCount = dto.DependentCount,
+                DeductUnionFee = dto.DeductUnionFee
+            };
         }
     }
 }

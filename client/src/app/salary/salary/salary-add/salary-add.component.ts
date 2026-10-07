@@ -20,16 +20,10 @@ export class SalaryAddComponent implements OnInit {
   @ViewChild('addSalaryForm') addSalaryForm!: NgForm;
   @ViewChild('excelInput') excelInput?: ElementRef<HTMLInputElement>;
 
-  salary: Salary = {
-    SalaryId: 0,
-    EmployeeId: 0, // Đây sẽ là EmployeeId
-    EmployeeName: '', // Frontend có thể hiển thị, nhưng backend không cần nó cho khóa ngoại
-    Date: '',
-    MonthlySalary: 0,
-    Bonus: 0,
-    TotalSalary: 0,
-    SalaryNotes: ''
-  };
+  salary: Salary = this.emptySalary();
+  period = this.currentPeriod();
+  previewing = false;
+  formulaNotes = '';
 
   employees: Employee[] = [];
   departments: Department[] = [];
@@ -45,6 +39,7 @@ export class SalaryAddComponent implements OnInit {
   loadingEmployees = false;
   loadingDepartments = false;
 
+  private previewTimer?: ReturnType<typeof setTimeout>;
   private readonly allowedExcelMimeTypes = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-excel'
@@ -60,6 +55,7 @@ export class SalaryAddComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.syncPeriod();
     this.getEmployees();
     this.getDepartments();
   }
@@ -72,8 +68,7 @@ export class SalaryAddComponent implements OnInit {
       next: (employees) => {
         this.employees = employees;
       },
-      error: (err) => {
-        console.error('Error fetching employees:', err);
+      error: () => {
         this.toastr.error('Failed to fetch employees');
       }
     });
@@ -87,17 +82,49 @@ export class SalaryAddComponent implements OnInit {
         next: (departments) => {
           this.departments = departments;
         },
-        error: (err) => {
-          console.error('Error fetching departments:', err);
+        error: () => {
           this.toastr.error('Không thể tải danh sách phòng ban');
         }
       });
   }
 
-  updateTotalSalary(): void {
-    const monthly = Number(this.salary.MonthlySalary) || 0;
-    const bonus = Number(this.salary.Bonus) || 0;
-    this.salary.TotalSalary = monthly + bonus;
+  onPeriodChange(): void {
+    this.syncPeriod();
+    this.queuePreview();
+  }
+
+  queuePreview(): void {
+    if (this.previewTimer) clearTimeout(this.previewTimer);
+    this.previewTimer = setTimeout(() => this.previewPayroll(), 350);
+  }
+
+  previewPayroll(): void {
+    this.syncPeriod();
+    if (!this.salary.EmployeeId) return;
+
+    this.previewing = true;
+    this.salaryService.calculatePayroll({
+      EmployeeId: Number(this.salary.EmployeeId),
+      Year: this.salary.PeriodYear || 0,
+      Month: this.salary.PeriodMonth || 0,
+      BasicSalary: this.salary.BasicSalary || null,
+      Allowance: this.salary.Allowance || null,
+      InsuranceSalary: this.salary.InsuranceSalary || null,
+      WorkedDays: this.salary.WorkedDays || null,
+      StandardDays: this.salary.StandardDays || null,
+      UnpaidLeaveDays: this.salary.UnpaidLeaveDays || 0,
+      OvertimeHours: this.salary.OvertimeHours || 0,
+      Bonus: this.salary.Bonus || 0,
+      OtherDeductions: this.salary.OtherDeductions || 0,
+      DependentCount: this.salary.DependentCount || 0,
+      DeductUnionFee: !!this.salary.DeductUnionFee,
+      Save: false
+    }).pipe(finalize(() => this.previewing = false)).subscribe({
+      next: (result) => this.applyPreview(result),
+      error: (err) => {
+        this.toastr.warning(err?.error?.message || 'Chưa tính được phiếu lương. Kiểm tra hợp đồng/lương cơ bản.');
+      }
+    });
   }
 
   AddSalary(): void {
@@ -112,29 +139,14 @@ export class SalaryAddComponent implements OnInit {
       return;
     }
 
-    const monthly = Number(this.salary.MonthlySalary);
-    if (Number.isNaN(monthly) || monthly <= 0) {
-      this.toastr.warning('Lương cơ bản phải lớn hơn 0.');
-      return;
-    }
-
-    const bonus = Number(this.salary.Bonus) || 0;
-    if (bonus < 0) {
-      this.toastr.warning('Bonus không được nhỏ hơn 0.');
-      return;
-    }
-
-    this.updateTotalSalary();
-
+    this.syncPeriod();
     const payload: Salary = {
+      ...this.salary,
       SalaryId: 0,
-      EmployeeId: this.salary.EmployeeId,
+      EmployeeId: Number(this.salary.EmployeeId),
+      EmployeeName: this.employees.find(emp => emp.EmployeeId === Number(this.salary.EmployeeId))?.EmployeeName,
       Date: this.salary.Date,
-      MonthlySalary: monthly,
-      Bonus: bonus,
-      TotalSalary: this.salary.TotalSalary,
-      SalaryNotes: this.salary.SalaryNotes?.trim(),
-      EmployeeName: this.employees.find(emp => emp.EmployeeId === this.salary.EmployeeId)?.EmployeeName
+      MonthlySalary: Number(this.salary.BasicSalary) || Number(this.salary.MonthlySalary) || 0
     };
 
     this.salaryService.AddSalary(payload).subscribe({
@@ -144,10 +156,23 @@ export class SalaryAddComponent implements OnInit {
         this.router.navigate(['/salaries']);
       },
       error: (error) => {
-        console.error('Error adding salary:', error);
         this.toastr.error(this.extractErrorMessage(error, 'Thêm bảng lương thất bại'));
       }
     });
+  }
+
+  removeLeadingZero(field: string) {
+    const value = this.salary.OvertimeHours;
+    if (typeof value === 'string' && (value as string).startsWith('0')){
+      this.salary.OvertimeHours = Number(value);
+    }
+  }
+
+  normalizeNumber(field: string, value: any) {
+    if (value === null || value === undefined || value === '') return;
+    const cleaned = String(value).replace(/^0+/, '') || '0';
+    this.salary.OvertimeHours = Number(cleaned);
+    this.queuePreview();
   }
 
   onFileSelected(event: Event) {
@@ -177,7 +202,6 @@ export class SalaryAddComponent implements OnInit {
     this.generatePreview(file);
   }
 
-  //hàm upload file excel
   uploadExcel() {
     if (!this.ensureFileReady('upload')) {
       return;
@@ -194,7 +218,7 @@ export class SalaryAddComponent implements OnInit {
         error: (error) => this.handleUploadError(error)
       });
   }
-  //hàm import nhân viên từ file excel
+
   importSalaries() {
     if (!this.ensureFileReady('import')) {
       return;
@@ -209,7 +233,7 @@ export class SalaryAddComponent implements OnInit {
             const importedCount = response.importedCount || 0;
             const totalRows = response.totalRows || 0;
             const errors = response.errors || [];
-            
+
             if (importedCount > 0) {
               this.toastr.success(`Import thành công ${importedCount}/${totalRows} bảng lương`);
               if (errors.length > 0) {
@@ -227,8 +251,6 @@ export class SalaryAddComponent implements OnInit {
                 });
               }
             }
-          } else if (response && response.message) {
-            this.toastr.success(response.message);
           } else {
             this.toastr.success('Import bảng lương thành công');
           }
@@ -236,6 +258,45 @@ export class SalaryAddComponent implements OnInit {
         },
         error: (error: any) => this.handleImportError(error)
       });
+  }
+
+  money(value?: number | null): string {
+    return Number(value || 0).toLocaleString('vi-VN') + ' ₫';
+  }
+
+  onCancel(): void {
+    this.resetForm();
+    this.router.navigate(['/salaries']);
+  }
+
+  private applyPreview(result: Salary): void {
+    this.salary.GrossSalary = result.GrossSalary;
+    this.salary.OvertimePay = result.OvertimePay;
+    if (!this.salary.BasicSalary) this.salary.BasicSalary = result.BasicSalary;
+    if (!this.salary.Allowance) this.salary.Allowance = result.Allowance;
+    if (!this.salary.InsuranceSalary) this.salary.InsuranceSalary = result.InsuranceSalary;
+    if (!this.salary.StandardDays) this.salary.StandardDays = result.StandardDays;
+    if (!this.salary.WorkedDays) this.salary.WorkedDays = result.WorkedDays;
+    this.salary.GrossSalary = result.GrossSalary;
+    this.salary.BhxhEmployee = result.BhxhEmployee;
+    this.salary.BhytEmployee = result.BhytEmployee;
+    this.salary.BhtnEmployee = result.BhtnEmployee;
+    this.salary.UnionFeeEmployee = result.UnionFeeEmployee;
+    this.salary.TotalInsuranceEmployee = result.TotalInsuranceEmployee;
+    this.salary.PersonalDeductionAmount = result.PersonalDeductionAmount;
+    this.salary.DependentDeduction = result.DependentDeduction;
+    this.salary.TaxableIncome = result.TaxableIncome;
+    this.salary.PersonalIncomeTax = result.PersonalIncomeTax;
+    this.salary.EmployerBhxh = result.EmployerBhxh;
+    this.salary.EmployerBhyt = result.EmployerBhyt;
+    this.salary.EmployerBhtn = result.EmployerBhtn;
+    this.salary.EmployerUnion = result.EmployerUnion;
+    this.salary.TotalEmployerInsurance = result.TotalEmployerInsurance;
+    this.salary.CompanyCost = result.CompanyCost;
+    this.salary.NetSalary = result.NetSalary;
+    this.salary.MonthlySalary = result.GrossSalary || 0;
+    this.salary.TotalSalary = result.NetSalary || 0;
+    this.formulaNotes = result.FormulaNotes || '';
   }
 
   private ensureFileReady(action: 'upload' | 'import'): boolean {
@@ -292,8 +353,7 @@ export class SalaryAddComponent implements OnInit {
         if (!json.length) {
           this.setFileError('File Excel không có dữ liệu');
         }
-      } catch (error) {
-        console.error('Không thể đọc file excel:', error);
+      } catch {
         this.setFileError('Không thể đọc dữ liệu file, vui lòng kiểm tra lại');
       }
     };
@@ -306,12 +366,10 @@ export class SalaryAddComponent implements OnInit {
   }
 
   private handleUploadError(error: any) {
-    console.error('Error uploading file:', error);
     this.toastr.error(this.extractErrorMessage(error, 'Upload file Excel thất bại'));
   }
 
   private handleImportError(error: any) {
-    console.error('Error importing salaries:', error);
     this.toastr.error(this.extractErrorMessage(error, 'Import bảng lương thất bại'));
   }
 
@@ -319,24 +377,55 @@ export class SalaryAddComponent implements OnInit {
     return error?.error?.message || error?.error?.title || error?.message || fallback;
   }
 
-  onCancel(): void {
-    this.resetForm(); // Reset form khi hủy
-    this.router.navigate(['/salaries']); // Điều hướng về trang danh sách Salary
+  private resetForm(): void {
+    this.salary = this.emptySalary();
+    this.period = this.currentPeriod();
+    this.syncPeriod();
+    this.formulaNotes = '';
+    this.selectedDepartmentId = null;
+    this.clearFileSelection();
+    setTimeout(() => this.addSalaryForm.resetForm(), 0);
   }
 
-  private resetForm(): void {
-    this.salary = {
+  private emptySalary(): Salary {
+    return {
       SalaryId: 0,
       EmployeeId: 0,
       EmployeeName: '',
       Date: '',
+      PeriodYear: 0,
+      PeriodMonth: 0,
       MonthlySalary: 0,
+      BasicSalary: 0,
+      Allowance: 0,
+      InsuranceSalary: 0,
+      StandardDays: 0,
+      WorkedDays: 0,
+      UnpaidLeaveDays: 0,
+      OvertimeHours: 0,
+      OvertimePay: 0,
       Bonus: 0,
+      OtherDeductions: 0,
+      DependentCount: 0,
+      DeductUnionFee: false,
+      GrossSalary: 0,
+      NetSalary: 0,
       TotalSalary: 0,
-      SalaryNotes: '' 
+      SalaryNotes: ''
     };
-    this.selectedDepartmentId = null;
-    this.clearFileSelection();
-    setTimeout(() => this.addSalaryForm.resetForm(), 0);
+  }
+
+  private currentPeriod(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+  }
+
+  private syncPeriod(): void {
+    const [year, month] = (this.period || '').split('-').map(Number);
+    this.salary.PeriodYear = year || 0;
+    this.salary.PeriodMonth = month || 0;
+    if (year && month) {
+      this.salary.Date = `${year}-${month.toString().padStart(2, '0')}-01`;
+    }
   }
 }
