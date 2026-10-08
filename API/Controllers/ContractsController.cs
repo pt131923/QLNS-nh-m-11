@@ -17,9 +17,9 @@ namespace API.Controllers
         private readonly IMongoCollection<Employee> _employees = _employees;
         private readonly IContractRepository _contractRepository = _contractRepository;
         private readonly AutoMapper.IMapper _mapper = _mapper;
-        
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ContractDto>>> GetContracts()
+        public async Task<ActionResult<IEnumerable<ContractDto>>> GetContract()
         {
             var contracts = await _contractRepository.GetContractAsync();
             return Ok(contracts);
@@ -37,6 +37,7 @@ namespace API.Controllers
 
             return Ok(contract);
         }
+
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateContract(ContractUpdateDto contractUpdateDto, int id)

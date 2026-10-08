@@ -11,35 +11,24 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EmployeesController : BaseApiController
+    public class EmployeesController(
+		IEmployeeRepository employeeRepository,
+		AutoMapper.IMapper mapper,
+		IMongoCollection<Employee> employees,
+		IMongoCollection<AppDepartment> departments,
+		IMongoCollection<FileHistory> fileHistory,
+		IMongoIdGenerator idGenerator,
+		IDashboardService dashboardService) : BaseApiController
     {
-        private readonly IMongoCollection<Employee> _employees;
-        private readonly IMongoCollection<AppDepartment> _departments;
-        private readonly IMongoCollection<FileHistory> _fileHistory;
-        private readonly IMongoIdGenerator _idGenerator;
-        private readonly IDashboardService _dashboardService;
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly AutoMapper.IMapper _mapper;
+        private readonly IMongoCollection<Employee> _employees = employees;
+        private readonly IMongoCollection<AppDepartment> _departments = departments;
+        private readonly IMongoCollection<FileHistory> _fileHistory = fileHistory;
+        private readonly IMongoIdGenerator _idGenerator = idGenerator;
+        private readonly IDashboardService _dashboardService = dashboardService;
+        private readonly IEmployeeRepository _employeeRepository = employeeRepository;
+        private readonly AutoMapper.IMapper _mapper = mapper;
 
-        public EmployeesController(
-            IEmployeeRepository employeeRepository,
-            AutoMapper.IMapper mapper,
-            IMongoCollection<Employee> employees,
-            IMongoCollection<AppDepartment> departments,
-            IMongoCollection<FileHistory> fileHistory,
-            IMongoIdGenerator idGenerator,
-            IDashboardService dashboardService)
-        {
-            _employeeRepository = employeeRepository;
-            _mapper = mapper;
-            _employees = employees;
-            _departments = departments;
-            _fileHistory = fileHistory;
-            _idGenerator = idGenerator;
-            _dashboardService = dashboardService;
-        }
-
-        [HttpGet]
+		[HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
         {
             var employees = await _employeeRepository.GetEmployeeAsync();

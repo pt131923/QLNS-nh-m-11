@@ -21,23 +21,22 @@ namespace API.Controllers
         private readonly TokenService _tokenService = _tokenService;
         private readonly ILogger<AuthController> _logger = _logger;
         private readonly IConfiguration _configuration = _configuration;
-        
-        // ---------------- LOGIN ---------------------
+    
 
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LogInDto loginDto)
         {
-            if (string.IsNullOrWhiteSpace(loginDto.UserName) ||
-                string.IsNullOrWhiteSpace(loginDto.Password))
+            if (string.IsNullOrWhiteSpace(loginDto.UserName)  ||
+               string.IsNullOrWhiteSpace(loginDto.Password))
             {
-                return BadRequest(new { message = "Username và password là bắt buộc." });
+                return BadRequest(new {message = "Username va password la bat buoc"});
             }
 
             var user = await _userRepository.GetUserEntityByUsernameAsync(loginDto.UserName);
-            if (user == null)
+            if(user == null)
             {
-                _logger.LogWarning("Login failed: username not found.");
-                return Unauthorized(new { message = "Invalid username or password" });
+                _logger.LogWarning("Login failed : Username not found");
+                return Unauthorized(new { message = "Invalid username or password"});
             }
 
             if (!VerifyPasswordHash(loginDto.Password, user.PasswordHash, user.PasswordSalt))
@@ -60,7 +59,7 @@ namespace API.Controllers
                 // Uploaded avatars (lưu dưới wwwroot/uploads/avatars trên API)
                 return $"{Request.Scheme}://{Request.Host}/uploads/avatars/{u.Image}";
             }
-
+            
             // Trả về đầy đủ thông tin user để frontend cập nhật UI
             return Ok(new
             {
