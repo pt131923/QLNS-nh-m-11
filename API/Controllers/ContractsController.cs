@@ -25,26 +25,22 @@ namespace API.Controllers
             return Ok(contracts);
         }
 
-        [HttpGet("{id}", Name = "GetContractById")]
+        [HttpGet("{id}", Name = "GetcontractById")]
         public async Task<ActionResult<ContractDto>> GetContractById(int id)
         {
             var contract = await _contractRepository.GetContractByIdAsync(id);
-
-            if (contract == null)
-            {
+            if(contract == null){
                 return NotFound();
             }
 
             return Ok(contract);
         }
-
-
-        [HttpPut("{id}")]
+        
+        [HttpPut("id")]
         public async Task<ActionResult> UpdateContract(ContractUpdateDto contractUpdateDto, int id)
         {
             var contract = await _contractRepository.GetContractByIdAsync(id);
-
-            if (contract == null)
+            if(contract == null)
             {
                 return NotFound();
             }
@@ -57,7 +53,7 @@ namespace API.Controllers
             {
                 return NoContent();
             }
-
+            
             return BadRequest("Failed to update contract");
         }
 
@@ -108,6 +104,7 @@ namespace API.Controllers
 
             return BadRequest("Failed to delete the contract");
         }
+
 
         [HttpGet("contracts-with-employees")]
         public async Task<ActionResult<IEnumerable<ContractWithEmployeeDto>>> GetContractsWithEmployees()

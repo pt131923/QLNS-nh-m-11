@@ -9,8 +9,7 @@ namespace API.Controllers
     
     [Route("api/[controller]")]
     [ApiController]
-    public class 
-    ContactHistoryController(IMongoCollection<ContactHistory> _history, IMongoIdGenerator _idGenerator) : BaseApiController
+    public class ContactHistoryController(IMongoCollection<ContactHistory> _history, IMongoIdGenerator _idGenerator) : BaseApiController
     {
         private readonly IMongoCollection<ContactHistory> _history = _history;
         private readonly IMongoIdGenerator _idGenerator = _idGenerator;
