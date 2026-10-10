@@ -156,19 +156,19 @@ namespace API.Controllers
 
                 var pendingLeaves = await leavesCol
                     .Find(l => l.Status == "Pending" || l.Status == "pending")
-                    .SortBy(l => l.StartDate)
+                    .SortBy(l => l.ContractEndDate)
                     .Limit(3)
-                    .Project(l => new { l.Reason, l.StartDate, l.UserId, l.Status })
+                    .Project(l => new { l.Note, l.ContractEndDate, l.EmployeeId, l.Status,l.LeaveType, l.StartDate, l.EmployeeName})
                     .ToListAsync();
 
                 foreach (var l in pendingLeaves)
                 {
-                    var daysLeft = (l.StartDate.Date - today).Days;
+                    var daysLeft = (l.ContractEndDate.Date - today).Days;
                     upcoming.Add(new UpcomingItemDto(
                         Type: "leave",
-                        Title: string.IsNullOrEmpty(l.Reason) ? "Leave request" : l.Reason,
-                        Subtitle: $"UserId: {l.UserId}",
-                        Date: l.StartDate,
+                        Title: string.IsNullOrEmpty(l.Note) ? "Leave request" : l.Note,
+                        Subtitle: $"UserId: {l.EmployeeId}",
+						Date: l.ContractEndDate,
                         DaysLeft: daysLeft,
                         Link: "/leaves"
                     ));

@@ -11,11 +11,14 @@ namespace API.Entities
     {
         [BsonId]
         [BsonRepresentation(BsonType.Int32)]
-        public int LeaveId { get; set; }
-        public int UserId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string Reason { get; set; }
+        public int LeaveId { get; set;}
+        public int EmployeeId { get; set; }
+        public string EmployeeName{ get; set; }
+        public string LeaveType{get; set; }
+        public DateTime StartDate{get; set; }
+        
+        public DateTime ContractEndDate { get; set; }
+        public string Note { get; set; }
 
         public string Status { get; set; }
     }

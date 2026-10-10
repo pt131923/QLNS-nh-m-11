@@ -16,5 +16,6 @@ namespace API.Interfaces
         Task<bool> LeaveExistsAsync(int leaveId);
         Task<bool> AddLeave(Leave leave);
         Task<bool> SaveChanges();
+        Task<bool> SaveAllAsync();
     }
 }

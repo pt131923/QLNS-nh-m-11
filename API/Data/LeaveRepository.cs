@@ -21,9 +21,9 @@ namespace API.Data
             return await _leaves.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Leave> GetLeaveByUserId(int userId)
+        public async Task<Leave> GetLeaveByUserId(int employeeId)
         {
-            return await _leaves.Find(x => x.UserId == userId).FirstOrDefaultAsync();
+            return await _leaves.Find(x => x.EmployeeId == employeeId).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Leave>> GetLeavesAsync()
@@ -65,5 +65,16 @@ namespace API.Data
             await _dashboardService.NotifyDataChangedWithCheckAsync();
             return true;
         }
-    }
+
+        public async Task<bool> SaveAllAsync()
+        {
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+            return true;
+        }
+
+		public bool ConvertExpiredContracts()
+		{
+			return true;
+		}
+	}
 }
