@@ -2,7 +2,7 @@
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Contract } from '../_model/contract';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -37,7 +37,7 @@ export class ContractService {
   }
 
   getContract(id: number): Observable<Contract> {
-    return this.http.get<Contract>(`${this.baseUrl3}${id}`);
+    return this.http.get<Contract>(`${this.baseUrl3}/${id}`);
   }
 
   getContractById(id: number): Observable<Contract> {
@@ -45,7 +45,8 @@ export class ContractService {
   }
 
   AddContract(contract: Contract): Observable<Contract> {
-      return this.http.post<Contract>(`${this.baseUrl3}/add-contract`, contract);
+      return this.http.post<Contract>(`${this.baseUrl3}/add-contract`, contract).pipe
+      (map(res =>res));
     }
 
     UpdateContract(id: number, contract: Contract): Observable<void> {

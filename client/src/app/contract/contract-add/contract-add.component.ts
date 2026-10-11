@@ -118,15 +118,30 @@ if (new Date(contractData.UpdateAt) < new Date(contractData.CreateAt)) {
 
     // Gọi API
     this.contractService.AddContract(contractData).subscribe({
-      next: () => {
-        this.toastr.success('Contract added successfully!');
-        this.addForm.reset();
-        this.router.navigate(['/contracts']);
+      next: (response: Contract) => {
+        console.log('Phản hồi từ BE:', response);
+        
+        const newContractId = response.ContractId;
+        
+        if (newContractId && newContractId !== 0) {
+          this.toastr.success(`Tạo hợp đồng thành công! Mã: ${newContractId}`);
+          
+          // Tải lại danh sách mới nhất
+          this.getContracts();
+          
+          this.addForm.reset();
+          
+          // Chuyển trang sau khi đảm bảo cập nhật xong
+          setTimeout(() => {
+            this.router.navigate(['/contracts']);
+          }, 100);
+        } else {
+          this.toastr.warning("Đã lưu nhưng không nhận được mã hợp đồng!");
+        }
       },
       error: (err) => {
-        console.error('Error adding contract:', err);
-        this.toastr.error('Failed to add contract!');
-        this.addForm.reset();
+        console.error('Lỗi thêm hợp đồng:', err);
+        this.toastr.error('Thêm hợp đồng thất bại!');
       }
     });
   }
