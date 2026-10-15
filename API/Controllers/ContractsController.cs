@@ -25,7 +25,7 @@ public class ContractsController(IContractRepository _contractRepository, AutoMa
         return Ok(contracts);
     }
 
-    [HttpGet("{id}", Name = "GetcontractById")]
+    [HttpGet("{id}", Name = "GetContractById")]
     public async Task<ActionResult<ContractDto>> GetContractById(int id)
     {
         var contract = await _contractRepository.GetContractByIdAsync(id);
@@ -43,7 +43,7 @@ public class ContractsController(IContractRepository _contractRepository, AutoMa
         var contract = await _contractRepository.GetContractByIdAsync(id);
         if(contract == null)
         {
-            return NotFound();
+            return NotFound("Contract does not exits");
         }
 
         _mapper.Map(contractUpdateDto, contract);

@@ -71,55 +71,55 @@ namespace API.Controllers
         // UPLOAD AVATAR (CURRENT USER)
         // ------------------------------------------------------------
         [Authorize]
-        [HttpPost("me/avatar")]
-        [RequestSizeLimit(10_000_000)]
-        public async Task<ActionResult> UploadMyAvatar([FromForm] IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest(new { message = "No file uploaded." });
-            
-            var username = User.FindFirstValue(ClaimTypes.Name);
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized(new { message = "Cannot read username from token." });
-            
-            var userEntity = await _userRepository.GetUserEntityByUsernameAsync(username);
-            if (userEntity == null)
-                return NotFound(new { message = "User not found." });
-            
-            var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
-            var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-            if (string.IsNullOrEmpty(ext) || !allowed.Contains(ext))
-                return BadRequest(new { message = "Only .jpg, .jpeg, .png, .webp files are allowed." });
-            
-            var webRoot = _env.WebRootPath;
-            if (string.IsNullOrEmpty(webRoot))
-                webRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
-            
-            var avatarDir = Path.Combine(webRoot, "uploads", "avatars");
-            Directory.CreateDirectory(avatarDir);
-            
-            var fileName = $"user_{userEntity.UserId}_{Guid.NewGuid():N}{ext}";
-            var filePath = Path.Combine(avatarDir, fileName);
-            
-            await using (var stream = System.IO.File.Create(filePath))
-            {
-                await file.CopyToAsync(stream);
-            }
-            
-            userEntity.Image = fileName;
-            var users = _db.GetCollection<User>("Users");
-            await users.ReplaceOneAsync(u => u.UserId == userEntity.UserId, userEntity);
-            
-            var avatarUrl = BuildAvatarUrl(fileName);
-            return Ok(new { AvatarUrl = avatarUrl, Image = fileName });
-        }
+[HttpPost("me/avatar")]
+[RequestSizeLimit(10_000_000)]
+public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
+{
+    if (dto.File == null || dto.File.Length == 0)
+        return BadRequest(new { message = "No file uploaded." });
+    
+    var username = User.FindFirstValue(ClaimTypes.Name);
+    if (string.IsNullOrEmpty(username))
+        return Unauthorized(new { message = "Cannot read username from token." });
+    
+    var userEntity = await _userRepository.GetUserEntityByUsernameAsync(username);
+    if (userEntity == null)
+        return NotFound(new { message = "User not found." });
+    
+    var ext = Path.GetExtension(dto.File.FileName)?.ToLowerInvariant();
+    var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+    if (string.IsNullOrEmpty(ext) || !allowed.Contains(ext))
+        return BadRequest(new { message = "Only .jpg, .jpeg, .png, .webp files are allowed." });
+    
+    var webRoot = _env.WebRootPath;
+    if (string.IsNullOrEmpty(webRoot))
+        webRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+    
+    var avatarDir = Path.Combine(webRoot, "uploads", "avatars");
+    Directory.CreateDirectory(avatarDir);
+    
+    var fileName = $"user_{userEntity.UserId}_{Guid.NewGuid():N}{ext}";
+    var filePath = Path.Combine(avatarDir, fileName);
+    
+    await using (var stream = System.IO.File.Create(filePath))
+    {
+        await dto.File.CopyToAsync(stream);
+    }
+    
+    userEntity.Image = fileName;
+    var users = _db.GetCollection<User>("Users");
+    await users.ReplaceOneAsync(u => u.UserId == userEntity.UserId, userEntity);
+    
+    var avatarUrl = BuildAvatarUrl(fileName);
+    return Ok(new { AvatarUrl = avatarUrl, Image = fileName });
+}
 
         // ------------------------------------------------------------
         // UPDATE PASSWORD
         // ------------------------------------------------------------
         [Authorize]
         [HttpPut("{id}/password")]
-        public async Task<ActionResult> UpdatePassword(int id, [FromBody] UpdatePasswordDto dto)
+        public async Task<ActionResult> UpdatePassword(int id, [FromForm] UpdatePasswordDto dto)
         {
             if (id <= 0)
                 return BadRequest(new { message = "Invalid user ID." });
@@ -204,7 +204,7 @@ namespace API.Controllers
         // CREATE
         // ------------------------------------------------------------
         [HttpPost]
-        public async Task<ActionResult> AddUser([FromBody] UserDto userDto)
+        public async Task<ActionResult> AddUser([FromForm] UserDto userDto)
         {
             if (userDto == null || string.IsNullOrWhiteSpace(userDto.UserName))
                 return BadRequest("User name cannot be empty.");
@@ -224,7 +224,7 @@ namespace API.Controllers
         // UPDATE
         // ------------------------------------------------------------
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateUser(int id, [FromBody] UserDto userDto)
+        public async Task<ActionResult> UpdateUser(int id, [FromForm] UserDto userDto)
         {
             if (id != userDto.UserId)
                 return BadRequest("Route ID and body ID do not match.");

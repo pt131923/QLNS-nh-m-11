@@ -33,20 +33,20 @@ namespace API.Controllers
         {
             return Ok(new
             {
-                BhxhEmployeeRate = PayrollCalculator.BhxhEmployeeRate,
-                BhytEmployeeRate = PayrollCalculator.BhytEmployeeRate,
-                BhtnEmployeeRate = PayrollCalculator.BhtnEmployeeRate,
-                UnionEmployeeRate = PayrollCalculator.UnionEmployeeRate,
-                BhxhEmployerRate = PayrollCalculator.BhxhEmployerRate,
-                BhytEmployerRate = PayrollCalculator.BhytEmployerRate,
-                BhtnEmployerRate = PayrollCalculator.BhtnEmployerRate,
-                UnionEmployerRate = PayrollCalculator.UnionEmployerRate,
-                BaseWage = PayrollCalculator.BaseWage,
-                RegionalMinimumWageRegion1 = PayrollCalculator.RegionalMinimumWageRegion1,
-                BhxhBhytCeiling = PayrollCalculator.BhxhBhytCeiling,
-                BhtnCeiling = PayrollCalculator.BhtnCeiling,
-                PersonalDeduction = PayrollCalculator.PersonalDeduction,
-                DependentDeduction = PayrollCalculator.DependentDeduction
+				PayrollCalculator.BhxhEmployeeRate,
+				PayrollCalculator.BhytEmployeeRate,
+				PayrollCalculator.BhtnEmployeeRate,
+				PayrollCalculator.UnionEmployeeRate,
+				PayrollCalculator.BhxhEmployerRate,
+				PayrollCalculator.BhytEmployerRate,
+				PayrollCalculator.BhtnEmployerRate,
+				PayrollCalculator.UnionEmployerRate,
+				PayrollCalculator.BaseWage,
+				PayrollCalculator.RegionalMinimumWageRegion1,
+				PayrollCalculator.BhxhBhytCeiling,
+				PayrollCalculator.BhtnCeiling,
+				PayrollCalculator.PersonalDeduction,
+				PayrollCalculator.DependentDeduction
             });
         }
 
