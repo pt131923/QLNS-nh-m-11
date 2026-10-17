@@ -71,10 +71,9 @@ namespace API.Controllers
                     email = user.Email,
                     phoneNumber = user.PhoneNumber,
                     address = user.Address,
-                    // Sử dụng trường Image cho avatar
                     avatarUrl = BuildAvatarUrl(user),
-                    displayName = user.UserName, // Sử dụng username làm display name
-                    role = user.Role ?? "user" // Sử dụng role từ database
+                    displayName = user.UserName,
+                    role = user.Role ?? "user" 
                 }
             });
         }
@@ -139,7 +138,6 @@ namespace API.Controllers
 
             var token = authHeader.Substring("Bearer ".Length);
 
-            // Manually validate the token (even if expired)
             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["TokenKey"]);
 

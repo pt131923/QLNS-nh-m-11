@@ -85,8 +85,7 @@ namespace API.Controllers
 
             return BadRequest("Failed to delete the Department");
         }
-
-        // DepartmentExists đã được chuyển vào repository (Mongo index + query)
+        
     }
 }
 
