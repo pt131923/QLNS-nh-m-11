@@ -61,7 +61,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("add")]
+        [HttpPost("add-salary")]
         public async Task<IActionResult> Add(SalaryDto dto)
         {
             try
@@ -71,7 +71,7 @@ namespace API.Controllers
                 var newSalary = await _payrollService.UpsertFromResultAsync(calcResult, dto.SalaryNotes);
                 
                 return CreatedAtRoute("GetSalaryById", new { id = newSalary.SalaryId }, 
-                                      _mapper.Map<SalaryDto>(newSalary));
+                 _mapper.Map<SalaryDto>(newSalary));
             }
             catch (Exception ex)
             {
@@ -84,7 +84,7 @@ namespace API.Controllers
         {
             var existing = await _salaryRepo.GetSalaryByIdAsync(id);
             if (existing == null) return NotFound("Không tìm thấy bản ghi");
-
+  
             try
             {
                 // Giữ EmployeeId nếu không truyền
