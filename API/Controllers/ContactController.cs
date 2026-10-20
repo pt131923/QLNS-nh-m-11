@@ -5,16 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 namespace API.Controllers
 {
     
     [ApiController]
     [Route("api/[controller]")]
-    public class ContactController(IContactRepository _contactRepository, AutoMapper.IMapper _mapper) : ControllerBase
+    public class ContactController(IContactRepository _contactRepository, IMapper _mapper) : ControllerBase
     {
         private readonly IContactRepository _contactRepository = _contactRepository;
-        private readonly AutoMapper.IMapper _mapper = _mapper;
+        private readonly IMapper _mapper = _mapper;
 
         // GET api/contact
         [HttpGet]

@@ -27,7 +27,6 @@ namespace API.Entities
 
         public string EmployeeInformation { get; set; }
 
-        // Thông tin chi tiết
         public DateTime? BirthDate { get; set; }
 
         public string PlaceOfBirth { get; set; }

@@ -60,7 +60,6 @@ namespace API.Controllers
                 return $"{Request.Scheme}://{Request.Host}/uploads/avatars/{u.Image}";
             }
             
-            // Trả về đầy đủ thông tin user để frontend cập nhật UI
             return Ok(new
             {
                 token,
@@ -130,13 +129,13 @@ namespace API.Controllers
         public async Task<ActionResult> RefreshToken()
         {
             // Get token from Authorization header
-            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            var authHeader = Request.Headers.Authorization.FirstOrDefault();
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
             {
                 return Unauthorized(new { message = "No token provided." });
             }
 
-            var token = authHeader.Substring("Bearer ".Length);
+            var token = authHeader["Bearer ".Length..];
 
             var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["TokenKey"]);
@@ -173,8 +172,7 @@ namespace API.Controllers
             }
         }
 
-        // ---------------- PASSWORD VERIFY ---------------------
-        private bool VerifyPasswordHash(string password, byte[] hash, byte[] salt)
+        private static bool VerifyPasswordHash(string password, byte[] hash, byte[] salt)
         {
             using var hmac = new HMACSHA512(salt);
             var computed = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));

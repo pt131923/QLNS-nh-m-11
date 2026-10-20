@@ -1,10 +1,9 @@
+using API.Entities; 
+
 namespace API.Services
 {
-    /// <summary>
-    /// Công thức lương Gross → Net theo thực tế HR/kế toán Việt Nam
-    /// (BHXH–BHYT–BHTN, giảm trừ gia cảnh, thuế TNCN lũy tiến từng phần).
-    /// </summary>
-    public static class PayrollCalculator
+
+    public class PayrollCalculator
     {
         public const decimal BhxhEmployeeRate = 0.08m;
         public const decimal BhytEmployeeRate = 0.015m;
@@ -173,25 +172,25 @@ namespace API.Services
     }
 
     public class PayrollInput
-    {
-        public int EmployeeId { get; set; }
-        public string EmployeeName { get; set; }
-        public int Year { get; set; }
-        public int Month { get; set; }
-        public decimal BasicSalary { get; set; }
-        public decimal Allowance { get; set; }
-        public decimal InsuranceSalary { get; set; }
-        public decimal? WorkedDays { get; set; }
-        public decimal StandardDays { get; set; }
-        public decimal UnpaidLeaveDays { get; set; }
-        public decimal OvertimeHours { get; set; }
-        public decimal Bonus { get; set; }
-        public decimal OtherDeductions { get; set; }
-        public int DependentCount { get; set; }
-        public bool DeductUnionFee { get; set; }
-    }
+	    {
+	        public int EmployeeId { get; set; }
+	        public string EmployeeName { get; set; }
+	        public int Year { get; set; }
+	        public int Month { get; set; }
+	        public decimal BasicSalary { get; set; }
+	        public decimal Allowance { get; set; }
+	        public decimal InsuranceSalary { get; set; }
+	        public decimal? WorkedDays { get; set; }
+	        public decimal StandardDays { get; set; }
+	        public decimal UnpaidLeaveDays { get; set; }
+	        public decimal OvertimeHours { get; set; }
+	        public decimal Bonus { get; set; }
+	        public decimal OtherDeductions { get; set; }
+	        public int DependentCount { get; set; }
+	        public bool DeductUnionFee { get; set; }
+	    }
 
-    public class PayrollResult
+        public class PayrollResult
     {
         public int EmployeeId { get; set; }
         public string EmployeeName { get; set; }
@@ -229,4 +228,5 @@ namespace API.Services
         public decimal NetSalary { get; set; }
         public string FormulaNotes { get; set; }
     }
+
 }

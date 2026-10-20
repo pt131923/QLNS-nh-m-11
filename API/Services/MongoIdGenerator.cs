@@ -3,10 +3,6 @@ using MongoDB.Driver;
 
 namespace API.Services
 {
-    /// <summary>
-    /// Sinh ID kiểu int tự tăng cho MongoDB theo từng collection/entity.
-    /// Dùng collection "Counters": { _id: "<name>", seq: <int> }.
-    /// </summary>
     public interface IMongoIdGenerator
     {
         Task<int> NextAsync(string name, CancellationToken cancellationToken = default);

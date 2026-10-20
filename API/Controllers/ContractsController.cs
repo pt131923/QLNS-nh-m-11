@@ -4,6 +4,7 @@ using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using AutoMapper;
 using System.Linq;
 
 namespace API.Controllers;
@@ -11,7 +12,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ContractsController(IContractRepository _contractRepository, AutoMapper.IMapper _mapper, IMongoCollection<Contract> _contracts, IMongoCollection<Employee> _employees) : BaseApiController
+public class ContractsController(IContractRepository _contractRepository, IMapper _mapper, IMongoCollection<Contract> _contracts, IMongoCollection<Employee> _employees) : BaseApiController
 {
     private readonly IMongoCollection<Contract> _contracts = _contracts;
     private readonly IMongoCollection<Employee> _employees = _employees;

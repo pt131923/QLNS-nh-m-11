@@ -73,7 +73,7 @@ namespace API.Services
                     await SeedAsync(ct);
                     return;
                 }
-                catch (System.FormatException ex)
+                catch (FormatException ex)
                 {
                     _logger.LogWarning(ex, "⚠️ Lỗi schema MongoDB (_id). Đang xóa collections và seed lại...");
                     await DropSeededCollectionsAsync(ct);
@@ -171,7 +171,7 @@ namespace API.Services
                         employees.Add(emp);
                     }
 
-                    if (employees.Any())
+                    if (employees.Count == 0)
                     {
                         await employeeCol.InsertManyAsync(employees, cancellationToken: ct);
                         _logger.LogInformation("✅ Seeded Employee data.");
@@ -189,8 +189,7 @@ namespace API.Services
 
                 var users = new List<User>
                 {
-                    new User
-                    {
+                    new() {
                         UserId = await _idGenerator.NextAsync("Users", ct),
                         UserName = "admin",
                         Email = "admin@qlns.com",
@@ -201,8 +200,7 @@ namespace API.Services
                         Role = "admin",
                         Image = "admin-avatar.png"
                     },
-                    new User
-                    {
+                    new() {
                         UserId = await _idGenerator.NextAsync("Users", ct),
                         UserName = "manager",
                         Email = "manager@qlns.com",
@@ -213,8 +211,7 @@ namespace API.Services
                         Role = "manager",
                         Image = "manager-avatar.png"
                     },
-                    new User
-                    {
+                    new() {
                         UserId = await _idGenerator.NextAsync("Users", ct),
                         UserName = "employee",
                         Email = "employee@qlns.com",
@@ -237,12 +234,12 @@ namespace API.Services
             {
                 var trainings = new List<Training>
                 {
-                    new Training { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "React Advanced", Description = "Advanced React Development", Date = DateTime.Now.AddDays(30), Cost = 5000000 },
-                    new Training { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "C# .NET Core", Description = "Backend Development with .NET", Date = DateTime.Now.AddDays(60), Cost = 7000000 },
-                    new Training { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "SQL Database", Description = "Database Design and Optimization", Date = DateTime.Now.AddDays(90), Cost = 3000000 },
-                    new Training { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "Agile Methodology", Description = "Project Management with Agile", Date = DateTime.Now.AddDays(45), Cost = 2000000 },
-                    new Training { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "DevOps & CI/CD", Description = "DevOps practices and CI/CD pipelines", Date = DateTime.Now.AddDays(75), Cost = 6000000 },
-                    new Training { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "Cloud Computing", Description = "AWS/Azure cloud architecture", Date = DateTime.Now.AddDays(120), Cost = 8000000 }
+                    new() { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "React Advanced", Description = "Advanced React Development", Date = DateTime.Now.AddDays(30), Cost = 5000000 },
+                    new() { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "C# .NET Core", Description = "Backend Development with .NET", Date = DateTime.Now.AddDays(60), Cost = 7000000 },
+                    new() { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "SQL Database", Description = "Database Design and Optimization", Date = DateTime.Now.AddDays(90), Cost = 3000000 },
+                    new() { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "Agile Methodology", Description = "Project Management with Agile", Date = DateTime.Now.AddDays(45), Cost = 2000000 },
+                    new() { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "DevOps & CI/CD", Description = "DevOps practices and CI/CD pipelines", Date = DateTime.Now.AddDays(75), Cost = 6000000 },
+                    new() { TrainingId = await _idGenerator.NextAsync("Trainings", ct), Title = "Cloud Computing", Description = "AWS/Azure cloud architecture", Date = DateTime.Now.AddDays(120), Cost = 8000000 }
                 };
 
                 await trainingCol.InsertManyAsync(trainings, cancellationToken: ct);
@@ -255,10 +252,10 @@ namespace API.Services
             {
                 var recuiments = new List<Recuiment>
                 {
-                    new Recuiment { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Tech Solutions", Amount = 15000000, OpeningsCount = 5 },
-                    new Recuiment { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Global Corp", Amount = 25000000, OpeningsCount = 8 },
-                    new Recuiment { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Startup Inc", Amount = 8000000, OpeningsCount = 3 },
-                    new Recuiment { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Enterprise Ltd", Amount = 35000000, OpeningsCount = 12 }
+                    new() { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Tech Solutions", Amount = 15000000, OpeningsCount = 5 },
+                    new() { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Global Corp", Amount = 25000000, OpeningsCount = 8 },
+                    new() { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Startup Inc", Amount = 8000000, OpeningsCount = 3 },
+                    new() { Id = await _idGenerator.NextAsync("Recuiments", ct), CustomerName = "Enterprise Ltd", Amount = 35000000, OpeningsCount = 12 }
                 };
 
                 await recuimentCol.InsertManyAsync(recuiments, cancellationToken: ct);
@@ -270,7 +267,7 @@ namespace API.Services
             if (await contractCol.CountDocumentsAsync(_ => true, cancellationToken: ct) == 0)
             {
                 var empList = await employeeCol.Find(_ => true).Limit(5).ToListAsync(ct);
-                if (empList.Any())
+                if (empList.Count == 0)
                 {
                     var contracts = new List<Contract>();
                     var now = DateTime.UtcNow;
@@ -305,7 +302,7 @@ namespace API.Services
             if (await salaryCol.CountDocumentsAsync(_ => true, cancellationToken: ct) == 0)
             {
                 var empList2 = await employeeCol.Find(_ => true).Limit(5).ToListAsync(ct);
-                if (empList2.Any())
+                if (empList2.Count == 0)
                 {
                     var salaries = new List<Salary>();
                     var now = DateTime.UtcNow;

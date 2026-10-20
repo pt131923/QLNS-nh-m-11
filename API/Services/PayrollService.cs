@@ -16,6 +16,7 @@ namespace API.Services
         private readonly IMongoCollection<Salary> _salaries = database.GetCollection<Salary>("Salaries");
         private readonly ISalaryRepository _salaryRepository = salaryRepository;
         private readonly IMongoIdGenerator _idGenerator = idGenerator;
+        
 
         public async Task<PayrollResult> BuildAsync(PayrollCalculateRequest request, CancellationToken ct = default)
         {

@@ -11,7 +11,7 @@ namespace API.Controllers
     
     [ApiController]
     [Route("api/[controller]")]
-    public class DepartmentsController(IDepartmentRepository _departmentRepository, AutoMapper.IMapper _mapper) : BaseApiController
+    public class DepartmentsController(IDepartmentRepository _departmentRepository, IMapper _mapper) : BaseApiController
     {
 
         [HttpGet]

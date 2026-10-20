@@ -34,7 +34,7 @@ namespace API.Controllers
             try
             {
                 // Log để debug
-                var username = User?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+                var username = User?.FindFirst(ClaimTypes.Name)?.Value;
                 var userId = User?.FindFirst("userId")?.Value;
                 var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
                 

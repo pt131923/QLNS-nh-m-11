@@ -122,15 +122,15 @@ namespace API.Controllers
             var deptMap = departments.ToDictionary(d => d.DepartmentId, d => d);
 
             if (employees.Count == 0)
-                return NotFound("Chưa có nhân viên nào");
+                return NotFound();
 
             foreach (var e in employees)
             {
                 if (deptMap.TryGetValue(e.DepartmentId, out var dept))
                     e.Department = dept;
             }
-
-            return Ok(employees.Select(e => _mapper.Map<EmployeeWithDepartmentDto>(e)).ToList());
+ 
+            return Ok(employees.Select(_mapper.Map<EmployeeWithDepartmentDto>).ToList());
         }
 
         [HttpGet("search")]
@@ -153,7 +153,7 @@ namespace API.Controllers
             var employees = await _employees.Find(filter).ToListAsync();
             
             if (employees.Count == 0)
-                return NotFound("Không tìm thấy nhân viên phù hợp điều kiện");
+                return NotFound();
 
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
@@ -219,7 +219,7 @@ namespace API.Controllers
                         continue;
                     }
 
-                    if (TryGet(ws, headers, row, new[] { "identitynumber", "identity number", "cccd" }, out string cccd))
+                    if (TryGet(ws, headers, row, ["identitynumber", "identity number", "cccd"], out string cccd))
                     {
                         cccd = cccd.Trim().ToLower();
 
@@ -239,7 +239,7 @@ namespace API.Controllers
                         emp.IdentityNumber = cccd;
                     }
 
-                    if (!TryGet(ws, headers, row, new[] { "departmentid", "department id", "department" }, out string deptValue))
+                    if (!TryGet(ws, headers, row, ["departmentid", "department id", "department"], out string deptValue))
                     {
                         errors.Add($"Row {row}: DepartmentId/Department is required");
                         continue;
@@ -303,7 +303,7 @@ namespace API.Controllers
             });
         }
 
-        private async Task<string> CalculateHash(IFormFile file)
+        private static async Task<string> CalculateHash(IFormFile file)
         {
             using var sha = SHA256.Create();
             using var stream = file.OpenReadStream();

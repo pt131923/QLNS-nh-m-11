@@ -6,12 +6,13 @@ using API.Data;
 using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TrainingController(ITrainingRepository _trainingRepository, AutoMapper.IMapper _mapper) : BaseApiController
+    public class TrainingController(ITrainingRepository _trainingRepository, IMapper _mapper) : BaseApiController
     {
         [HttpGet]
         public async Task<IActionResult> GetTraining()

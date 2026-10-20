@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RecuimentController(IRecuimentRepository _recuimentRepository, AutoMapper.IMapper _mapper) : BaseApiController
+    public class RecuimentController(IRecuimentRepository _recuimentRepository, IMapper _mapper) : BaseApiController
     {
         // GET api/recuiment
         [HttpGet]
