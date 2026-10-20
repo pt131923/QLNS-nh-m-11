@@ -121,6 +121,9 @@ namespace API.Controllers
             var departments = await _departments.Find(_ => true).ToListAsync();
             var deptMap = departments.ToDictionary(d => d.DepartmentId, d => d);
 
+            if (employees.Count == 0)
+                return NotFound("Chưa có nhân viên nào");
+
             foreach (var e in employees)
             {
                 if (deptMap.TryGetValue(e.DepartmentId, out var dept))
@@ -131,9 +134,7 @@ namespace API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(
-            string name = null,
-            int? departmentId = null)
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(string name = null, int? departmentId = null)
         {
             var filter = Builders<Employee>.Filter.Empty;
 
@@ -146,10 +147,14 @@ namespace API.Controllers
 
             if (departmentId.HasValue)
             {
-                filter &= Builders<Employee>.Filter.Eq(x => x.DepartmentId, departmentId.Value);
+                filter = Builders<Employee>.Filter.Eq(x => x.DepartmentId, departmentId.Value);
             }
 
             var employees = await _employees.Find(filter).ToListAsync();
+            
+            if (employees.Count == 0)
+                return NotFound("Không tìm thấy nhân viên phù hợp điều kiện");
+
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
 
@@ -200,7 +205,7 @@ namespace API.Controllers
                 {
                     var emp = new Employee();
 
-                    if (!TryGet(ws, headers, row, new[] { "employeename", "employee name", "name" }, out string name))
+                    if (!TryGet(ws, headers, row, ["employeename", "employee name", "name"], out string name))
                     {
                         errors.Add($"Row {row}: EmployeeName is required");
                         continue;
