@@ -52,6 +52,7 @@
     "title": "Quản lý nhân viên",
     "add": "Thêm nhân viên",
     "name": "Tên",
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "addNew": "Thêm mới",
     "edit": "Sửa",
     "delete": "Xóa",
@@ -86,6 +87,7 @@
   "department": {
     "title": "Quản lý phòng ban",
     "addNew": "Thêm mới",
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "edit": "Sửa",
     "delete": "Xóa",
     "exportToExcel": "Xuất ra Excel",
@@ -102,6 +104,7 @@
     "title": "Quản lý hợp đồng",
     "addNew": "Thêm mới",
     "edit": "Sửa",
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "delete": "Xóa",
     "exportToExcel": "Xuất ra Excel",
     "searchPlaceholder": "Tìm kiếm...",
@@ -127,6 +130,7 @@
     "addNew": "Thêm mới",
     "edit": "Sửa",
     "delete": "Xóa",
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "exportToExcel": "Xuất ra Excel",
     "searchPlaceholder": "Tìm kiếm...",
     "loading": "Đang tải bảng lương",
@@ -179,6 +183,7 @@
     "companyCost": "Tổng chi phí công ty"
   },
   "contact": {
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "title": "Liên hệ",
     "contactInfo": "Nếu bạn có vấn đề hoặc cần hỗ trợ, vui lòng liên hệ:",
     "email": "Email",
@@ -306,6 +311,7 @@
     "updateError": "Lỗi cập nhật"
   },
   "training": {
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "title": "Khóa học đào tạo",
     "trainingCourses": "Khóa học",
     "titleLabel": "Tiêu đề",
@@ -323,6 +329,7 @@
     "fullstackDescription": "Phát triển cả thành phần frontend và backend bằng Java và ReactJS."
   },
   "timekeeping": {
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "title": "Chấm công nhận diện khuôn mặt",
     "captureAndCheckIn": "Chụp ảnh và Chấm công",
     "attendanceHistory": "Lịch sử chấm công",
@@ -346,6 +353,7 @@
     "earlyLeave": "Về sớm"
   },
   "recruitment": {
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "title": "Hệ thống quản lý tuyển dụng",
     "welcome": "Chào mừng đến với Hệ thống quản lý tuyển dụng. Vui lòng đăng nhập để tiếp tục.",
     "currentJobOpenings": "Cơ hội việc làm hiện tại",
@@ -357,6 +365,7 @@
     "backendDescription": "Làm việc với API và cơ sở dữ liệu ASP.NET Core."
   },
   "benefits": {
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "title": "Quản lý phúc lợi nhân viên",
     "welcome": "Chào mừng đến với phần Quản lý phúc lợi nhân viên. Tại đây bạn có thể xem và quản lý các phúc lợi nhân viên khác nhau.",
     "navigateOptions": "Sử dụng các tùy chọn bên dưới để điều hướng qua các danh mục phúc lợi khác nhau:",
@@ -381,6 +390,7 @@
     "developedBy": "Phát triển bởi PhongNH"
   },
   "leave": {
+    "backToDashboard":"Quay lại Bảng điều khiển",
     "title": "Danh sách nghỉ phép",
     "leaveId": "Mã nghỉ phép",
     "employeeId": "Mã nhân viên",
@@ -391,6 +401,7 @@
     "status": "Trạng thái"
   },
     "help": {
+      "backToDashboard":"Quay lại Bảng điều khiển",
       "title": "Câu hỏi thường gặp",
   
       "q1": "Làm sao để chấm công đúng giờ?",
