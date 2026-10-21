@@ -29,21 +29,18 @@ public class EmployeeRepository(
     private readonly List<Employee> _pendingUpdates = [];
     private readonly List<Employee> _pendingDeletes = [];
 
-    // === Lấy danh sách nhân viên ===
     public async Task<IEnumerable<EmployeeDto>> GetEmployeesAsync()
     {
         var employees = await _employees.Find(_ => true).ToListAsync();
         return _mapper.Map<IEnumerable<EmployeeDto>>(employees);
     }
 
-    // === Lấy theo ID ===
     public async Task<EmployeeDto> GetEmployeeByIdAsync(int id)
     {
         var employee = await _employees.Find(x => x.EmployeeId == id).FirstOrDefaultAsync();
         return employee == null ? null : _mapper.Map<EmployeeDto>(employee);
     }
 
-    // === Lấy kèm thông tin phòng ban ===
     public async Task<IEnumerable<EmployeeWithDepartmentDto>> GetWithDepartmentsAsync()
     {
         var employees = await _employees.Find(_ => true).ToListAsync();
@@ -59,23 +56,19 @@ public class EmployeeRepository(
         return _mapper.Map<IEnumerable<EmployeeWithDepartmentDto>>(employees);
     }
 
-    // === Thêm nhân viên ===
     public async Task<EmployeeDto> AddEmployeeAsync(EmployeeDto dto)
     {
-        // Kiểm tra tên trùng
         if (await IsNameExistsAsync(dto.EmployeeName))
             throw new ArgumentException("Employee name already exists");
 
-        // Kiểm tra phòng ban tồn tại
         var deptExists = await _departments.CountDocumentsAsync(d => d.DepartmentId == dto.DepartmentId) > 0;
         if (!deptExists)
             throw new ArgumentException("Department does not exist");
 
-        // Tạo đối tượng
+
         var employee = _mapper.Map<Employee>(dto);
         employee.EmployeeName = employee.EmployeeName.Trim().ToLower();
 
-        // Lưu
         Add(employee);
         if (!await SaveAllAsync())
             throw new InvalidOperationException("Failed to save employee");
@@ -83,7 +76,6 @@ public class EmployeeRepository(
         return _mapper.Map<EmployeeDto>(employee);
     }
 
-    // === Cập nhật ===
     public async Task<bool> UpdateEmployeeAsync(int id, EmployeeUpdateDto dto)
     {
         var employee = await _employees.Find(x => x.EmployeeId == id).FirstOrDefaultAsync();
@@ -94,8 +86,12 @@ public class EmployeeRepository(
         return await SaveAllAsync();
     }
 
-    // === Xóa ===
-    public async Task<bool> DeleteEmployeeAsync(int id)
+	private void Update(Employee employee)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<bool> DeleteEmployeeAsync(int id)
     {
         var employee = await _employees.Find(x => x.EmployeeId == id).FirstOrDefaultAsync();
         if (employee == null) return false;
@@ -104,7 +100,6 @@ public class EmployeeRepository(
         return await SaveAllAsync();
     }
 
-    // === Import file Excel ===
     public async Task<(int total, int imported, List<string> errors)> ImportEmployeesAsync(IFormFile file)
     {
         var errors = new List<string>();
@@ -143,7 +138,6 @@ public class EmployeeRepository(
         {
             try
             {
-                // Tên nhân viên
                 if (!TryGet(ws, headers, row, ["employeename", "employee name", "name"], out string name))
                 {
                     errors.Add($"Row {row}: EmployeeName is required");
@@ -161,7 +155,6 @@ public class EmployeeRepository(
                     EmployeeName = name
                 };
 
-                // Số CCCD
                 if (TryGet(ws, headers, row, ["identitynumber", "identity number", "cccd"], out string cccd))
                 {
                     cccd = cccd.Trim().ToLower();
@@ -179,7 +172,6 @@ public class EmployeeRepository(
                     emp.IdentityNumber = cccd;
                 }
 
-                // Phòng ban
                 if (!TryGet(ws, headers, row, ["departmentid", "department id", "department"], out string deptValue))
                 {
                     errors.Add($"Row {row}: DepartmentId/Department is required");
@@ -212,7 +204,6 @@ public class EmployeeRepository(
                     emp.DepartmentId = dept.DepartmentId;
                 }
 
-                // Gán thông tin hệ thống
                 emp.EmployeeId = await _idGenerator.NextAsync("Employees");
                 emp.CreatedAt = DateTime.UtcNow;
                 employeesToImport.Add(emp);
@@ -301,7 +292,6 @@ public class EmployeeRepository(
         return false;
     }
 
-    // === Lưu thay đổi hàng loạt ===
     public async Task<bool> SaveAllAsync()
     {
         var anyChanges = _pendingInserts.Count > 0 || _pendingUpdates.Count > 0 || _pendingDeletes.Count > 0;
@@ -358,17 +348,7 @@ public class EmployeeRepository(
 		throw new NotImplementedException();
 	}
 
-	public void Update(Employee employee)
-	{
-		throw new NotImplementedException();
-	}
-
 	public void Update(int id, Employee employee)
-	{
-		throw new NotImplementedException();
-	}
-
-	public Task<bool> GetWithDepartmentAsync()
 	{
 		throw new NotImplementedException();
 	}
