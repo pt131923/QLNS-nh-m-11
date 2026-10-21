@@ -16,6 +16,8 @@ namespace API.Interfaces
         Task<bool> UpdateEmployeeAsync(int id, EmployeeUpdateDto dto);
         Task<bool> DeleteEmployeeAsync(int id);
         Task<bool> GetWithDepartmentsAsync();
+        Task<bool> GetCountAsync();
+
         Task<(int total, int imported, List<string> errors)> ImportEmployeesAsync(IFormFile file);
     }
 }

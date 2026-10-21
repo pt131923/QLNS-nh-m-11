@@ -17,6 +17,12 @@ public class EmployeesController(IEmployeeRepository employeeRepository) : BaseA
         return Ok(data);
     }
 
+    [HttpGet("count")]
+    public async Task<IActionResult> GetCount()
+    {
+        return Ok(await _employeeRepository.GetCountAsync());
+    }
+
     [HttpGet("{id}", Name = "GetEmployeeById")]
     public async Task<IActionResult> GetById(int id)
     {

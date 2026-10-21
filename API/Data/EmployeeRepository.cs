@@ -15,7 +15,7 @@ public class EmployeeRepository(
     IMongoCollection<FileHistory> fileHistory,
     IMongoIdGenerator idGenerator,
     IDashboardService dashboardService,
-    IMapper mapper) : IEmployeeRepository
+    IMapper mapper)
 {
     // === Kết nối CSDL ===
     private readonly IMongoCollection<Employee> _employees = database.GetCollection<Employee>("Employees");
@@ -76,7 +76,11 @@ public class EmployeeRepository(
         return _mapper.Map<EmployeeDto>(employee);
     }
 
-    public async Task<bool> UpdateEmployeeAsync(int id, EmployeeUpdateDto dto)
+	private static void Add(Employee employee)
+    {
+    }
+
+	public async Task<bool> UpdateEmployeeAsync(int id, EmployeeUpdateDto dto)
     {
         var employee = await _employees.Find(x => x.EmployeeId == id).FirstOrDefaultAsync();
         if (employee == null) return false;
@@ -86,9 +90,8 @@ public class EmployeeRepository(
         return await SaveAllAsync();
     }
 
-	private void Update(Employee employee)
+	private static void Update(Employee employee)
 	{
-		throw new NotImplementedException();
 	}
 
 	public async Task<bool> DeleteEmployeeAsync(int id)
@@ -96,11 +99,15 @@ public class EmployeeRepository(
         var employee = await _employees.Find(x => x.EmployeeId == id).FirstOrDefaultAsync();
         if (employee == null) return false;
 
-        Delete(employee);
+		Delete(employee);
         return await SaveAllAsync();
     }
 
-    public async Task<(int total, int imported, List<string> errors)> ImportEmployeesAsync(IFormFile file)
+	private static void Delete(Employee employee)
+	{
+	}
+
+	public async Task<(int total, int imported, List<string> errors)> ImportEmployeesAsync(IFormFile file)
     {
         var errors = new List<string>();
         var employeesToImport = new List<Employee>();
@@ -322,39 +329,4 @@ public class EmployeeRepository(
         await _dashboardService.NotifyDataChangedWithCheckAsync();
         return true;
     }
-
-	Task<IEnumerable<Employee>> IEmployeeRepository.GetEmployeesAsync()
-	{
-		throw new NotImplementedException();
-	}
-
-	Task<Employee> IEmployeeRepository.GetEmployeeByIdAsync(int id)
-	{
-		throw new NotImplementedException();
-	}
-
-	public Task<IEnumerable<EmployeeDto>> GetEmployeeAsync()
-	{
-		throw new NotImplementedException();
-	}
-
-	public void Add(Employee employee)
-	{
-		throw new NotImplementedException();
-	}
-
-	public void Delete(Employee employee)
-	{
-		throw new NotImplementedException();
-	}
-
-	public void Update(int id, Employee employee)
-	{
-		throw new NotImplementedException();
-	}
-
-	Task<bool> IEmployeeRepository.GetWithDepartmentsAsync()
-	{
-		throw new NotImplementedException();
-	}
 }
