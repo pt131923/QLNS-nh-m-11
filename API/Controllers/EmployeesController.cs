@@ -6,6 +6,7 @@ using OfficeOpenXml;
 using System.Security.Cryptography;
 using MongoDB.Driver;
 using API.Services;
+using AutoMapper;
 
 namespace API.Controllers
 {
@@ -13,7 +14,7 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class EmployeesController(
 		IEmployeeRepository employeeRepository,
-		AutoMapper.IMapper mapper,
+		IMapper mapper,
 		IMongoCollection<Employee> employees,
 		IMongoCollection<AppDepartment> departments,
 		IMongoCollection<FileHistory> fileHistory,
@@ -26,7 +27,7 @@ namespace API.Controllers
         private readonly IMongoIdGenerator _idGenerator = idGenerator;
         private readonly IDashboardService _dashboardService = dashboardService;
         private readonly IEmployeeRepository _employeeRepository = employeeRepository;
-        private readonly AutoMapper.IMapper _mapper = mapper;
+        private readonly IMapper _mapper = mapper;
 
 		[HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()

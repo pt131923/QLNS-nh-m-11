@@ -52,11 +52,11 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(u.Image) || u.Image == "default.png")
                     return "/assets/default-avatar.png";
 
-                // Seed avatars (đã có trong Angular assets)
+
                 if (u.Image == "admin-avatar.png" || u.Image == "manager-avatar.png" || u.Image == "employee-avatar.png")
                     return $"/assets/avatars/{u.Image}";
 
-                // Uploaded avatars (lưu dưới wwwroot/uploads/avatars trên API)
+
                 return $"{Request.Scheme}://{Request.Host}/uploads/avatars/{u.Image}";
             }
             
@@ -77,7 +77,7 @@ namespace API.Controllers
             });
         }
 
-        // ---------------- CURRENT USER ---------------------
+
         [Authorize]
         [HttpGet("current")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
@@ -95,7 +95,7 @@ namespace API.Controllers
             return Ok(user);
         }
 
-        // ---------------- TEST AUTH ---------------------
+        
         [Authorize]
         [HttpGet("test")]
         public IActionResult TestAuth()
@@ -112,7 +112,7 @@ namespace API.Controllers
             });
         }
 
-        // ---------------- PUBLIC TEST ---------------------
+
         [HttpGet("public-test")]
         public IActionResult PublicTest()
         {
@@ -128,7 +128,6 @@ namespace API.Controllers
         [HttpPost("refresh")]
         public async Task<ActionResult> RefreshToken()
         {
-            // Get token from Authorization header
             var authHeader = Request.Headers.Authorization.FirstOrDefault();
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
             {
@@ -142,7 +141,6 @@ namespace API.Controllers
 
             try
             {
-                // Parse token without validating expiration
                 var jwtToken = tokenHandler.ReadJwtToken(token);
                 var username = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
 
