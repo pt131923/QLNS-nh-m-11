@@ -13,7 +13,6 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class DepartmentsController(IDepartmentRepository _departmentRepository, IMapper _mapper) : BaseApiController
     {
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetDepartments()
         {

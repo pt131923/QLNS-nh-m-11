@@ -36,7 +36,7 @@ namespace API.Data
         }
 
         // 🔥 Hàm quan trọng — dùng cho Login
-        public async Task<User> GetUserEntityByUsernameAsync(string username)
+        public async Task<User> GetUserByUsernameAsync(string username)
         {
             return await _users.Find(x => x.UserName == username).FirstOrDefaultAsync();
         }

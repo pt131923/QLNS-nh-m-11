@@ -26,13 +26,12 @@ namespace API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LogInDto loginDto)
         {
-            if (string.IsNullOrWhiteSpace(loginDto.UserName)  ||
-               string.IsNullOrWhiteSpace(loginDto.Password))
+            if (string.IsNullOrWhiteSpace(loginDto.UserName) || string.IsNullOrWhiteSpace(loginDto.Password))
             {
                 return BadRequest(new {message = "Username va password la bat buoc"});
             }
 
-            var user = await _userRepository.GetUserEntityByUsernameAsync(loginDto.UserName);
+            var user = await _userRepository.GetUserByUsernameAsync(loginDto.UserName);
             if(user == null)
             {
                 _logger.LogWarning("Login failed : Username not found");
@@ -56,7 +55,6 @@ namespace API.Controllers
                 if (u.Image == "admin-avatar.png" || u.Image == "manager-avatar.png" || u.Image == "employee-avatar.png")
                     return $"/assets/avatars/{u.Image}";
 
-
                 return $"{Request.Scheme}://{Request.Host}/uploads/avatars/{u.Image}";
             }
             
@@ -77,7 +75,6 @@ namespace API.Controllers
             });
         }
 
-
         [Authorize]
         [HttpGet("current")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
@@ -95,35 +92,6 @@ namespace API.Controllers
             return Ok(user);
         }
 
-        
-        [Authorize]
-        [HttpGet("test")]
-        public IActionResult TestAuth()
-        {
-            var username = User.FindFirstValue(ClaimTypes.Name);
-            var userId = User.FindFirstValue("userId");
-
-            return Ok(new
-            {
-                message = "Authentication successful",
-                username = username,
-                userId = userId,
-                timestamp = DateTime.Now
-            });
-        }
-
-
-        [HttpGet("public-test")]
-        public IActionResult PublicTest()
-        {
-            return Ok(new
-            {
-                message = "Public API works",
-                timestamp = DateTime.Now,
-                server = "API running on localhost:5002"
-            });
-        }
-
         // ---------------- REFRESH TOKEN ---------------------
         [HttpPost("refresh")]
         public async Task<ActionResult> RefreshToken()
@@ -131,7 +99,7 @@ namespace API.Controllers
             var authHeader = Request.Headers.Authorization.FirstOrDefault();
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
             {
-                return Unauthorized(new { message = "No token provided." });
+                return Unauthorized(new { message = "No token providedmâu." });
             }
 
             var token = authHeader["Bearer ".Length..];
@@ -149,7 +117,8 @@ namespace API.Controllers
                     return Unauthorized(new { message = "Invalid token claims." });
                 }
 
-                var user = await _userRepository.GetUserEntityByUsernameAsync(username);
+                var user = await _userRepository.GetUserByUsernameAsync(username);
+                
                 if (user == null)
                 {
                     return NotFound(new { message = "User not found." });
@@ -163,13 +132,14 @@ namespace API.Controllers
                     message = "Token refreshed successfully"
                 });
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Token refresh failed");
                 return Unauthorized(new { message = "Invalid token." });
             }
         }
-
+ 
         private static bool VerifyPasswordHash(string password, byte[] hash, byte[] salt)
         {
             using var hmac = new HMACSHA512(salt);

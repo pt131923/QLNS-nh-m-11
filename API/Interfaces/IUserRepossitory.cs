@@ -12,7 +12,7 @@ namespace API.Interfaces
         Task<UserDto> GetUserByNameAsync(string userName);
 
         // 🔥 Thêm mới — dùng cho login
-        Task<User> GetUserEntityByUsernameAsync(string username);
+        Task<User> GetUserByUsernameAsync(string username);
 
         Task<bool> UserExistsAsync(string userName);
         Task<bool> AddUserAsync(UserDto userDto);
