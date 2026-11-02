@@ -14,6 +14,8 @@ namespace API.Interfaces
         Task<TimeKeepingWithEmployeeDto> GetTimeEntryById(int timeKeepingId);
         Task<TimeKeeping> UpdateTimeEntry(TimeKeepingDto timeKeepingDto);
         Task<TimeKeeping> CreateTimeEntry(TimeKeepingDto timeKeepingDto);
+        Task<TimeKeeping> CheckIn(string employeeId);
+        Task<TimeKeeping> CheckOut(string employeeId);
 
     }
 }

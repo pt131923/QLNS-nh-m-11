@@ -25,13 +25,12 @@
             <span class="user-role">User</span>
           </div>
         </div>
-
-        <button class="btn btn-logout" (click)="logout()">
-          <i class="bi bi-box-arrow-right me-1"></i>{{ 'Logout' | translate }}
-        </button>
       </ng-container>
 
       <ng-template #notLoggedIn>
+        <button class="btn btn-logout" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-1"></i>{{ 'dashboard.Logout' | translate }}
+        </button>
         <button class="btn btn-ghost me-2" (click)="loginNavigate()">
           <i class="bi bi-box-arrow-in-right me-1"></i>{{ 'dashboard.login' | translate }}
         </button>

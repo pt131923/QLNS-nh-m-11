@@ -1,126 +1,170 @@
+
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+
+interface AttendanceRecord {
+  id?: number;
+  date: string;
+  checkInTime: string | null;
+  checkOutTime: string | null;
+  totalHoursWorked: number | null;
+  status: string;
+}
 
 @Component({
   selector: 'app-timekeeping',
   templateUrl: './timekeeping.component.html',
   styleUrls: ['./timekeeping.component.css']
 })
-export class TimekeepingComponent {
-[x: string]: any;
-     @ViewChild('video', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
+export class TimekeepingComponent implements OnInit, OnDestroy {
+  message = '';
+  isSuccess = false;
+  loading = false;
 
-  message: string = '';
-  isSuccess: boolean = false;
+  checkedIn = false;
 
-  timekeepingRecords: any[] = [];
+  currentTime = new Date();
+  workDuration = '00:00:00';
 
-  TimekeepingForm!: FormGroup;
+  todayRecord: AttendanceRecord | null = null;
+  timekeepingRecords: AttendanceRecord[] = [];
 
-  constructor(private http: HttpClient, private fb: FormBuilder) {}
+  private timerId: ReturnType<typeof setInterval> | undefined;
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.initializeForm();
-    this.startCamera();
+    this.updateClock();
+
+    this.timerId = setInterval(() => {
+      this.updateClock();
+    }, 1000);
+
     this.loadAttendanceHistory();
   }
 
-  // Khởi tạo form nhập liệu thủ công
-  initializeForm(): void {
-    this.TimekeepingForm = this.fb.group({
-      employeeId: ['', Validators.required],
-      checkInTime: ['', Validators.required],
-      checkOutTime: ['', Validators.required],
-      status: ['Present', Validators.required],
-      note: ['']
-    });
-  }
-
-  startCamera(): void {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        this.videoElement.nativeElement.srcObject = stream;
-      })
-      .catch(error => {
-        this.message = 'Cannot access the camera.';
-        this.isSuccess = false;
-        console.error('Camera error:', error);
-      });
-  }
-
-  // Dừng webcam
-  stopCamera(): void {
-    const video = this.videoElement.nativeElement;
-    const stream = video.srcObject as MediaStream;
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      video.srcObject = null;
+  ngOnDestroy(): void {
+    if (this.timerId) {
+      clearInterval(this.timerId);
     }
-    this.message = 'Camera stopped.';
-    this.isSuccess = false;
   }
 
-  // Chụp ảnh và gửi nhận diện khuôn mặt
-  captureImage(): void {
-    const video = this.videoElement.nativeElement;
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 720;
-    canvas.height = video.videoHeight || 560;
+  private updateClock(): void {
+    this.currentTime = new Date();
+    this.updateWorkDuration();
+  }
 
-    const context = canvas.getContext('2d');
-    context?.drawImage(video, 0, 0, canvas.width, canvas.height);
+  private updateWorkDuration(): void {
+    if (!this.todayRecord?.checkInTime ||
+        this.todayRecord.checkOutTime) {
+      return;
+    }
 
-    const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+    const start = new Date(this.todayRecord.checkInTime).getTime();
+    const now = this.currentTime.getTime();
 
-    this.http.post<any>('/api/attendance/face-check', {
-      imageBase64: base64Image
-    }).subscribe({
-      next: (res) => {
-        this.message = res.message || 'Face recognition successful. Attendance recorded.';
-        this.isSuccess = true;
-        this.loadAttendanceHistory();
+    if (isNaN(start) || now < start) {
+      this.workDuration = '00:00:00';
+      return;
+    }
+
+    const seconds = Math.floor((now - start) / 1000);
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    this.workDuration = [
+      h.toString().padStart(2, '0'),
+      m.toString().padStart(2, '0'),
+      s.toString().padStart(2, '0')
+    ].join(':');
+  }
+
+  loadAttendanceHistory(): void {
+    this.http.get<AttendanceRecord[]>(
+      '/api/attendance/history'
+    ).subscribe({
+      next: (data) => {
+        this.timekeepingRecords = data;
+
+        // Backend cần trả về dữ liệu của nhân viên đang đăng nhập
+        // và lịch sử được sắp xếp theo ngày giảm dần.
+        const today = new Date();
+
+        const isToday = (dateValue: string) => {
+          const d = new Date(dateValue);
+
+          return d.getFullYear() === today.getFullYear() &&
+            d.getMonth() === today.getMonth() &&
+            d.getDate() === today.getDate();
+        };
+
+        this.todayRecord =
+          data.find(r => isToday(r.date)) ?? null;
+
+        this.checkedIn = !!(
+          this.todayRecord?.checkInTime &&
+          !this.todayRecord?.checkOutTime
+        );
+
+        this.updateWorkDuration();
       },
-      error: (err) => {
-        this.message = err.error?.message || 'Face not recognized. Please try again.';
+      error: () => {
+        this.message = 'Failed to load attendance history.';
         this.isSuccess = false;
       }
     });
   }
 
-  // Gửi chấm công thủ công
-  submitTimekeeping(): void {
-    if (this.TimekeepingForm.invalid) return;
+  checkIn(): void {
+    if (this.loading || this.checkedIn) return;
 
-    const formData = this.TimekeepingForm.value;
+    this.loading = true;
+    this.message = '';
 
-    this.http.post<any>('/api/attendance/manual-entry', formData)
-      .subscribe({
-        next: (res) => {
-          this.message = res.message || 'Manual attendance entry successful.';
-          this.isSuccess = true;
-          this.TimekeepingForm.reset({
-            status: 'Present'
-          });
-          this.loadAttendanceHistory();
-        },
-        error: (err) => {
-          this.message = err.error?.message || 'Failed to submit manual attendance.';
-          this.isSuccess = false;
-        }
-      });
+    // Không gửi employeeId từ frontend.
+    // Backend lấy nhân viên từ thông tin xác thực.
+    this.http.post<any>(
+      '/api/attendance/check-in',
+      {}
+    ).subscribe({
+      next: (res) => {
+        this.message = res.message || 'Check-in successful.';
+        this.isSuccess = true;
+        this.loadAttendanceHistory();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.message =
+          err.error?.message || 'Check-in failed.';
+        this.isSuccess = false;
+        this.loading = false;
+      }
+    });
   }
 
-  // Tải lịch sử chấm công
-  loadAttendanceHistory(): void {
-    this.http.get<any[]>('/api/attendance/history')
-      .subscribe({
-        next: (data) => {
-          this.timekeepingRecords = data;
-        },
-        error: (err) => {
-          console.error('Failed to load attendance history', err);
-        }
-      });
+  checkOut(): void {
+    if (this.loading || !this.checkedIn) return;
+
+    this.loading = true;
+    this.message = '';
+
+    this.http.post<any>(
+      '/api/attendance/check-out',
+      {}
+    ).subscribe({
+      next: (res) => {
+        this.message = res.message || 'Check-out successful.';
+        this.isSuccess = true;
+        this.loadAttendanceHistory();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.message =
+          err.error?.message || 'Check-out failed.';
+        this.isSuccess = false;
+        this.loading = false;
+      }
+    });
   }
 }

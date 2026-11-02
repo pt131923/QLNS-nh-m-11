@@ -17,7 +17,7 @@ export class SettingComponent implements OnInit {
 
  // Chỉ giữ phần ngôn ngữ
  settings = {
-    defaultLanguage: 'en'
+    defaultLanguage: 'vi'
  };
 
  // Hồ sơ người dùng (Profile)

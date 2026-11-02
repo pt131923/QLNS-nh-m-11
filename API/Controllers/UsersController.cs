@@ -82,7 +82,7 @@ public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
     if (string.IsNullOrEmpty(username))
         return Unauthorized(new { message = "Cannot read username from token." });
     
-    var userEntity = await _userRepository.GetUserEntityByUsernameAsync(username);
+    var userEntity = await _userRepository.GetUserByUsernameAsync(username);
     if (userEntity == null)
         return NotFound(new { message = "User not found." });
     
@@ -131,7 +131,7 @@ public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
             if (string.IsNullOrEmpty(username))
                 return Unauthorized(new { message = "Token missing or invalid." });
             
-            var userEntity = await _userRepository.GetUserEntityByUsernameAsync(username);
+            var userEntity = await _userRepository.GetUserByUsernameAsync(username);
             if (userEntity == null)
                 return NotFound(new { message = "User not found." });
             
@@ -151,7 +151,7 @@ public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
             return Ok(new { message = "Password updated successfully." });
         }
 
-        private bool VerifyPasswordHash(string password, byte[] hash, byte[] salt)
+        private static bool VerifyPasswordHash(string password, byte[] hash, byte[] salt)
         {
             using var hmac = new System.Security.Cryptography.HMACSHA512(salt);
             var computed = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));

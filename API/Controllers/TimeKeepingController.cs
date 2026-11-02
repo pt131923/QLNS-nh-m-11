@@ -1,46 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using API.DTOs;
+﻿
+using System.Security.Claims;
 using API.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TimeKeepingController(ITimeKeepingRepository _timekeepingRepository) : ControllerBase
+    [Authorize]
+    public class TimeKeepingController(
+        ITimeKeepingRepository timekeepingRepository
+    ) : ControllerBase
     {
-        [HttpGet("{employeeId}")]
-        public async Task<IActionResult> GetTimeEntriesForUser(string employeeId)
+        // Lấy lịch sử chấm công của tài khoản đang đăng nhập
+        [HttpGet]
+        public async Task<IActionResult> GetMyTimeEntries()
         {
-            var timeEntries = await _timekeepingRepository.GetTimeEntriesForUser(employeeId);
-            return Ok(timeEntries);
+            var employeeId = GetEmployeeId();
+
+            if (employeeId == null)
+                return Unauthorized();
+
+            var entries = await timekeepingRepository
+                .GetTimeEntriesForUser(employeeId);
+
+            return Ok(entries);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateTimeEntry([FromBody] TimeKeepingDto timeKeepingDto)
+        // Check-in
+        [HttpPost("check-in")]
+        public async Task<IActionResult> CheckIn()
         {
-            var createdEntry = await _timekeepingRepository.CreateTimeEntry(timeKeepingDto);
-            return CreatedAtAction(nameof(GetTimeEntriesForUser), new { employeeId = timeKeepingDto.EmployeeId }, createdEntry);
+            var employeeId = GetEmployeeId();
+
+            if (employeeId == null)
+                return Unauthorized();
+
+            var result = await timekeepingRepository
+                .CheckIn(employeeId);
+
+            return Ok(result);
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateTimeEntry(int id, [FromBody] TimeKeepingDto timeKeepingDto)
+        // Check-out
+        [HttpPost("check-out")]
+        public async Task<IActionResult> CheckOut()
         {
-            if (id != timeKeepingDto.TimeKeepingId)
-            {
-                return BadRequest("ID mismatch");
-            }
+            var employeeId = GetEmployeeId();
 
-            var updatedEntry = await _timekeepingRepository.UpdateTimeEntry(timeKeepingDto);
-            if (updatedEntry == null)
-            {
-                return NotFound();
-            }
+            if (employeeId == null)
+                return Unauthorized();
 
-            return Ok(updatedEntry);
+            var result = await timekeepingRepository
+                .CheckOut(employeeId);
+
+            return Ok(result);
+        }
+
+        private string GetEmployeeId()
+        {
+            // Điều chỉnh claim theo cấu trúc JWT của project.
+            return User.FindFirst("employeeId")?.Value
+                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }
