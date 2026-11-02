@@ -58,6 +58,15 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("timekeeping-with-employees")]
+        public async Task<IActionResult> GetTimekeepingWithEmployees()
+        {
+            var result = await timekeepingRepository
+                .GetTimekeepingWithEmployees();
+
+            return Ok(result);
+        }
+
         private string GetEmployeeId()
         {
             // Điều chỉnh claim theo cấu trúc JWT của project.

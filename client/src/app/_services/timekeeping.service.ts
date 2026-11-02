@@ -15,29 +15,18 @@ export class TimekeepingService {
   getTimekeepingRecords(): Observable<Timekeeping[]> {
     return this.http.get<Timekeeping[]>(this.baseUrl);
   }
-
   getTimekeepingWithEmployees(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/timekeeping-with-employees`);
   }
-
-  searchTimekeeping(employeeName?: string, id?: number): Observable<Timekeeping[]> {
-    const params = new URLSearchParams();
-    if (employeeName) params.append('employeeName', employeeName);
-    if (id !== undefined) params.append('id', id.toString());
-
-    return this.http.get<Timekeeping[]>(`${this.baseUrl}/search?${params.toString()}`);
-  }
-
-  AddTimekeeping(timekeeping: Timekeeping): Observable<Timekeeping> {
-    return this.http.post<Timekeeping>(`${this.baseUrl}/add-timekeeping`, timekeeping);
-  }
-
-  UpdateTimekeeping(id: number, timekeeping: Timekeeping): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${id}`, timekeeping);
-  }
-
   getTimekeepingById(id: number): Observable<Timekeeping> {
     return this.http.get<Timekeeping>(`${this.baseUrl}/${id}`);
+  }
+
+  CheckIn(): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/check-in`, {});
+  }
+  CheckOut(): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/check-out`, {});
   }
 }
 

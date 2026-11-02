@@ -16,6 +16,6 @@ namespace API.Interfaces
         Task<TimeKeeping> CreateTimeEntry(TimeKeepingDto timeKeepingDto);
         Task<TimeKeeping> CheckIn(string employeeId);
         Task<TimeKeeping> CheckOut(string employeeId);
-
+        Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployees();
     }
 }

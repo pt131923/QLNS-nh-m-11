@@ -80,5 +80,33 @@ namespace API.Data
             await _dashboardService.NotifyDataChangedWithCheckAsync();
             return _mapper.Map<TimeKeepingDto>(timeKeeping);
         }
+
+        public async Task<TimeKeeping> CheckIn(string employeeId)
+        {
+            var timeKeeping = await _timeKeeping.Find(x => x.EmployeeId == int.Parse(employeeId)).FirstOrDefaultAsync();
+            if (timeKeeping == null) return null;
+
+            timeKeeping.CheckIn = TimeSpan.FromHours(DateTime.UtcNow.Hour);
+            await _timeKeeping.ReplaceOneAsync(x => x.TimeKeepingId == timeKeeping.TimeKeepingId, timeKeeping);
+            return timeKeeping;
+        }
+
+        public async Task<TimeKeeping> CheckOut(string employeeId)
+        {
+            var timeKeeping = await _timeKeeping.Find(x => x.EmployeeId == int.Parse(employeeId)).FirstOrDefaultAsync();
+            if (timeKeeping == null) return null;
+
+            timeKeeping.CheckOut = TimeSpan.FromHours(DateTime.UtcNow.Hour);
+            await _timeKeeping.ReplaceOneAsync(x => x.TimeKeepingId == timeKeeping.TimeKeepingId, timeKeeping);
+            return timeKeeping;
+        }
+        public async Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployees()
+        {
+            var timeKeeping = await _timeKeeping.Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero).ToListAsync();
+            if (timeKeeping == null) return null;
+
+            var employees = await _employees.Find(x => timeKeeping.Any(y => y.EmployeeId == x.EmployeeId)).ToListAsync();
+            return _mapper.Map<List<TimeKeepingWithEmployeeDto>>(timeKeeping);
+        }
     }
 }
