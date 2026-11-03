@@ -58,14 +58,30 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("history")]
+        public async Task<IActionResult> GetMyTimeEntriesHistory()
+        {
+            var employeeId = GetEmployeeId();
+
+            if (employeeId == null)
+            return Unauthorized();
+
+            var entries = await timekeepingRepository.GetTimeEntriesForUser(employeeId);
+            if(entries == null)
+                return NotFound();
+
+            return Ok(entries);
+        }
+
         [HttpGet("timekeeping-with-employees")]
         public async Task<IActionResult> GetTimekeepingWithEmployees()
         {
-            var result = await timekeepingRepository
-                .GetTimekeepingWithEmployees();
+            var result = await timekeepingRepository.GetTimekeepingWithEmployees();
+            if(result == null)
+                return NotFound();
 
             return Ok(result);
-        }
+        }       
 
         private string GetEmployeeId()
         {
