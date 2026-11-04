@@ -13,7 +13,7 @@ export class TimekeepingService {
   constructor(private http: HttpClient) {}
 
   getTimekeepingRecords(): Observable<Timekeeping[]> {
-    return this.http.get<Timekeeping[]>(this.baseUrl);
+    return this.http.get<Timekeeping[]>(`${this.baseUrl}/history`);
   }
   getTimekeepingWithEmployees(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/timekeeping-with-employees`);
@@ -27,6 +27,9 @@ export class TimekeepingService {
   }
   CheckOut(): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/check-out`, {});
+  }
+  getTimekeepingWithEmployeesByDate(date: Date): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/timekeeping-with-employees-by-date?date=${date}`);
   }
 }
 

@@ -14,7 +14,7 @@ namespace API.Controllers
     ) : ControllerBase
     {
         // Lấy lịch sử chấm công của tài khoản đang đăng nhập
-        [HttpGet]
+        [HttpGet("history")]
         public async Task<IActionResult> GetMyTimeEntries()
         {
             var employeeId = GetEmployeeId();
@@ -58,21 +58,6 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("history")]
-        public async Task<IActionResult> GetMyTimeEntriesHistory()
-        {
-            var employeeId = GetEmployeeId();
-
-            if (employeeId == null)
-            return Unauthorized();
-
-            var entries = await timekeepingRepository.GetTimeEntriesForUser(employeeId);
-            if(entries == null)
-                return NotFound();
-
-            return Ok(entries);
-        }
-
         [HttpGet("timekeeping-with-employees")]
         public async Task<IActionResult> GetTimekeepingWithEmployees()
         {
@@ -88,6 +73,16 @@ namespace API.Controllers
             // Điều chỉnh claim theo cấu trúc JWT của project.
             return User.FindFirst("employeeId")?.Value
                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
+
+        [HttpGet("timekeeping-with-employees-by-date")]
+        public async Task<IActionResult> GetTimekeepingWithEmployeesByDate(DateTime date)
+        {
+            var result = await timekeepingRepository.GetTimekeepingWithEmployeesByDate(date);
+            if(result == null)
+                return NotFound();
+
+            return Ok(result);
         }
     }
 }

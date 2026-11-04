@@ -10,12 +10,10 @@ namespace API.Interfaces
     public interface ITimeKeepingRepository
     {
         Task<List<TimeKeepingDto>> GetTimeEntriesForUser(string employeeId);
-        Task<TimeKeepingDto> UpdateTimeEntry(int timeKeepingId, TimeKeepingUpdateDto timeKeepingUpdateDto);
-        Task<TimeKeepingWithEmployeeDto> GetTimeEntryById(int timeKeepingId);
-        Task<TimeKeeping> UpdateTimeEntry(TimeKeepingDto timeKeepingDto);
-        Task<TimeKeeping> CreateTimeEntry(TimeKeepingDto timeKeepingDto);
+        Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingHistory();
+        Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployees();
+        Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployeesByDate(DateTime date);
         Task<TimeKeeping> CheckIn(string employeeId);
         Task<TimeKeeping> CheckOut(string employeeId);
-        Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployees();
     }
 }

@@ -1,122 +1,367 @@
 
-<div class="mb-3">
-  <button class="btn btn-secondary" [routerLink]="['/dashboard']">
-    <i class="bi bi-arrow-left-short me-1"></i>
-    Back to Dashboard
-  </button>
-</div>
+<div class="attendance-page">
+  <div class="container">
 
-<!-- Thông báo -->
-<div *ngIf="message"
-     class="alert"
-     [ngClass]="{
-       'alert-success': isSuccess,
-       'alert-danger': !isSuccess
-     }">
-  {{ message }}
-</div>
+    <!-- Header -->
+    <header class="page-header">
+      <div class="header-icon">🕒</div>
 
-<!-- Chấm công -->
-<div class="card mt-4 p-4 shadow-sm">
-  <h3>Automatic Attendance</h3>
+      <div>
+        <h1>Chấm công nhân viên</h1>
+        <p>Theo dõi giờ làm việc và lịch sử chấm công</p>
+      </div>
+    </header>
 
-  <div class="mb-3">
-    <p class="text-muted mb-1">Current Date</p>
-    <h5>{{ currentTime | date:'dd/MM/yyyy' }}</h5>
+    <!-- Đồng hồ hiện tại -->
+    <section class="clock-panel">
+      <div class="section-heading">
+        <span class="heading-icon">◷</span>
+        <h2>Thời gian hiện tại</h2>
+      </div>
 
-    <p class="text-muted mb-1">Current Time</p>
-    <h2>{{ currentTime | date:'HH:mm:ss' }}</h2>
-  </div>
+      <div class="clock-time">
+        {{ currentTime | date:'HH:mm:ss' }}
+      </div>
 
-  <div class="mb-3">
-    <span class="badge"
-          [ngClass]="checkedIn ? 'bg-success' : 'bg-secondary'">
-      {{ checkedIn ? 'Working' : 'Not Checked In' }}
-    </span>
-  </div>
+      <div class="clock-date">
+        <span>▦</span>
+        {{ currentTime | date:'EEEE, dd/MM/yyyy' }}
+      </div>
+    </section>
 
-  <div *ngIf="todayRecord" class="mb-3">
-    <p>
-      <strong>Check-In:</strong>
-      {{ todayRecord.checkInTime | date:'HH:mm:ss' }}
-    </p>
+    <!-- Chấm công hôm nay -->
+    <section class="attendance-panel">
 
-    <p *ngIf="todayRecord.checkOutTime">
-      <strong>Check-Out:</strong>
-      {{ todayRecord.checkOutTime | date:'HH:mm:ss' }}
-    </p>
+      <div class="attendance-heading">
+        <div>
+          <div class="section-heading">
+            <span class="heading-icon">▣</span>
+            <h2>Chấm công hôm nay</h2>
+          </div>
 
-    <p *ngIf="!todayRecord.checkOutTime">
-      <strong>Work duration:</strong>
-      {{ workDuration }}
-    </p>
+          <div class="status-row">
+            <strong>Trạng thái:</strong>
 
-    <p *ngIf="todayRecord.totalHoursWorked != null">
-      <strong>Total Hours:</strong>
-      {{ todayRecord.totalHoursWorked }}
-    </p>
+            <span
+              class="status-badge"
+              [class.active]="checkedIn"
+              [class.inactive]="!checkedIn">
 
-    <p>
-      <strong>Status:</strong>
-      {{ todayRecord.status }}
-    </p>
-  </div>
+              <span class="status-dot"></span>
 
-  <button
-    *ngIf="!checkedIn"
-    class="btn btn-success btn-lg"
-    [disabled]="loading"
-    (click)="checkIn()">
-    {{ loading ? 'Processing...' : 'Check In' }}
-  </button>
+              {{
+                checkedIn
+                  ? 'Đang làm việc'
+                  : (todayRecord
+                      ? 'Đã kết thúc'
+                      : 'Chưa chấm công')
+              }}
+            </span>
+          </div>
+        </div>
 
-  <button
-    *ngIf="checkedIn"
-    class="btn btn-danger btn-lg"
-    [disabled]="loading"
-    (click)="checkOut()">
-    {{ loading ? 'Processing...' : 'Check Out' }}
-  </button>
-</div>
+        <!-- Chỉ hiện khi chưa có bản ghi -->
+        <div
+          class="attendance-notice"
+          *ngIf="!todayRecord && !historyLoading">
 
-<!-- Attendance History -->
-<div class="mt-4">
-  <h3>Attendance History</h3>
+          <span class="notice-dot"></span>
+          <p>Hôm nay bạn chưa có bản ghi chấm công.</p>
+          <span class="notice-icon">📅</span>
+        </div>
+      </div>
 
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Check-In</th>
-          <th>Check-Out</th>
-          <th>Total Hours</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+      <!-- Loading lịch sử -->
+      <div
+        *ngIf="historyLoading"
+        class="history-loading">
+        Đang tải dữ liệu chấm công...
+      </div>
 
-      <tbody>
-        <tr *ngFor="let record of timekeepingRecords">
-          <td>{{ record.date | date:'dd/MM/yyyy' }}</td>
+      <!-- Lỗi tải lịch sử -->
+      <div
+        *ngIf="historyError"
+        class="message error"
+        role="alert">
 
-          <td>
-            {{ record.checkInTime ? (record.checkInTime | date:'HH:mm:ss') : '-' }}
-          </td>
+        {{ historyError }}
 
-          <td>
-            {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm:ss') : '-' }}
-          </td>
+        <button
+          type="button"
+          class="retry-btn"
+          (click)="loadAttendanceHistory()"
+          [disabled]="historyLoading">
+          Thử lại
+        </button>
+      </div>
 
-          <td>{{ record.totalHoursWorked ?? '-' }}</td>
-          <td>{{ record.status }}</td>
-        </tr>
+      <!-- Các thẻ thông tin -->
+      <div class="stats-grid">
 
-        <tr *ngIf="timekeepingRecords.length === 0">
-          <td colspan="5" class="text-center">
-            No attendance records found.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <!-- Giờ vào / giờ ra -->
+        <div class="stat-card time-card">
+          <div class="stat-icon">📅</div>
+
+          <div class="time-info">
+
+            <div class="time-item">
+              <span class="stat-label">Giờ vào</span>
+
+              <strong>
+                <ng-container
+                  *ngIf="todayRecord as record; else noCheckIn">
+                  {{
+                    record.checkInTime
+                      ? (record.checkInTime | date:'HH:mm:ss')
+                      : '--:--:--'
+                  }}
+                </ng-container>
+
+                <ng-template #noCheckIn>
+                  --:--:--
+                </ng-template>
+              </strong>
+            </div>
+
+            <div class="time-divider"></div>
+
+            <div class="time-item">
+              <span class="stat-label">Giờ ra</span>
+
+              <strong>
+                <ng-container
+                  *ngIf="todayRecord as record; else noCheckOut">
+                  {{
+                    record.checkOutTime
+                      ? (record.checkOutTime | date:'HH:mm:ss')
+                      : '--:--:--'
+                  }}
+                </ng-container>
+
+                <ng-template #noCheckOut>
+                  --:--:--
+                </ng-template>
+              </strong>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Tổng giờ làm -->
+        <div class="stat-card total-card">
+          <div class="stat-icon">⌛</div>
+
+          <div>
+            <span class="stat-label">Tổng giờ làm</span>
+
+            <strong class="stat-value">
+              <ng-container
+                *ngIf="todayRecord as record; else noTodayRecord">
+
+                {{
+                  record.totalHoursWorked != null
+                    ? record.totalHoursWorked + ' giờ'
+                    : (checkedIn ? workDuration : '-- giờ')
+                }}
+              </ng-container>
+
+              <ng-template #noTodayRecord>
+                {{
+                  checkedIn
+                    ? workDuration
+                    : '-- giờ'
+                }}
+              </ng-template>
+            </strong>
+          </div>
+        </div>
+
+        <!-- Thời gian làm việc hiện tại -->
+        <div class="stat-card duration-card">
+          <div class="stat-icon">💼</div>
+
+          <div class="duration-content">
+            <span class="stat-label">
+              Thời gian làm việc hiện tại
+            </span>
+
+            <strong class="duration-value">
+              <span class="stopwatch-icon">◴</span>
+
+              {{ checkedIn ? workDuration : '00:00:00' }}
+            </strong>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Nút chấm công -->
+      <div class="controls">
+
+        <!-- Chấm công vào -->
+        <button
+          type="button"
+          class="btn btn-primary"
+          *ngIf="!checkedIn"
+          [disabled]="loading || historyLoading || !!historyError"
+          (click)="checkIn()">
+
+          <span>▶</span>
+
+          {{
+            loading
+              ? 'Đang xử lý...'
+              : 'Chấm công vào'
+          }}
+        </button>
+
+        <!-- Chấm công ra -->
+        <button
+          type="button"
+          class="btn btn-secondary"
+          *ngIf="checkedIn"
+          [disabled]="loading"
+          (click)="checkOut()">
+
+          <span>■</span>
+
+          {{
+            loading
+              ? 'Đang xử lý...'
+              : 'Chấm công ra'
+          }}
+        </button>
+
+      </div>
+
+      <!-- Thông báo thao tác -->
+      <div
+        *ngIf="message"
+        class="message"
+        [class.success]="isSuccess"
+        [class.error]="!isSuccess"
+        role="status"
+        aria-live="polite">
+
+        {{ message }}
+      </div>
+
+    </section>
+
+    <!-- Lịch sử chấm công -->
+    <section class="history-panel">
+
+      <div class="section-heading history-heading">
+        <span class="heading-icon history-icon">◴</span>
+        <h2>Lịch sử chấm công</h2>
+      </div>
+
+      <!-- Trạng thái tải -->
+      <div
+        *ngIf="historyLoading"
+        class="history-loading">
+        Đang tải lịch sử chấm công...
+      </div>
+
+      <!-- Lỗi tải -->
+      <div
+        *ngIf="historyError"
+        class="message error"
+        role="alert">
+        Không thể hiển thị đầy đủ lịch sử chấm công.
+      </div>
+
+      <!-- Không có dữ liệu -->
+      <div
+        *ngIf="!historyLoading
+          && !historyError
+          && timekeepingRecords.length === 0"
+        class="empty-state">
+
+        <div class="empty-icon">📋</div>
+
+        <h3>Chưa có dữ liệu chấm công</h3>
+
+        <p>
+          Lịch sử chấm công của bạn sẽ hiển thị tại đây.
+        </p>
+      </div>
+
+      <!-- Bảng lịch sử -->
+      <div
+        *ngIf="!historyLoading
+          && !historyError
+          && timekeepingRecords.length > 0"
+        class="table-wrapper">
+
+        <table class="attendance-table">
+
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Ngày</th>
+              <th>Giờ vào</th>
+              <th>Giờ ra</th>
+              <th>Tổng giờ làm</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="
+                let record of timekeepingRecords;
+                let i = index
+              ">
+
+              <td>{{ i + 1 }}</td>
+
+              <td class="date-cell">
+                {{ record.date | date:'dd/MM/yyyy' }}
+              </td>
+
+              <td>
+                {{
+                  record.checkInTime
+                    ? (record.checkInTime | date:'HH:mm:ss')
+                    : '--:--:--'
+                }}
+              </td>
+
+              <td>
+                {{
+                  record.checkOutTime
+                    ? (record.checkOutTime | date:'HH:mm:ss')
+                    : '--:--:--'
+                }}
+              </td>
+
+              <td class="hours-cell">
+                {{
+                  record.totalHoursWorked != null
+                    ? record.totalHoursWorked + ' giờ'
+                    : '--'
+                }}
+              </td>
+
+              <td>
+                <span
+                  class="record-status"
+                  [class.completed]="!!record.checkOutTime">
+
+                  <span class="record-dot"></span>
+
+                  {{ record.status }}
+                </span>
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+    </section>
+
   </div>
 </div>

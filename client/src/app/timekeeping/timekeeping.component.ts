@@ -11,27 +11,47 @@ interface AttendanceRecord {
   status: string;
 }
 
+interface AttendanceResponse {
+  message?: string;
+}
+
 @Component({
   selector: 'app-timekeeping',
   templateUrl: './timekeeping.component.html',
   styleUrls: ['./timekeeping.component.css']
 })
 export class TimekeepingComponent implements OnInit, OnDestroy {
+
+  // Thông báo
   message = '';
   isSuccess = false;
+
+  // Trạng thái xử lý chấm công
   loading = false;
 
+  // Trạng thái làm việc
   checkedIn = false;
 
+  // Đồng hồ hiện tại
   currentTime = new Date();
   workDuration = '00:00:00';
 
+  // Dữ liệu chấm công
   todayRecord: AttendanceRecord | null = null;
   timekeepingRecords: AttendanceRecord[] = [];
 
-  private timerId: ReturnType<typeof setInterval> | undefined;
+  // Trạng thái tải lịch sử
+  historyLoading = false;
+  historyError = '';
+
+  // Timer
+  private timerId?: ReturnType<typeof setInterval>;
 
   constructor(private http: HttpClient) {}
+
+  // =====================================
+  // Lifecycle
+  // =====================================
 
   ngOnInit(): void {
     this.updateClock();
@@ -44,10 +64,14 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.timerId) {
+    if (this.timerId !== undefined) {
       clearInterval(this.timerId);
     }
   }
+
+  // =====================================
+  // Đồng hồ
+  // =====================================
 
   private updateClock(): void {
     this.currentTime = new Date();
@@ -55,115 +79,239 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
   }
 
   private updateWorkDuration(): void {
-    if (!this.todayRecord?.checkInTime ||
-        this.todayRecord.checkOutTime) {
-      return;
-    }
+    const record = this.todayRecord;
 
-    const start = new Date(this.todayRecord.checkInTime).getTime();
-    const now = this.currentTime.getTime();
-
-    if (isNaN(start) || now < start) {
+    if (!record?.checkInTime || record.checkOutTime) {
       this.workDuration = '00:00:00';
       return;
     }
 
-    const seconds = Math.floor((now - start) / 1000);
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
+    const startTime = new Date(record.checkInTime).getTime();
+    const currentTimestamp = this.currentTime.getTime();
+
+    if (!Number.isFinite(startTime) || currentTimestamp < startTime) {
+      this.workDuration = '00:00:00';
+      return;
+    }
+
+    const totalSeconds = Math.floor(
+      (currentTimestamp - startTime) / 1000
+    );
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
     this.workDuration = [
-      h.toString().padStart(2, '0'),
-      m.toString().padStart(2, '0'),
-      s.toString().padStart(2, '0')
+      hours.toString().padStart(2, '0'),
+      minutes.toString().padStart(2, '0'),
+      seconds.toString().padStart(2, '0')
     ].join(':');
   }
 
-  loadAttendanceHistory(): void {
-    this.http.get<AttendanceRecord[]>(
-      '/api/attendance/history'
-    ).subscribe({
-      next: (data) => {
-        this.timekeepingRecords = data;
+  // =====================================
+  // Xử lý ngày
+  // =====================================
 
-        // Backend cần trả về dữ liệu của nhân viên đang đăng nhập
-        // và lịch sử được sắp xếp theo ngày giảm dần.
-        const today = new Date();
+  private isToday(dateValue: string): boolean {
+    if (!dateValue) {
+      return false;
+    }
 
-        const isToday = (dateValue: string) => {
-          const d = new Date(dateValue);
+    const today = new Date();
 
-          return d.getFullYear() === today.getFullYear() &&
-            d.getMonth() === today.getMonth() &&
-            d.getDate() === today.getDate();
-        };
+    // Ngày dạng YYYY-MM-DD
+    // Xử lý trực tiếp để tránh lệch ngày do UTC.
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(
+      dateValue
+    );
 
-        this.todayRecord =
-          data.find(r => isToday(r.date)) ?? null;
+    if (dateOnlyMatch) {
+      const year = Number(dateOnlyMatch[1]);
+      const month = Number(dateOnlyMatch[2]);
+      const day = Number(dateOnlyMatch[3]);
 
-        this.checkedIn = !!(
-          this.todayRecord?.checkInTime &&
-          !this.todayRecord?.checkOutTime
-        );
+      return (
+        year === today.getFullYear() &&
+        month === today.getMonth() + 1 &&
+        day === today.getDate()
+      );
+    }
 
-        this.updateWorkDuration();
-      },
-      error: () => {
-        this.message = 'Failed to load attendance history.';
-        this.isSuccess = false;
-      }
-    });
+    // Ngày dạng ISO datetime hoặc timestamp string.
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+      return false;
+    }
+
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
   }
+
+  // =====================================
+  // Đồng bộ trạng thái chấm công
+  // =====================================
+
+  private syncAttendanceState(
+    records: AttendanceRecord[]
+  ): void {
+    this.timekeepingRecords = records;
+
+    this.todayRecord =
+      records.find(record => this.isToday(record.date)) ?? null;
+
+    this.checkedIn = !!(
+      this.todayRecord?.checkInTime &&
+      !this.todayRecord?.checkOutTime
+    );
+
+    this.updateWorkDuration();
+  }
+
+  // =====================================
+  // Tải lịch sử chấm công
+  // =====================================
+
+  loadAttendanceHistory(): void {
+    if (this.historyLoading) {
+      return;
+    }
+
+    this.historyLoading = true;
+    this.historyError = '';
+
+    this.http.get<AttendanceRecord[]>('/api/history')
+      .subscribe({
+        next: (data) => {
+          const records = Array.isArray(data) ? data : [];
+
+          this.syncAttendanceState(records);
+          this.historyLoading = false;
+        },
+
+        error: (err) => {
+          console.error(
+            'Failed to load attendance history:',
+            err
+          );
+
+          this.historyError =
+            err?.error?.message ??
+            'Không thể tải lịch sử chấm công.';
+
+          this.historyLoading = false;
+        }
+      });
+  }
+
+  // =====================================
+  // Chấm công vào
+  // =====================================
 
   checkIn(): void {
-    if (this.loading || this.checkedIn) return;
+    if (this.loading || this.checkedIn) {
+      return;
+    }
 
     this.loading = true;
     this.message = '';
+    this.isSuccess = false;
 
     // Không gửi employeeId từ frontend.
-    // Backend lấy nhân viên từ thông tin xác thực.
-    this.http.post<any>(
-      '/api/attendance/check-in',
+    // Backend xác định nhân viên từ thông tin xác thực.
+    this.http.post<AttendanceResponse>(
+      '/api/check-in',
       {}
     ).subscribe({
       next: (res) => {
-        this.message = res.message || 'Check-in successful.';
-        this.isSuccess = true;
-        this.loadAttendanceHistory();
-        this.loading = false;
-      },
-      error: (err) => {
         this.message =
-          err.error?.message || 'Check-in failed.';
+          res?.message ?? 'Chấm công vào thành công.';
+
+        this.isSuccess = true;
+        this.loading = false;
+
+        // Đồng bộ lại dữ liệu sau khi chấm công.
+        this.loadAttendanceHistory();
+      },
+
+      error: (err) => {
+        console.error('Check-in failed:', err);
+
+        this.message =
+          err?.error?.message ??
+          'Chấm công vào thất bại. Vui lòng thử lại.';
+
         this.isSuccess = false;
         this.loading = false;
       }
     });
   }
 
+  // =====================================
+  // Chấm công ra
+  // =====================================
+
   checkOut(): void {
-    if (this.loading || !this.checkedIn) return;
+    if (this.loading || !this.checkedIn) {
+      return;
+    }
 
     this.loading = true;
     this.message = '';
+    this.isSuccess = false;
 
-    this.http.post<any>(
-      '/api/attendance/check-out',
+    this.http.post<AttendanceResponse>(
+      '/api/check-out',
       {}
     ).subscribe({
       next: (res) => {
-        this.message = res.message || 'Check-out successful.';
-        this.isSuccess = true;
-        this.loadAttendanceHistory();
-        this.loading = false;
-      },
-      error: (err) => {
         this.message =
-          err.error?.message || 'Check-out failed.';
+          res?.message ?? 'Chấm công ra thành công.';
+
+        this.isSuccess = true;
+        this.loading = false;
+
+        // Đồng bộ lại dữ liệu sau khi chấm công.
+        this.loadAttendanceHistory();
+      },
+
+      error: (err) => {
+        console.error('Check-out failed:', err);
+
+        this.message =
+          err?.error?.message ??
+          'Chấm công ra thất bại. Vui lòng thử lại.';
+
         this.isSuccess = false;
         this.loading = false;
+      }
+    });
+  }
+
+  // =====================================
+  // Lịch sử chấm công kèm nhân viên
+  // Dành cho màn hình quản trị nếu cần
+  // =====================================
+
+  getTimekeepingWithEmployees(): void {
+    this.http.get<AttendanceRecord[]>(
+      '/api/timekeeping-with-employees'
+    ).subscribe({
+      next: (data) => {
+        const records = Array.isArray(data) ? data : [];
+
+        this.syncAttendanceState(records);
+      },
+
+      error: (err) => {
+        console.error(
+          'Failed to load timekeeping with employees:',
+          err
+        );
       }
     });
   }
