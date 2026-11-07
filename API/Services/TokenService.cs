@@ -18,6 +18,9 @@ namespace API.Services
                 new ("userId", user.UserId.ToString())
             };
 
+            if (user.EmployeeId > 0)
+                claims.Add(new("employeeId", user.EmployeeId.ToString()));
+
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor

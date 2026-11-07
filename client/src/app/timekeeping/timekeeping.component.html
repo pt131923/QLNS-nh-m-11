@@ -1,6 +1,11 @@
 
 <div class="attendance-page">
   <div class="container">
+    <div class="mb-3">
+      <button class="btn btn-secondary" [routerLink]="['/dashboard']">
+        <i class="bi bi-arrow-left-short me-1"></i> Back to Dashboard
+      </button>
+    </div>
 
     <!-- Header -->
     <header class="page-header">
@@ -110,11 +115,7 @@
               <strong>
                 <ng-container
                   *ngIf="todayRecord as record; else noCheckIn">
-                  {{
-                    record.checkInTime
-                      ? (record.checkInTime | date:'HH:mm:ss')
-                      : '--:--:--'
-                  }}
+                  {{ formatTime(record.checkInTime) }}
                 </ng-container>
 
                 <ng-template #noCheckIn>
@@ -131,11 +132,7 @@
               <strong>
                 <ng-container
                   *ngIf="todayRecord as record; else noCheckOut">
-                  {{
-                    record.checkOutTime
-                      ? (record.checkOutTime | date:'HH:mm:ss')
-                      : '--:--:--'
-                  }}
+                  {{ formatTime(record.checkOutTime) }}
                 </ng-container>
 
                 <ng-template #noCheckOut>
@@ -160,7 +157,7 @@
 
                 {{
                   record.totalHoursWorked != null
-                    ? record.totalHoursWorked + ' giờ'
+                    ? formatHours(record.totalHoursWorked)
                     : (checkedIn ? workDuration : '-- giờ')
                 }}
               </ng-container>
@@ -198,12 +195,11 @@
       <!-- Nút chấm công -->
       <div class="controls">
 
-        <!-- Chấm công vào -->
         <button
           type="button"
           class="btn btn-primary"
-          *ngIf="!checkedIn"
-          [disabled]="loading || historyLoading || !!historyError"
+          *ngIf="canCheckIn"
+          [disabled]="loading || historyLoading"
           (click)="checkIn()">
 
           <span>▶</span>
@@ -215,11 +211,10 @@
           }}
         </button>
 
-        <!-- Chấm công ra -->
         <button
           type="button"
           class="btn btn-secondary"
-          *ngIf="checkedIn"
+          *ngIf="canCheckOut"
           [disabled]="loading"
           (click)="checkOut()">
 
@@ -231,6 +226,13 @@
               : 'Chấm công ra'
           }}
         </button>
+
+        <div
+          class="attendance-notice"
+          *ngIf="hasFinishedToday && !loading">
+          <span class="notice-dot"></span>
+          <p>Hôm nay bạn đã chấm công xong.</p>
+        </div>
 
       </div>
 
@@ -317,31 +319,19 @@
               <td>{{ i + 1 }}</td>
 
               <td class="date-cell">
-                {{ record.date | date:'dd/MM/yyyy' }}
+                {{ formatDate(record.date) }}
               </td>
 
               <td>
-                {{
-                  record.checkInTime
-                    ? (record.checkInTime | date:'HH:mm:ss')
-                    : '--:--:--'
-                }}
+                {{ formatTime(record.checkInTime) }}
               </td>
 
               <td>
-                {{
-                  record.checkOutTime
-                    ? (record.checkOutTime | date:'HH:mm:ss')
-                    : '--:--:--'
-                }}
+                {{ formatTime(record.checkOutTime) }}
               </td>
 
               <td class="hours-cell">
-                {{
-                  record.totalHoursWorked != null
-                    ? record.totalHoursWorked + ' giờ'
-                    : '--'
-                }}
+                {{ formatHours(record.totalHoursWorked) }}
               </td>
 
               <td>

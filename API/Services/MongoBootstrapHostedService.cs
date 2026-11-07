@@ -187,6 +187,8 @@ namespace API.Services
                 var passwordSalt = hmac.Key;
                 var passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes("admin123"));
 
+                var sampleEmployee = await employeeCol.Find(_ => true).FirstOrDefaultAsync(ct);
+
                 var users = new List<User>
                 {
                     new() {
@@ -214,7 +216,8 @@ namespace API.Services
                     new() {
                         UserId = await _idGenerator.NextAsync("Users", ct),
                         UserName = "employee",
-                        Email = "employee@qlns.com",
+                        Email = sampleEmployee?.EmployeeEmail ?? "employee@qlns.com",
+                        EmployeeId = sampleEmployee?.EmployeeId ?? 0,
                         PhoneNumber = "0555666777",
                         Address = "789 Employee Road",
                         PasswordHash = passwordHash,
@@ -226,6 +229,28 @@ namespace API.Services
 
                 await userCol.InsertManyAsync(users, cancellationToken: ct);
                 _logger.LogInformation("✅ Seeded User accounts: admin/manager/employee (password: admin123)");
+            }
+
+            var demoEmployeeUser = await userCol
+                .Find(x => x.UserName == "employee")
+                .FirstOrDefaultAsync(ct);
+            if (demoEmployeeUser != null && demoEmployeeUser.EmployeeId == 0)
+            {
+                var linkedEmployee = await employeeCol.Find(_ => true).FirstOrDefaultAsync(ct);
+                if (linkedEmployee != null)
+                {
+                    demoEmployeeUser.EmployeeId = linkedEmployee.EmployeeId;
+                    if (string.IsNullOrWhiteSpace(demoEmployeeUser.Email) ||
+                        demoEmployeeUser.Email == "employee@qlns.com")
+                    {
+                        demoEmployeeUser.Email = linkedEmployee.EmployeeEmail;
+                    }
+
+                    await userCol.ReplaceOneAsync(
+                        x => x.UserId == demoEmployeeUser.UserId,
+                        demoEmployeeUser,
+                        cancellationToken: ct);
+                }
             }
 
             // Training

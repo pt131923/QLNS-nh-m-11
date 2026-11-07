@@ -22,11 +22,11 @@ export class TimekeepingService {
     return this.http.get<Timekeeping>(`${this.baseUrl}/${id}`);
   }
 
-  CheckIn(): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/check-in`, {});
+  CheckIn(): Observable<{ message?: string; Message?: string }> {
+    return this.http.post<{ message?: string; Message?: string }>(`${this.baseUrl}/check-in`, {});
   }
-  CheckOut(): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/check-out`, {});
+  CheckOut(): Observable<{ message?: string; Message?: string }> {
+    return this.http.post<{ message?: string; Message?: string }>(`${this.baseUrl}/check-out`, {});
   }
   getTimekeepingWithEmployeesByDate(date: Date): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/timekeeping-with-employees-by-date?date=${date}`);

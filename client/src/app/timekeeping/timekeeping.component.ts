@@ -1,6 +1,5 @@
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { TimekeepingService } from '../_services/timekeeping.service';
 
 interface AttendanceRecord {
   id?: number;
@@ -11,10 +10,6 @@ interface AttendanceRecord {
   status: string;
 }
 
-interface AttendanceResponse {
-  message?: string;
-}
-
 @Component({
   selector: 'app-timekeeping',
   templateUrl: './timekeeping.component.html',
@@ -22,36 +17,35 @@ interface AttendanceResponse {
 })
 export class TimekeepingComponent implements OnInit, OnDestroy {
 
-  // Thông báo
   message = '';
   isSuccess = false;
-
-  // Trạng thái xử lý chấm công
   loading = false;
-
-  // Trạng thái làm việc
   checkedIn = false;
 
-  // Đồng hồ hiện tại
   currentTime = new Date();
   workDuration = '00:00:00';
 
-  // Dữ liệu chấm công
   todayRecord: AttendanceRecord | null = null;
   timekeepingRecords: AttendanceRecord[] = [];
 
-  // Trạng thái tải lịch sử
   historyLoading = false;
   historyError = '';
 
-  // Timer
   private timerId?: ReturnType<typeof setInterval>;
 
-  constructor(private http: HttpClient) {}
+  constructor(private timekeepingService: TimekeepingService) {}
 
-  // =====================================
-  // Lifecycle
-  // =====================================
+  get canCheckIn(): boolean {
+    return !this.checkedIn && !this.hasFinishedToday;
+  }
+
+  get canCheckOut(): boolean {
+    return this.checkedIn;
+  }
+
+  get hasFinishedToday(): boolean {
+    return !!(this.todayRecord?.checkInTime && this.todayRecord?.checkOutTime);
+  }
 
   ngOnInit(): void {
     this.updateClock();
@@ -69,9 +63,34 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     }
   }
 
-  // =====================================
-  // Đồng hồ
-  // =====================================
+  formatTime(value: string | null | undefined): string {
+    if (!this.hasTimeValue(value)) {
+      return '--:--:--';
+    }
+
+    const clock = this.asClock(value as string);
+    return clock ?? '--:--:--';
+  }
+
+  formatDate(value: string | null | undefined): string {
+    const date = this.asDate(value);
+    if (!date) {
+      return '--/--/----';
+    }
+
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  formatHours(value: number | null | undefined): string {
+    if (value == null || Number.isNaN(value)) {
+      return '--';
+    }
+
+    return `${Number(value).toFixed(2)} giờ`;
+  }
 
   private updateClock(): void {
     this.currentTime = new Date();
@@ -86,7 +105,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const startTime = new Date(record.checkInTime).getTime();
+    const startTime = this.toTimestamp(record.date, record.checkInTime);
     const currentTimestamp = this.currentTime.getTime();
 
     if (!Number.isFinite(startTime) || currentTimestamp < startTime) {
@@ -94,10 +113,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const totalSeconds = Math.floor(
-      (currentTimestamp - startTime) / 1000
-    );
-
+    const totalSeconds = Math.floor((currentTimestamp - startTime) / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
@@ -109,42 +125,13 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     ].join(':');
   }
 
-  // =====================================
-  // Xử lý ngày
-  // =====================================
-
   private isToday(dateValue: string): boolean {
-    if (!dateValue) {
+    const date = this.asDate(dateValue);
+    if (!date) {
       return false;
     }
 
     const today = new Date();
-
-    // Ngày dạng YYYY-MM-DD
-    // Xử lý trực tiếp để tránh lệch ngày do UTC.
-    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(
-      dateValue
-    );
-
-    if (dateOnlyMatch) {
-      const year = Number(dateOnlyMatch[1]);
-      const month = Number(dateOnlyMatch[2]);
-      const day = Number(dateOnlyMatch[3]);
-
-      return (
-        year === today.getFullYear() &&
-        month === today.getMonth() + 1 &&
-        day === today.getDate()
-      );
-    }
-
-    // Ngày dạng ISO datetime hoặc timestamp string.
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-      return false;
-    }
-
     return (
       date.getFullYear() === today.getFullYear() &&
       date.getMonth() === today.getMonth() &&
@@ -152,15 +139,8 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     );
   }
 
-  // =====================================
-  // Đồng bộ trạng thái chấm công
-  // =====================================
-
-  private syncAttendanceState(
-    records: AttendanceRecord[]
-  ): void {
+  private syncAttendanceState(records: AttendanceRecord[]): void {
     this.timekeepingRecords = records;
-
     this.todayRecord =
       records.find(record => this.isToday(record.date)) ?? null;
 
@@ -172,10 +152,6 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.updateWorkDuration();
   }
 
-  // =====================================
-  // Tải lịch sử chấm công
-  // =====================================
-
   loadAttendanceHistory(): void {
     if (this.historyLoading) {
       return;
@@ -184,36 +160,24 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.historyLoading = true;
     this.historyError = '';
 
-    this.http.get<AttendanceRecord[]>('/api/history')
-      .subscribe({
-        next: (data) => {
-          const records = Array.isArray(data) ? data : [];
-
-          this.syncAttendanceState(records);
-          this.historyLoading = false;
-        },
-
-        error: (err) => {
-          console.error(
-            'Failed to load attendance history:',
-            err
-          );
-
-          this.historyError =
-            err?.error?.message ??
-            'Không thể tải lịch sử chấm công.';
-
-          this.historyLoading = false;
-        }
-      });
+    this.timekeepingService.getTimekeepingRecords().subscribe({
+      next: (data) => {
+        const records = this.mapRecords(data);
+        this.syncAttendanceState(records);
+        this.historyLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load attendance history:', err);
+        this.historyError =
+          err?.error?.message ??
+          'Không thể tải lịch sử chấm công.';
+        this.historyLoading = false;
+      }
+    });
   }
 
-  // =====================================
-  // Chấm công vào
-  // =====================================
-
   checkIn(): void {
-    if (this.loading || this.checkedIn) {
+    if (this.loading || !this.canCheckIn) {
       return;
     }
 
@@ -221,42 +185,27 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.message = '';
     this.isSuccess = false;
 
-    // Không gửi employeeId từ frontend.
-    // Backend xác định nhân viên từ thông tin xác thực.
-    this.http.post<AttendanceResponse>(
-      '/api/check-in',
-      {}
-    ).subscribe({
+    this.timekeepingService.CheckIn().subscribe({
       next: (res) => {
-        this.message =
-          res?.message ?? 'Chấm công vào thành công.';
-
+        this.message = res?.message ?? res?.Message ?? 'Chấm công vào thành công.';
         this.isSuccess = true;
         this.loading = false;
-
-        // Đồng bộ lại dữ liệu sau khi chấm công.
+        this.applyLocalCheckIn();
         this.loadAttendanceHistory();
       },
-
       error: (err) => {
         console.error('Check-in failed:', err);
-
         this.message =
           err?.error?.message ??
           'Chấm công vào thất bại. Vui lòng thử lại.';
-
         this.isSuccess = false;
         this.loading = false;
       }
     });
   }
 
-  // =====================================
-  // Chấm công ra
-  // =====================================
-
   checkOut(): void {
-    if (this.loading || !this.checkedIn) {
+    if (this.loading || !this.canCheckOut) {
       return;
     }
 
@@ -264,55 +213,222 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.message = '';
     this.isSuccess = false;
 
-    this.http.post<AttendanceResponse>(
-      '/api/check-out',
-      {}
-    ).subscribe({
+    this.timekeepingService.CheckOut().subscribe({
       next: (res) => {
-        this.message =
-          res?.message ?? 'Chấm công ra thành công.';
-
+        this.message = res?.message ?? res?.Message ?? 'Chấm công ra thành công.';
         this.isSuccess = true;
         this.loading = false;
-
-        // Đồng bộ lại dữ liệu sau khi chấm công.
+        this.applyLocalCheckOut();
         this.loadAttendanceHistory();
       },
-
       error: (err) => {
         console.error('Check-out failed:', err);
-
         this.message =
           err?.error?.message ??
           'Chấm công ra thất bại. Vui lòng thử lại.';
-
         this.isSuccess = false;
         this.loading = false;
       }
     });
   }
 
-  // =====================================
-  // Lịch sử chấm công kèm nhân viên
-  // Dành cho màn hình quản trị nếu cần
-  // =====================================
+  private applyLocalCheckIn(): void {
+    const clock = this.formatClock(this.currentTime);
+    this.todayRecord = {
+      ...(this.todayRecord ?? { date: this.toDateOnly(this.currentTime), status: '' }),
+      date: this.todayRecord?.date ?? this.toDateOnly(this.currentTime),
+      checkInTime: clock,
+      checkOutTime: null,
+      totalHoursWorked: null,
+      status: 'Đang làm việc'
+    };
+    this.checkedIn = true;
+    this.updateWorkDuration();
+  }
 
-  getTimekeepingWithEmployees(): void {
-    this.http.get<AttendanceRecord[]>(
-      '/api/timekeeping-with-employees'
-    ).subscribe({
-      next: (data) => {
-        const records = Array.isArray(data) ? data : [];
+  private applyLocalCheckOut(): void {
+    if (!this.todayRecord) {
+      return;
+    }
 
-        this.syncAttendanceState(records);
-      },
+    const clock = this.formatClock(this.currentTime);
+    const hours = this.hoursBetween(this.todayRecord.date, this.todayRecord.checkInTime, clock);
 
-      error: (err) => {
-        console.error(
-          'Failed to load timekeeping with employees:',
-          err
-        );
-      }
+    this.todayRecord = {
+      ...this.todayRecord,
+      checkOutTime: clock,
+      totalHoursWorked: hours,
+      status: 'Đã chấm công'
+    };
+    this.checkedIn = false;
+    this.updateWorkDuration();
+  }
+
+  private mapRecords(data: unknown): AttendanceRecord[] {
+    const rows = Array.isArray(data) ? data : [];
+
+    return rows.map((item: any) => {
+      const checkIn = this.normalizeTime(
+        item?.CheckInTime ?? item?.checkInTime ?? item?.CheckIn ?? item?.checkIn
+      );
+      const checkOut = this.normalizeTime(
+        item?.CheckOutTime ?? item?.checkOutTime ?? item?.CheckOut ?? item?.checkOut
+      );
+      const totalHours = this.normalizeHours(
+        item?.TotalHours ?? item?.totalHours ?? item?.TotalHoursWorked ?? item?.totalHoursWorked
+      );
+
+      return {
+        id: item?.TimeKeepingId ?? item?.id ?? item?.timeKeepingId,
+        date: item?.Date ?? item?.date ?? '',
+        checkInTime: checkIn,
+        checkOutTime: checkOut,
+        totalHoursWorked: totalHours,
+        status: item?.Status ?? item?.status ?? ''
+      } as AttendanceRecord;
     });
+  }
+
+  private normalizeTime(value: unknown): string | null {
+    if (value == null || value === '') {
+      return null;
+    }
+
+    if (typeof value === 'number') {
+      return this.clockFromSeconds(value);
+    }
+
+    const text = String(value).trim();
+    if (!text || text === '00:00:00' || text.startsWith('00:00:00')) {
+      return null;
+    }
+
+    const clock = this.asClock(text);
+    return clock;
+  }
+
+  private normalizeHours(value: unknown): number | null {
+    if (value == null || value === '') {
+      return null;
+    }
+
+    if (typeof value === 'number') {
+      return value > 0 ? value : null;
+    }
+
+    const text = String(value).trim();
+    if (!text || text === '00:00:00') {
+      return null;
+    }
+
+    const numeric = Number(text);
+    if (Number.isFinite(numeric)) {
+      return numeric > 0 ? numeric : null;
+    }
+
+    const clock = this.asClock(text);
+    if (!clock) {
+      return null;
+    }
+
+    const [hours, minutes, seconds] = clock.split(':').map(part => Number(part));
+    const total = hours + minutes / 60 + seconds / 3600;
+    return total > 0 ? total : null;
+  }
+
+  private hasTimeValue(value: string | null | undefined): boolean {
+    return !!value && value !== '00:00:00';
+  }
+
+  private asClock(value: string): string | null {
+    const timeMatch = /(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(value);
+    if (!timeMatch) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return null;
+      }
+      return this.formatClock(date);
+    }
+
+    return [
+      timeMatch[1].padStart(2, '0'),
+      timeMatch[2],
+      (timeMatch[3] ?? '00').padStart(2, '0')
+    ].join(':');
+  }
+
+  private asDate(value: string | null | undefined): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+    if (dateOnlyMatch) {
+      return new Date(
+        Number(dateOnlyMatch[1]),
+        Number(dateOnlyMatch[2]) - 1,
+        Number(dateOnlyMatch[3])
+      );
+    }
+
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private toTimestamp(dateValue: string, timeValue: string): number {
+    const date = this.asDate(dateValue) ?? this.currentTime;
+    const clock = this.asClock(timeValue);
+    if (!clock) {
+      return NaN;
+    }
+
+    const [hours, minutes, seconds] = clock.split(':').map(part => Number(part));
+    const combined = new Date(date);
+    combined.setHours(hours, minutes, seconds, 0);
+    return combined.getTime();
+  }
+
+  private hoursBetween(dateValue: string, start: string | null, end: string): number | null {
+    if (!start) {
+      return null;
+    }
+
+    const startTime = this.toTimestamp(dateValue, start);
+    const endTime = this.toTimestamp(dateValue, end);
+    if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) {
+      return null;
+    }
+
+    return (endTime - startTime) / 3600000;
+  }
+
+  private formatClock(date: Date): string {
+    return [
+      date.getHours().toString().padStart(2, '0'),
+      date.getMinutes().toString().padStart(2, '0'),
+      date.getSeconds().toString().padStart(2, '0')
+    ].join(':');
+  }
+
+  private toDateOnly(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private clockFromSeconds(totalSeconds: number): string | null {
+    if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
+      return null;
+    }
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    return [
+      hours.toString().padStart(2, '0'),
+      minutes.toString().padStart(2, '0'),
+      seconds.toString().padStart(2, '0')
+    ].join(':');
   }
 }

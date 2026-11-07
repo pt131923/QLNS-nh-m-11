@@ -47,6 +47,12 @@ namespace API.Helpers
             CreateMap<UserDto, User>()
                 // Không ghi đè các field hiện tại bằng null (giúp UpdateUser không làm mất Role/Image)
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<TimeKeeping, TimeKeepingDto>()
+                .ForMember(dest => dest.CheckInTime, opt => opt.MapFrom(src => src.CheckIn))
+                .ForMember(dest => dest.CheckOutTime, opt => opt.MapFrom(src => src.CheckOut))
+                .ForMember(dest => dest.Employee, opt => opt.Ignore())
+                .ForMember(dest => dest.TimeKeepings, opt => opt.Ignore());
         }
     }
 }
