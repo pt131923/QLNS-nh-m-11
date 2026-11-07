@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -13,6 +10,8 @@ namespace API.Entities
         [BsonRepresentation(BsonType.Int32)]
         public int TimeKeepingId { get; set; }
         public int EmployeeId { get; set; }
+
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime Date { get; set; }
         public TimeSpan CheckIn { get; set; }
         public TimeSpan CheckOut { get; set; }

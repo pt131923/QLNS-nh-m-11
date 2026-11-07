@@ -12,7 +12,7 @@ namespace API.Services
     {
         private readonly IMongoCollection<Employee> _employees = database.GetCollection<Employee>("Employees");
         private readonly IMongoCollection<Contract> _contracts = database.GetCollection<Contract>("Contracts");
-        private readonly IMongoCollection<TimeKeeping> _timekeeping = database.GetCollection<TimeKeeping>("TimeKeeping");
+        private readonly IMongoCollection<TimeKeeping> _timekeeping = database.GetCollection<TimeKeeping>("TimeKeepings");
         private readonly IMongoCollection<Salary> _salaries = database.GetCollection<Salary>("Salaries");
         private readonly ISalaryRepository _salaryRepository = salaryRepository;
         private readonly IMongoIdGenerator _idGenerator = idGenerator;

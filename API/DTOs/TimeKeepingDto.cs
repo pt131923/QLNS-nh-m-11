@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace API.DTOs
 {
@@ -13,14 +11,12 @@ namespace API.DTOs
         public TimeSpan CheckInTime { get; set; }
         public TimeSpan CheckOutTime { get; set; }
         public TimeSpan TotalHoursWorked { get; set; }
-        public string Status { get; set; } // e.g., Present, Absent, Late, etc.
-        public string Note { get; set; } // Additional notes for the time entry
+        public decimal TotalHours { get; set; }
+        public string Status { get; set; }
+        public string Note { get; set; }
 
-        // Navigation property
         public EmployeeDto Employee { get; set; }
-
         public int DepartmentId { get; set; }
-
         public ICollection<TimeKeepingDto> TimeKeepings { get; set; }
     }
 }

@@ -17,7 +17,9 @@ namespace API.Data
         IMongoIdGenerator idGenerator) : ITimeKeepingRepository
     {
         private readonly IMongoCollection<TimeKeeping> _timeKeeping = database.GetCollection<TimeKeeping>("TimeKeepings");
+        private readonly IMongoCollection<TimeKeeping> _legacyTimeKeeping = database.GetCollection<TimeKeeping>("TimeKeeping");
         private readonly IMongoCollection<Employee> _employees = database.GetCollection<Employee>("Employees");
+        private readonly IMongoCollection<AppDepartment> _departments = database.GetCollection<AppDepartment>("Departments");
         private readonly AutoMapper.IMapper _mapper = mapper;
         private readonly IDashboardService _dashboardService = dashboardService;
         private readonly IMongoIdGenerator _idGenerator = idGenerator;
@@ -54,7 +56,7 @@ namespace API.Data
             {
                 TimeKeepingId = await _idGenerator.NextAsync("TimeKeepings"),
                 EmployeeId = id,
-                Date = now.Date,
+                Date = DateTime.SpecifyKind(now.Date, DateTimeKind.Local),
                 CheckIn = now.TimeOfDay,
                 CheckOut = TimeSpan.Zero,
                 TotalHoursWorked = TimeSpan.Zero,
@@ -112,7 +114,14 @@ namespace API.Data
                 .Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero)
                 .ToListAsync();
 
-            return MapWithEmployees(timeKeeping);
+            if (timeKeeping.Count == 0)
+            {
+                timeKeeping = await _legacyTimeKeeping
+                    .Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero)
+                    .ToListAsync();
+            }
+
+            return await MapWithEmployees(timeKeeping);
         }
 
         public async Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployeesByDate(DateTime date)
@@ -123,7 +132,14 @@ namespace API.Data
                 .Find(x => x.Date >= start && x.Date < end)
                 .ToListAsync();
 
-            return MapWithEmployees(timeKeeping);
+            if (timeKeeping.Count == 0)
+            {
+                timeKeeping = await _legacyTimeKeeping
+                    .Find(x => x.Date >= start && x.Date < end)
+                    .ToListAsync();
+            }
+
+            return await MapWithEmployees(timeKeeping);
         }
 
         public async Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingHistory()
@@ -132,7 +148,14 @@ namespace API.Data
                 .Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero)
                 .ToListAsync();
 
-            return MapWithEmployees(timeKeeping);
+            if (timeKeeping.Count == 0)
+            {
+                timeKeeping = await _legacyTimeKeeping
+                    .Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero)
+                    .ToListAsync();
+            }
+
+            return await MapWithEmployees(timeKeeping);
         }
 
         public async Task<List<TimeKeepingDto>> GetTimeEntriesForUser(string employeeId)
@@ -141,7 +164,17 @@ namespace API.Data
             var timeKeeping = await _timeKeeping
                 .Find(x => x.EmployeeId == id)
                 .SortByDescending(x => x.Date)
+                .ThenByDescending(x => x.TimeKeepingId)
                 .ToListAsync();
+
+            if (timeKeeping.Count == 0)
+            {
+                timeKeeping = await _legacyTimeKeeping
+                    .Find(x => x.EmployeeId == id)
+                    .SortByDescending(x => x.Date)
+                    .ThenByDescending(x => x.TimeKeepingId)
+                    .ToListAsync();
+            }
 
             return timeKeeping.Select(ToDto).ToList();
         }
@@ -150,31 +183,97 @@ namespace API.Data
         {
             var start = now.Date;
             var end = start.AddDays(1);
+            var startUtc = DateTime.SpecifyKind(start, DateTimeKind.Utc);
+            var endUtc = DateTime.SpecifyKind(end, DateTimeKind.Utc);
 
-            return await _timeKeeping
-                .Find(x => x.EmployeeId == employeeId && x.Date >= start && x.Date < end)
+            var record = await _timeKeeping
+                .Find(x => x.EmployeeId == employeeId &&
+                    ((x.Date >= start && x.Date < end) || (x.Date >= startUtc && x.Date < endUtc)))
                 .FirstOrDefaultAsync();
+
+            if (record != null) return record;
+
+            // Fallback: compare local dates among recent records
+            var recentRecords = await _timeKeeping
+                .Find(x => x.EmployeeId == employeeId)
+                .SortByDescending(x => x.Date)
+                .Limit(10)
+                .ToListAsync();
+
+            var matched = recentRecords.FirstOrDefault(x =>
+            {
+                var d = x.Date.Kind == DateTimeKind.Utc ? x.Date.ToLocalTime().Date : x.Date.Date;
+                return d == now.Date;
+            });
+
+            if (matched != null) return matched;
+
+            var legacyRecent = await _legacyTimeKeeping
+                .Find(x => x.EmployeeId == employeeId)
+                .SortByDescending(x => x.Date)
+                .Limit(5)
+                .ToListAsync();
+
+            return legacyRecent.FirstOrDefault(x =>
+            {
+                var d = x.Date.Kind == DateTimeKind.Utc ? x.Date.ToLocalTime().Date : x.Date.Date;
+                return d == now.Date;
+            });
         }
 
-        private List<TimeKeepingWithEmployeeDto> MapWithEmployees(List<TimeKeeping> timeKeeping)
+        private async Task<List<TimeKeepingWithEmployeeDto>> MapWithEmployees(List<TimeKeeping> timeKeeping)
         {
             if (timeKeeping == null || timeKeeping.Count == 0)
                 return new List<TimeKeepingWithEmployeeDto>();
 
-            return _mapper.Map<List<TimeKeepingWithEmployeeDto>>(timeKeeping)
-                ?? new List<TimeKeepingWithEmployeeDto>();
+            var employeeIds = timeKeeping.Select(t => t.EmployeeId).Distinct().ToList();
+            var employeeList = await _employees.Find(e => employeeIds.Contains(e.EmployeeId)).ToListAsync();
+            var employeeMap = employeeList.ToDictionary(e => e.EmployeeId);
+
+            var deptList = await _departments.Find(_ => true).ToListAsync();
+            var deptMap = deptList.ToDictionary(d => d.DepartmentId, d => d.Name);
+
+            return timeKeeping.Select(t =>
+            {
+                employeeMap.TryGetValue(t.EmployeeId, out var emp);
+                string deptName = string.Empty;
+                if (emp != null && deptMap.TryGetValue(emp.DepartmentId, out var dn))
+                    deptName = dn;
+
+                return new TimeKeepingWithEmployeeDto
+                {
+                    TimeKeepingId = t.TimeKeepingId,
+                    EmployeeId = t.EmployeeId,
+                    EmployeeName = emp?.EmployeeName ?? t.Employee?.EmployeeName ?? $"Nhân viên #{t.EmployeeId}",
+                    EmployeeEmail = emp?.EmployeeEmail ?? string.Empty,
+                    DepartmentId = emp?.DepartmentId ?? t.DepartmentId,
+                    DepartmentName = deptName,
+                    Date = t.Date.Kind == DateTimeKind.Utc ? t.Date.ToLocalTime().Date : t.Date.Date,
+                    CheckInTime = t.CheckIn,
+                    CheckOutTime = t.CheckOut,
+                    TotalHoursWorked = t.TotalHoursWorked,
+                    TotalHours = t.TotalHours,
+                    Status = t.Status,
+                    Note = t.Note
+                };
+            }).ToList();
         }
 
         private static TimeKeepingDto ToDto(TimeKeeping record)
         {
+            var localDate = record.Date.Kind == DateTimeKind.Utc
+                ? record.Date.ToLocalTime().Date
+                : record.Date.Date;
+
             return new TimeKeepingDto
             {
                 TimeKeepingId = record.TimeKeepingId,
                 EmployeeId = record.EmployeeId,
-                Date = record.Date,
+                Date = localDate,
                 CheckInTime = record.CheckIn,
                 CheckOutTime = record.CheckOut,
                 TotalHoursWorked = record.TotalHoursWorked,
+                TotalHours = record.TotalHours,
                 Status = record.Status,
                 Note = record.Note,
                 DepartmentId = record.DepartmentId

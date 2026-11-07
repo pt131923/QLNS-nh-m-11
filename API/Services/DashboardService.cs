@@ -74,7 +74,7 @@ namespace API.Services
             var contracts = _db.GetCollection<Contract>("Contracts");
             var contacts = _db.GetCollection<Contact>("Contacts");
             var salaries = _db.GetCollection<Salary>("Salaries");
-            var timeKeeping = _db.GetCollection<TimeKeeping>("TimeKeeping");
+            var timeKeeping = _db.GetCollection<TimeKeeping>("TimeKeepings");
             var trainings = _db.GetCollection<Training>("Trainings");
             var benefits = _db.GetCollection<Benefits>("Benefits");
             var leaves = _db.GetCollection<Leave>("Leaves");

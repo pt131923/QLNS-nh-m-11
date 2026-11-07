@@ -231,25 +231,20 @@ namespace API.Services
                 _logger.LogInformation("✅ Seeded User accounts: admin/manager/employee (password: admin123)");
             }
 
-            var demoEmployeeUser = await userCol
-                .Find(x => x.UserName == "employee")
-                .FirstOrDefaultAsync(ct);
-            if (demoEmployeeUser != null && demoEmployeeUser.EmployeeId == 0)
+            var sampleEmployees = await employeeCol.Find(_ => true).Limit(3).ToListAsync(ct);
+            if (sampleEmployees.Count > 0)
             {
-                var linkedEmployee = await employeeCol.Find(_ => true).FirstOrDefaultAsync(ct);
-                if (linkedEmployee != null)
+                var defaultEmp = sampleEmployees[0];
+                var allUsers = await userCol.Find(_ => true).ToListAsync(ct);
+                for (int i = 0; i < allUsers.Count; i++)
                 {
-                    demoEmployeeUser.EmployeeId = linkedEmployee.EmployeeId;
-                    if (string.IsNullOrWhiteSpace(demoEmployeeUser.Email) ||
-                        demoEmployeeUser.Email == "employee@qlns.com")
+                    var u = allUsers[i];
+                    if (u.EmployeeId == 0)
                     {
-                        demoEmployeeUser.Email = linkedEmployee.EmployeeEmail;
+                        var empToLink = i < sampleEmployees.Count ? sampleEmployees[i] : defaultEmp;
+                        u.EmployeeId = empToLink.EmployeeId;
+                        await userCol.ReplaceOneAsync(x => x.UserId == u.UserId, u, cancellationToken: ct);
                     }
-
-                    await userCol.ReplaceOneAsync(
-                        x => x.UserId == demoEmployeeUser.UserId,
-                        demoEmployeeUser,
-                        cancellationToken: ct);
                 }
             }
 

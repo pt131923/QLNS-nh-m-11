@@ -1,8 +1,12 @@
 export interface Timekeeping {
   TimeKeepingId: number;
-  EmployeeId: string;
-  CheckInTime: Date;
-  CheckOutTime: Date;
+  EmployeeId: number | string;
+  Date?: string | Date;
+  CheckInTime?: any;
+  CheckOutTime?: any;
+  TotalHoursWorked?: any;
+  TotalHours?: number;
   Status: string;
-  Note: string;
+  Note?: string;
+  DepartmentId?: number;
 }

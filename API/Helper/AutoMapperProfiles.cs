@@ -53,6 +53,12 @@ namespace API.Helpers
                 .ForMember(dest => dest.CheckOutTime, opt => opt.MapFrom(src => src.CheckOut))
                 .ForMember(dest => dest.Employee, opt => opt.Ignore())
                 .ForMember(dest => dest.TimeKeepings, opt => opt.Ignore());
+
+            CreateMap<TimeKeeping, TimeKeepingWithEmployeeDto>()
+                .ForMember(dest => dest.CheckInTime, opt => opt.MapFrom(src => src.CheckIn))
+                .ForMember(dest => dest.CheckOutTime, opt => opt.MapFrom(src => src.CheckOut))
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.EmployeeName : string.Empty))
+                .ForMember(dest => dest.EmployeeEmail, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.EmployeeEmail : string.Empty));
         }
     }
 }
