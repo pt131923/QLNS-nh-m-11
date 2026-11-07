@@ -60,6 +60,7 @@ namespace API.Controllers
             var department = _mapper.Map<AppDepartment>(departmentDto);
 
             _departmentRepository.Add(department);
+            
             await _departmentRepository.SaveAllAsync();
 
             return CreatedAtRoute(
@@ -84,7 +85,7 @@ namespace API.Controllers
 
             return BadRequest("Failed to delete the Department");
         }
-        
+
     }
 }
 

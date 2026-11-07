@@ -92,34 +92,30 @@ namespace API.Controllers
                 ?? User.FindFirst("employeeId")?.Value;
             var username = User.FindFirstValue(ClaimTypes.Name);
 
-            UserDto user = null;
+            UserDtoLike user = null;
 
             if (int.TryParse(userIdValue, out var userId) && userId > 0)
-                user = await userRepository.GetUserByIdAsync(userId);
+            {
+                var userDto = await userRepository.GetUserByIdAsync(userId);
+                if (userDto != null)
+                {
+                    user = new UserDtoLike(userDto.UserId, userDto.UserName, userDto.Email);
+                }
+            }
 
             if (user == null && !string.IsNullOrWhiteSpace(username))
-                user = await userRepository.GetUserByNameAsync(username);
+            {
+                var userDto = await userRepository.GetUserByNameAsync(username);
+                if (userDto != null)
+                    user = new UserDtoLike(userDto.UserId, userDto.UserName, userDto.Email);
+            }
 
             if (user == null)
                 return null;
 
             Employee employee = null;
 
-            if (int.TryParse(User.FindFirst("employeeId")?.Value, out var claimedEmployeeId) && claimedEmployeeId > 0)
-            {
-                employee = await employees
-                    .Find(x => x.EmployeeId == claimedEmployeeId)
-                    .FirstOrDefaultAsync();
-            }
-
-            if (employee == null && user.EmployeeId > 0)
-            {
-                employee = await employees
-                    .Find(x => x.EmployeeId == user.EmployeeId)
-                    .FirstOrDefaultAsync();
-            }
-
-            if (employee == null && !string.IsNullOrWhiteSpace(user.Email))
+            if (!string.IsNullOrWhiteSpace(user.Email))
             {
                 employee = await employees
                     .Find(x => x.EmployeeEmail == user.Email)
@@ -129,7 +125,14 @@ namespace API.Controllers
             if (employee == null && !string.IsNullOrWhiteSpace(user.UserName))
             {
                 employee = await employees
-                    .Find(x => x.EmployeeName == user.UserName || x.EmployeeEmail == user.UserName)
+                    .Find(x => x.EmployeeName == user.UserName)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (employee == null && user.UserId > 0)
+            {
+                employee = await employees
+                    .Find(x => x.EmployeeId == user.UserId)
                     .FirstOrDefaultAsync();
             }
 
@@ -146,5 +149,7 @@ namespace API.Controllers
                 message = "Tài khoản chưa liên kết hồ sơ nhân viên nên không thể chấm công."
             });
         }
+
+        private sealed record UserDtoLike(int UserId, string UserName, string Email);
     }
 }
