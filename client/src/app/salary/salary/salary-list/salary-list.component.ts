@@ -18,7 +18,8 @@ export class SalaryListComponent implements OnInit {
   payrollPeriod = this.currentPeriod();
   generating = false;
 
-  public rowSelection: 'single' | 'multiple' = 'multiple';
+  showStats = false;
+  statsData: any = null;
 
   public columnDefs: ColDef<Salary>[] = [
     {
@@ -52,7 +53,7 @@ export class SalaryListComponent implements OnInit {
 
   public gridOptions: GridOptions<Salary> = {
     rowSelection: 'multiple',
-    columnDefs: this.columnDefs,
+    columnDefs: this.columnDefs
   };
 
   defaultColDef = {
@@ -60,6 +61,7 @@ export class SalaryListComponent implements OnInit {
     minWidth: 100,
     sortable: true,
     resizable: true,
+    filter: true
   };
 
   pagination = true;
@@ -83,10 +85,10 @@ export class SalaryListComponent implements OnInit {
   onBtExport() {
     if (this.gridApi) {
       this.gridApi.exportDataAsCsv({
-        fileName: 'Bang-luong.csv'
+        fileName: 'Bảng lương_' + new Date().toLocaleDateString('vi-VN') + '.csv'
       });
     } else {
-      this.toastr.error('Grid API is not initialized');
+      this.toastr.error('Grid API chưa khởi tạo');
     }
   }
 
@@ -95,9 +97,10 @@ export class SalaryListComponent implements OnInit {
       next: (salaries: Salary[]) => {
         this.salaries = salaries;
         this.rowData = [...salaries];
+        this.updateStats();
       },
       error: () => {
-        this.toastr.error('Failed to load salary data');
+        this.toastr.error('Tải dữ liệu bảng lương thất bại');
       }
     });
   }
@@ -130,10 +133,10 @@ export class SalaryListComponent implements OnInit {
       if (salary.SalaryId) {
         this.router.navigate(['/salary-edit', salary.SalaryId]);
       } else {
-        alert('Selected salary record does not have a valid ID.');
+        alert('Bản ghi lương không có mã hợp lệ.');
       }
     } else {
-      alert('Please select one salary record to edit.');
+      alert('Vui lòng chọn một bản ghi để sửa.');
     }
   }
 
@@ -141,17 +144,19 @@ export class SalaryListComponent implements OnInit {
     const selectedRows = this.gridApi.getSelectedRows();
     if (selectedRows.length === 1) {
       const id = selectedRows[0].SalaryId;
-      this.salaryService.DeleteSalary(id).subscribe({
-        next: () => {
-          this.toastr.success('Salary deleted successfully');
-          this.loadSalaries();
-        },
-        error: () => {
-          this.toastr.error('Failed to delete salary');
-        }
-      });
+      if (confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) {
+        this.salaryService.DeleteSalary(id).subscribe({
+          next: () => {
+            this.toastr.success('Xóa bản ghi lương thành công');
+            this.loadSalaries();
+          },
+          error: () => {
+            this.toastr.error('Xóa bản ghi lương thất bại');
+          }
+        });
+      }
     } else {
-      alert('Please select one salary record to delete.');
+      alert('Vui lòng chọn một bản ghi để xóa.');
     }
   }
 
@@ -167,6 +172,39 @@ export class SalaryListComponent implements OnInit {
     } else {
       this.rowData = [...this.salaries];
     }
+    this.gridApi?.setGridOption('rowData', this.rowData);
+    this.updateStats();
+  }
+
+  onClearFilter() {
+    this.searchText = '';
+    this.rowData = [...this.salaries];
+    this.gridApi?.setGridOption('rowData', this.rowData);
+    this.updateStats();
+  }
+
+  toggleStats() {
+    this.showStats = !this.showStats;
+  }
+
+  updateStats() {
+    const totalRecords = this.rowData.length;
+    const totalBasic = this.rowData.reduce((sum, r) => sum + (r.BasicSalary || 0), 0);
+    const totalGross = this.rowData.reduce((sum, r) => sum + (r.GrossSalary || 0), 0);
+    const totalNet = this.rowData.reduce((sum, r) => sum + (r.NetSalary || 0), 0);
+    const totalTax = this.rowData.reduce((sum, r) => sum + (r.PersonalIncomeTax || 0), 0);
+    const totalInsurance = this.rowData.reduce((sum, r) =>
+      sum + (r.BhxhEmployee || 0) + (r.BhytEmployee || 0) + (r.BhtnEmployee || 0), 0
+    );
+
+    this.statsData = {
+      totalRecords,
+      totalBasic,
+      totalGross,
+      totalNet,
+      totalTax,
+      totalInsurance
+    };
   }
 
   private vnd(params: ValueFormatterParams<Salary>): string {

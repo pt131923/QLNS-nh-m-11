@@ -8,12 +8,15 @@ import { Timekeeping } from '../_model/timekeeping';
   providedIn: 'root'
 })
 export class TimekeepingService {
-  private baseUrl = `${environment.apiUrl}/timekeeping`;
+  private baseUrl = `${environment.apiUrl}/TimeKeeping`;
 
   constructor(private http: HttpClient) {}
 
   getTimekeepingRecords(): Observable<Timekeeping[]> {
-    return this.http.get<Timekeeping[]>(`${this.baseUrl}/history`);
+    // Ghi thẳng để loại bỏ mọi nghi vấn
+    const url = 'http://localhost:5002/api/TimeKeeping/history';
+    console.log('Gọi đến:', url);
+    return this.http.get<Timekeeping[]>(url);
   }
   getTimekeepingWithEmployees(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/timekeeping-with-employees`);

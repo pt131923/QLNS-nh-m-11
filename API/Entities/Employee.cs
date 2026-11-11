@@ -21,6 +21,7 @@ namespace API.Entities
         [EmailAddress]
         public string EmployeeEmail { get; set; }
 
+
         public string EmployeePhone { get; set; }
 
         public string EmployeeAddress { get; set; }

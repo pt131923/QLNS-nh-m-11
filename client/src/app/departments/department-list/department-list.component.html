@@ -1,44 +1,83 @@
 <div class="container-fluid">
+
+  <!-- Back Button -->
   <div class="mb-3">
-    <button class="btn btn-secondary me-2" [routerLink]="['/dashboard']">
-      <i class="bi bi-arrow-left-short me-1"></i> Back to Dashboard
+    <button class="btn btn-secondary" [routerLink]="['/dashboard']">
+      <i class="bi bi-arrow-left-short me-1"></i>
+      Quay lại Dashboard
     </button>
   </div>
-  <div class="mb-3">
-    <button class="btn btn-success me-2" [routerLink]="['/department-add']">{{ 'common.addNew' | translate }}</button>
-    <button class="btn btn-primary me-2" (click)="onEditRow()">{{ 'common.edit' | translate }}</button>
-    <button class="btn btn-danger me-2" (click)="onDeleteRow()">{{ 'common.delete' | translate }}</button>
-    <button class="btn btn-info" (click)="onBtExport()">{{ 'common.exportToExcel' | translate }}</button>
-  </div>
 
-  <div class="mb-3">
-    <input type="text" class="form-control" [placeholder]="'common.searchPlaceholder' | translate" [(ngModel)]="searchText" (input)="onSearch()">
-  </div>
+  <!-- Main Card -->
+  <div class="card mb-4">
+    <div class="card-body">
 
-  <ag-grid-angular
-    style="width: 100%; height: 500px;"
-    class="ag-theme-alpine"
-    [columnDefs]="columnDefs"
-    [rowData]="rowData"
-    [gridOptions]="gridOptions"
-    (gridReady)="onGridReady($event)"
-    [pagination]="pagination"
-    (rowClicked)="onRowClicked($event)"
-    [paginationPageSize]="paginationPageSize"
-    [paginationPageSizeSelector]="paginationPageSizeSelector"
-    [defaultColDef]="defaultColDef"
-    [rowSelection]="rowSelection"
-  ></ag-grid-angular>
-
-  <ng-template #loadListDepartment>
-    <div class="modal-header">
-      <h4 class="modal-title pull-left">{{ 'department.loading' | translate }}</h4>
-    </div>
-    <div class="modal-body">
-      <p>{{ 'department.loadingData' | translate }}</p>
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
+      <!-- Action Buttons -->
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <button class="btn btn-success" [routerLink]="['/department-add']">
+          <i class="bi bi-plus-circle me-1"></i> Thêm mới
+        </button>
+        <button class="btn btn-primary" (click)="onEditRow()">
+          <i class="bi bi-pencil-square me-1"></i> Sửa
+        </button>
+        <button class="btn btn-danger" (click)="onDeleteRow()">
+          <i class="bi bi-trash me-1"></i> Xóa
+        </button>
+        <button class="btn btn-success" (click)="onBtExport()">
+          <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        </button>
+        <button class="btn btn-info text-white" (click)="toggleStats()">
+          <i class="bi bi-bar-chart-line me-1"></i>
+          {{ showStats ? 'Ẩn thống kê' : 'Thống kê' }}
+        </button>
       </div>
+
+      <!-- Search -->
+      <div class="mb-3">
+        <input type="text" class="form-control form-control-sm"
+               [(ngModel)]="searchText"
+               (keyup.enter)="onSearch()"
+               placeholder="Tìm kiếm phòng ban...">
+      </div>
+
+      <!-- Thống kê -->
+      <div *ngIf="showStats && statsData" class="mb-4">
+        <div class="row g-3">
+          <div class="col-md-12">
+            <div class="alert alert-primary d-flex align-items-center py-2">
+              <i class="bi bi-building fs-5 me-2"></i>
+              <strong>Tổng số phòng ban: {{ statsData.total }}</strong>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-header fw-semibold bg-primary text-white py-2">
+                <i class="bi bi-people me-1"></i> Thông tin chung
+              </div>
+              <div class="card-body py-3">
+                <p class="mb-1">Tổng số nhân viên: <strong>{{ statsData.totalEmployees }}</strong></p>
+                <p class="mb-0">Trung bình mỗi phòng: <strong>{{ statsData.avgEmployeesPerDept }}</strong> nhân viên</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AG Grid -->
+      <ag-grid-angular
+        style="width: 100%; height: 450px;"
+        class="ag-theme-alpine"
+        [columnDefs]="columnDefs"
+        [rowData]="rowData"
+        [gridOptions]="gridOptions"
+        [defaultColDef]="defaultColDef"
+        [pagination]="pagination"
+        [paginationPageSize]="paginationPageSize"
+        [paginationPageSizeSelector]="paginationPageSizeSelector"
+        (gridReady)="onGridReady($event)"
+        (rowClicked)="onRowClicked($event)"
+      ></ag-grid-angular>
+
     </div>
-  </ng-template>
+  </div>
 </div>

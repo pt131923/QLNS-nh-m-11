@@ -17,7 +17,6 @@ namespace API.Controllers
         IMongoCollection<Employee> employees
     ) : ControllerBase
     {
-        [HttpGet("history")]
         public async Task<IActionResult> GetMyTimeEntries()
         {
             var employeeId = await ResolveEmployeeId();

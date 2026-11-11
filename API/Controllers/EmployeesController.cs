@@ -3,10 +3,13 @@ using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System.Security.Cryptography;
 using MongoDB.Driver;
 using API.Services;
 using AutoMapper;
+using System.Drawing;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -135,7 +138,12 @@ namespace API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(string name = null, int? departmentId = null)
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> SearchEmployees(
+            string name = null,
+            int? departmentId = null,
+            string gender = null,
+            string educationLevel = null,
+            string contractStatus = null)
         {
             var filter = Builders<Employee>.Filter.Empty;
 
@@ -148,15 +156,182 @@ namespace API.Controllers
 
             if (departmentId.HasValue)
             {
-                filter = Builders<Employee>.Filter.Eq(x => x.DepartmentId, departmentId.Value);
+                filter &= Builders<Employee>.Filter.Eq(x => x.DepartmentId, departmentId.Value);
             }
 
-            var employees = await _employees.Find(filter).ToListAsync();
-            
-            if (employees.Count == 0)
-                return NotFound();
+            if (!string.IsNullOrWhiteSpace(gender))
+            {
+                filter &= Builders<Employee>.Filter.Regex(
+                    x => x.Gender,
+                    new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(gender.Trim())}$", "i"));
+            }
 
-            return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
+            if (!string.IsNullOrWhiteSpace(educationLevel))
+            {
+                filter &= Builders<Employee>.Filter.Regex(
+                    x => x.EducationLevel,
+                    new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(educationLevel.Trim())}$", "i"));
+            }
+
+            var employeeList = await _employees.Find(filter).ToListAsync();
+
+            // Filter by contract status if requested
+            if (!string.IsNullOrWhiteSpace(contractStatus))
+            {
+                var contractCol = _employees.Database.GetCollection<Contract>("Contracts");
+                var today = DateTime.UtcNow;
+                var empNames = employeeList.Select(e => e.EmployeeName?.ToLower()).Where(n => n != null).ToList();
+
+                var contracts = await contractCol
+                    .Find(Builders<Contract>.Filter.In(c => c.EmployeeName, empNames))
+                    .ToListAsync();
+
+                var contractMap = contracts
+                    .GroupBy(c => c.EmployeeName?.ToLower())
+                    .ToDictionary(g => g.Key ?? "", g => g.ToList());
+
+                employeeList = employeeList.Where(emp =>
+                {
+                    var key = emp.EmployeeName?.ToLower() ?? "";
+                    if (!contractMap.TryGetValue(key, out var empContracts) || empContracts.Count == 0)
+                        return contractStatus.Equals("none", StringComparison.OrdinalIgnoreCase);
+
+                    var active = empContracts.Any(c => c.StartDate <= today && c.EndDate >= today);
+                    return contractStatus.Equals("active", StringComparison.OrdinalIgnoreCase) ? active : !active;
+                }).ToList();
+            }
+
+            return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employeeList));
+        }
+
+        [HttpPost("batch-update-department")]
+        public async Task<ActionResult> BatchUpdateDepartment([FromBody] BatchDepartmentUpdateDto dto)
+        {
+            if (dto == null || dto.EmployeeIds == null || dto.EmployeeIds.Count == 0)
+                return BadRequest("No employee IDs provided");
+
+            var deptExists = await _departments.CountDocumentsAsync(d => d.DepartmentId == dto.NewDepartmentId) > 0;
+            if (!deptExists)
+                return BadRequest("Department does not exist");
+
+            var update = Builders<Employee>.Update.Set(x => x.DepartmentId, dto.NewDepartmentId);
+            var filter = Builders<Employee>.Filter.In(x => x.EmployeeId, dto.EmployeeIds);
+            var result = await _employees.UpdateManyAsync(filter, update);
+
+            await _dashboardService.NotifyDataChangedWithCheckAsync();
+
+            return Ok(new { updated = result.ModifiedCount });
+        }
+
+        [HttpGet("statistics")]
+        public async Task<ActionResult> GetStatistics()
+        {
+            var allEmployees = await _employees.Find(_ => true).ToListAsync();
+            var allDepartments = await _departments.Find(_ => true).ToListAsync();
+            var deptMap = allDepartments.ToDictionary(d => d.DepartmentId, d => d.Name);
+
+            // By Department
+            var byDepartment = allEmployees
+                .GroupBy(e => e.DepartmentId)
+                .Select(g => new
+                {
+                    departmentId = g.Key,
+                    departmentName = deptMap.TryGetValue(g.Key, out var n) ? n : $"Dept {g.Key}",
+                    count = g.Count()
+                })
+                .OrderByDescending(x => x.count)
+                .ToList();
+
+            // By Gender
+            var byGender = allEmployees
+                .GroupBy(e => string.IsNullOrWhiteSpace(e.Gender) ? "Chưa xác định" : e.Gender)
+                .Select(g => new { gender = g.Key, count = g.Count() })
+                .ToList();
+
+            // By Age Group
+            var today = DateTime.UtcNow;
+            var byAgeGroup = allEmployees
+                .Where(e => e.BirthDate.HasValue)
+                .Select(e => (int)((today - e.BirthDate.Value).TotalDays / 365.25))
+                .GroupBy(age => age < 25 ? "Dưới 25" : age < 35 ? "25–34" : age < 45 ? "35–44" : age < 55 ? "45–54" : "55+")
+                .Select(g => new { ageGroup = g.Key, count = g.Count() })
+                .ToList();
+
+            return Ok(new { byDepartment, byGender, byAgeGroup, total = allEmployees.Count });
+        }
+
+        [HttpGet("export-excel")]
+        public async Task<IActionResult> ExportExcel(
+            string name = null,
+            int? departmentId = null,
+            string gender = null,
+            string educationLevel = null)
+        {
+            var filter = Builders<Employee>.Filter.Empty;
+            if (!string.IsNullOrWhiteSpace(name))
+                filter &= Builders<Employee>.Filter.Regex(x => x.EmployeeName,
+                    new MongoDB.Bson.BsonRegularExpression(System.Text.RegularExpressions.Regex.Escape(name.Trim()), "i"));
+            if (departmentId.HasValue)
+                filter &= Builders<Employee>.Filter.Eq(x => x.DepartmentId, departmentId.Value);
+            if (!string.IsNullOrWhiteSpace(gender))
+                filter &= Builders<Employee>.Filter.Regex(x => x.Gender,
+                    new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(gender.Trim())}$", "i"));
+            if (!string.IsNullOrWhiteSpace(educationLevel))
+                filter &= Builders<Employee>.Filter.Regex(x => x.EducationLevel,
+                    new MongoDB.Bson.BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(educationLevel.Trim())}$", "i"));
+
+            var employeeList = await _employees.Find(filter).ToListAsync();
+            var depts = await _departments.Find(_ => true).ToListAsync();
+            var deptMap = depts.ToDictionary(d => d.DepartmentId, d => d.Name);
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("Danh sách nhân viên");
+
+            // Header styling
+            var headers = new[] { "STT", "Mã NV", "Họ và tên", "Phòng ban", "Email", "Điện thoại", "Giới tính", "Ngày sinh", "Địa chỉ", "CCCD", "Trình độ", "Chuyên ngành" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cells[1, i + 1];
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(31, 73, 125));
+                cell.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                cell.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            }
+
+            // Data rows
+            for (int i = 0; i < employeeList.Count; i++)
+            {
+                var emp = employeeList[i];
+                var row = i + 2;
+                ws.Cells[row, 1].Value = i + 1;
+                ws.Cells[row, 2].Value = emp.EmployeeId;
+                ws.Cells[row, 3].Value = emp.EmployeeName;
+                ws.Cells[row, 4].Value = deptMap.TryGetValue(emp.DepartmentId, out var dn) ? dn : emp.DepartmentId.ToString();
+                ws.Cells[row, 5].Value = emp.EmployeeEmail;
+                ws.Cells[row, 6].Value = emp.EmployeePhone;
+                ws.Cells[row, 7].Value = emp.Gender;
+                ws.Cells[row, 8].Value = emp.BirthDate?.ToString("dd/MM/yyyy");
+                ws.Cells[row, 9].Value = emp.EmployeeAddress;
+                ws.Cells[row, 10].Value = emp.IdentityNumber;
+                ws.Cells[row, 11].Value = emp.EducationLevel;
+                ws.Cells[row, 12].Value = emp.Specialization;
+
+                if (i % 2 == 1)
+                {
+                    using var range = ws.Cells[row, 1, row, headers.Length];
+                    range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(217, 225, 242));
+                }
+            }
+
+            ws.Cells[ws.Dimension.Address].AutoFitColumns();
+
+            var bytes = await package.GetAsByteArrayAsync();
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"DanhSachNhanVien_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
 
         [HttpPost("import")]

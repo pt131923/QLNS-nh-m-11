@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ColDef, GridApi, GridReadyEvent, GridOptions, RowClickedEvent } from 'ag-grid-community';
-import { EmployeeService } from 'src/app/_services/employee.service';
+import { EmployeeService, EmployeeFilter, EmployeeStats } from 'src/app/_services/employee.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Employee } from 'src/app/_model/employee';
 import { Department } from 'src/app/_model/department';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-employee-list',
@@ -15,20 +16,34 @@ export class EmployeeListComponent implements OnInit {
 
   gridOptions: GridOptions = {};
 
-  // Inject services
   private empService = inject(EmployeeService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
-  private gridApi!: GridApi<Employee>;
+  public gridApi!: GridApi<Employee>;
 
   // Signals
   departments = signal<Department[]>([]);
   employees = signal<Employee[]>([]);
   rowData = signal<Employee[]>([]);
 
-  // Search text
-  searchText: string = '';
+  // Statistics
+  stats = signal<EmployeeStats | null>(null);
+  showStats = false;
+
+  // Filter state
+  filter: EmployeeFilter = {
+    name: '',
+    departmentId: undefined,
+    gender: '',
+    educationLevel: '',
+    contractStatus: ''
+  };
+
+  // Batch department transfer
+  showBatchModal = false;
+  batchTargetDeptId: number | null = null;
+  batchLoading = false;
 
   // Pagination
   rowSelection: 'single' | 'multiple' = 'multiple';
@@ -46,11 +61,11 @@ export class EmployeeListComponent implements OnInit {
       headerCheckboxSelectionFilteredOnly: true,
       pinned: 'left'
     },
-    { field: 'EmployeeId', headerName: 'Employee ID', maxWidth: 100 },
-    { field: 'EmployeeName', headerName: 'Employee Name', filter: true, minWidth: 150 },
+    { field: 'EmployeeId', headerName: 'Mã NV', maxWidth: 100 },
+    { field: 'EmployeeName', headerName: 'Họ và tên', filter: true, minWidth: 150 },
     {
       field: 'DepartmentId',
-      headerName: 'Department',
+      headerName: 'Phòng ban',
       filter: true,
       valueFormatter: (params) => {
         const dep = this.departments().find(d => d.DepartmentId === params.value);
@@ -59,12 +74,13 @@ export class EmployeeListComponent implements OnInit {
       minWidth: 150,
     },
     { field: 'EmployeeEmail', headerName: 'Email', filter: true, minWidth: 150 },
-    { field: 'EmployeePhone', headerName: 'Phone', filter: true, minWidth: 120 },
-    { field: 'EmployeeAddress', headerName: 'Address', filter: true, minWidth: 200 },
-    { field: 'BirthDate', headerName: 'Birth Date', filter: true, minWidth: 120 },
-    { field: 'Gender', headerName: 'Gender', filter: true, minWidth: 100 },
-    { field: 'IdentityNumber', headerName: 'ID Number', filter: true },
-    { field: 'EducationLevel', headerName: 'Education Level', filter: true }
+    { field: 'EmployeePhone', headerName: 'Điện thoại', filter: true, minWidth: 120 },
+    { field: 'Gender', headerName: 'Giới tính', filter: true, minWidth: 100 },
+    { field: 'BirthDate', headerName: 'Ngày sinh', filter: true, minWidth: 120,
+      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('vi-VN') : '' },
+    { field: 'EmployeeAddress', headerName: 'Địa chỉ', filter: true, minWidth: 200 },
+    { field: 'IdentityNumber', headerName: 'CCCD', filter: true },
+    { field: 'EducationLevel', headerName: 'Trình độ', filter: true }
   ];
 
   defaultColDef: ColDef = {
@@ -75,27 +91,29 @@ export class EmployeeListComponent implements OnInit {
     filter: true,
   };
 
-  // ------------ Lifecycle ------------
+  genderOptions = ['', 'Nam', 'Nữ', 'Khác'];
+  educationOptions = ['', 'Trung học', 'Trung cấp', 'Cao đẳng', 'Đại học', 'Thạc sĩ', 'Tiến sĩ'];
+  contractStatusOptions = [
+    { value: '', label: 'Tất cả' },
+    { value: 'active', label: 'Đang có hợp đồng' },
+    { value: 'inactive', label: 'Hết hạn hợp đồng' },
+    { value: 'none', label: 'Chưa có hợp đồng' }
+  ];
+
   ngOnInit(): void {
     this.loadDepartments();
     this.loadEmployee();
+    this.loadStats();
   }
 
   onGridReady(event: GridReadyEvent<Employee>) {
     this.gridApi = event.api;
   }
 
-  // ------------ Load Data ------------
-
   loadDepartments() {
     this.empService.getDepartment().subscribe({
-      next: (dep) => {
-        this.departments.set(dep);
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error('Unable to load departments.');
-      }
+      next: (dep) => this.departments.set(dep),
+      error: () => this.toastr.error('Không thể tải danh sách phòng ban.')
     });
   }
 
@@ -105,130 +123,202 @@ export class EmployeeListComponent implements OnInit {
         this.employees.set(employees);
         this.rowData.set(employees);
       },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error('Unable to load employees.');
-      }
+      error: () => this.toastr.error('Không thể tải danh sách nhân viên.')
     });
   }
 
-  // ------------ Export CSV ------------
-
-  onBtExport() {
-    const depMap = new Map<number, string>();
-    this.departments().forEach(d => depMap.set(d.DepartmentId, d.Name));
-
-    this.gridApi.exportDataAsCsv({
-      fileName: 'Employee_List_Export.csv',
-      processCellCallback: (params) => {
-        const colId = params.column.getColId();
-
-        if (colId === 'DepartmentId') {
-          return depMap.get(params.value) || 'Unknown';
-        }
-
-        if (colId === 'BirthDate' || colId === 'IdentityIssuedDate') {
-          if (params.value instanceof Date) {
-            return params.value.toLocaleDateString('en-US');
-          }
-        }
-
-        return params.value;
-      },
-      prependContent: [
-        [{ data: 'EMPLOYEE LIST' as any }],
-        [{ data: 'Export Date:' }, { data: new Date().toLocaleDateString('en-US') }],
-        []
-      ],
-
-      columnKeys: this.columnDefs.map(c => c.field).filter(f => f) as string[],
-      skipColumnHeaders: false,
-      suppressQuotes: true
-    });
-
-    this.toastr.success('CSV export completed successfully!');
-  }
-
-  // ------------ Edit ------------
-
-  onEditRow() {
-    const rows = this.gridApi.getSelectedRows();
-    if (rows.length !== 1) {
-      this.toastr.warning('Please select exactly one employee to edit.');
-      return;
-    }
-
-    const emp = rows[0];
-    if (!emp.EmployeeId) {
-      this.toastr.error('Invalid Employee ID.');
-      return;
-    }
-
-    this.empService.setEmployeeData(emp);
-    this.router.navigate(['/employee-edit', emp.EmployeeId]);
-  }
-
-  // ------------ Delete ------------
-
-  handleDeleteConfirmation() {
-    const rows = this.gridApi.getSelectedRows();
-    if (rows.length !== 1) {
-      this.toastr.warning('Please select exactly one employee to delete.');
-      return;
-    }
-
-    const emp = rows[0];
-    if (!emp.EmployeeId) {
-      this.toastr.error('Invalid Employee ID.');
-      return;
-    }
-
-    this.toastr.info(`Deleting employee with ID: ${emp.EmployeeId}...`);
-
-    this.deleteEmployee(emp.EmployeeId);
-  }
-
-  private deleteEmployee(id: number) {
-    this.empService.DeleteEmployee(id).subscribe({
-      next: () => {
-        this.toastr.success('Employee deleted successfully!');
-        this.loadEmployee();
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error('Failed to delete employee.');
-      }
+  loadStats() {
+    this.empService.getStatistics().subscribe({
+      next: (s) => this.stats.set(s),
+      error: () => {}
     });
   }
-
-  // ------------ Search ------------
 
   onSearch() {
-    const text = this.searchText.toLowerCase().trim();
+    const hasFilter = this.filter.name || this.filter.departmentId ||
+      this.filter.gender || this.filter.educationLevel;
 
-    if (!text) {
+    if (!hasFilter) {
       this.rowData.set([...this.employees()]);
       return;
     }
 
-    const filtered = this.employees().filter(emp =>
-      Object.values(emp).some(v =>
-        typeof v === 'string' && v.toLowerCase().includes(text)
-      )
-    );
-
-    this.rowData.set(filtered);
+    this.empService.searchEmployees(this.filter).subscribe({
+      next: (result) => this.rowData.set(result),
+      error: () => {
+        this.toastr.warning('Không tìm thấy nhân viên phù hợp.');
+        this.rowData.set([]);
+      }
+    });
   }
 
-  // ------------ Row Click ------------
+  onClearFilter() {
+    this.filter = { name: '', departmentId: undefined, gender: '', educationLevel: '', contractStatus: '' };
+    this.rowData.set([...this.employees()]);
+  }
 
-  onRowClicked(event: RowClickedEvent<Employee>) {
-    if (!event.data?.EmployeeId) {
-      this.toastr.error('Employee details not found.');
+  // ───────────────────── Export Excel (server-side) ─────────────────────
+
+  onExportExcel() {
+    this.empService.exportExcel(this.filter).subscribe({
+      next: (blob) => {
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        saveAs(blob, `DanhSachNhanVien_${date}.xlsx`);
+        this.toastr.success('Xuất Excel thành công!');
+      },
+      error: () => this.toastr.error('Xuất Excel thất bại.')
+    });
+  }
+
+  // ───────────────────── Export PDF (client-side print) ─────────────────────
+
+  onExportPDF() {
+    const depMap = new Map<number, string>();
+    this.departments().forEach(d => depMap.set(d.DepartmentId, d.Name));
+
+    const rows = this.rowData();
+    const tableRows = rows.map((emp, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${emp.EmployeeId}</td>
+        <td>${emp.EmployeeName || ''}</td>
+        <td>${depMap.get(emp.DepartmentId) || emp.DepartmentId}</td>
+        <td>${emp.EmployeeEmail || ''}</td>
+        <td>${emp.EmployeePhone || ''}</td>
+        <td>${emp.Gender || ''}</td>
+        <td>${emp.BirthDate ? new Date(emp.BirthDate).toLocaleDateString('vi-VN') : ''}</td>
+        <td>${emp.EducationLevel || ''}</td>
+      </tr>`).join('');
+
+    const html = `
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Danh sách nhân viên</title>
+        <style>
+          body { font-family: Arial, sans-serif; font-size: 12px; }
+          h2 { text-align: center; }
+          table { width: 100%; border-collapse: collapse; }
+          th { background: #1f497d; color: white; padding: 6px; text-align: left; }
+          td { padding: 5px; border-bottom: 1px solid #ddd; }
+          tr:nth-child(even) { background: #f2f2f2; }
+          .export-info { text-align: right; font-size: 11px; margin-bottom: 8px; }
+        </style>
+      </head>
+      <body>
+        <h2>DANH SÁCH NHÂN VIÊN</h2>
+        <div class="export-info">Ngày xuất: ${new Date().toLocaleDateString('vi-VN')} | Tổng: ${rows.length} nhân viên</div>
+        <table>
+          <thead>
+            <tr>
+              <th>STT</th><th>Mã NV</th><th>Họ và tên</th><th>Phòng ban</th>
+              <th>Email</th><th>ĐT</th><th>Giới tính</th><th>Ngày sinh</th><th>Trình độ</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </body>
+      </html>`;
+
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(() => { win.print(); win.close(); }, 500);
+    }
+  }
+
+  // ───────────────────── Batch Department Transfer ─────────────────────
+
+  openBatchModal() {
+    const rows = this.gridApi.getSelectedRows();
+    if (rows.length < 2) {
+      this.toastr.warning('Vui lòng chọn ít nhất 2 nhân viên để chuyển phòng ban hàng loạt.');
+      return;
+    }
+    this.batchTargetDeptId = null;
+    this.showBatchModal = true;
+  }
+
+  closeBatchModal() {
+    this.showBatchModal = false;
+    this.batchTargetDeptId = null;
+  }
+
+  confirmBatchTransfer() {
+    if (!this.batchTargetDeptId) {
+      this.toastr.warning('Vui lòng chọn phòng ban đích.');
       return;
     }
 
-    this.router.navigate(['/employee', event.data.EmployeeId]);
+    const rows = this.gridApi.getSelectedRows();
+    const ids = rows.map(r => r.EmployeeId);
+
+    this.batchLoading = true;
+    this.empService.batchUpdateDepartment({ employeeIds: ids, newDepartmentId: this.batchTargetDeptId }).subscribe({
+      next: (res) => {
+        this.toastr.success(`Đã chuyển ${res.updated} nhân viên thành công!`);
+        this.showBatchModal = false;
+        this.batchLoading = false;
+        this.loadEmployee();
+        this.loadStats();
+      },
+      error: () => {
+        this.toastr.error('Chuyển phòng ban thất bại.');
+        this.batchLoading = false;
+      }
+    });
   }
 
+  // ───────────────────── Statistics ─────────────────────
+
+  toggleStats() {
+    this.showStats = !this.showStats;
+    if (this.showStats) this.loadStats();
+  }
+
+  getStatPercent(count: number): number {
+    const total = this.stats()?.total || 1;
+    return Math.round((count / total) * 100);
+  }
+
+  // ───────────────────── Edit ─────────────────────
+
+  onEditRow() {
+    const rows = this.gridApi.getSelectedRows();
+    if (rows.length !== 1) {
+      this.toastr.warning('Vui lòng chọn đúng 1 nhân viên để sửa.');
+      return;
+    }
+    const emp = rows[0];
+    this.empService.setEmployeeData(emp);
+    this.router.navigate(['/employee-edit', emp.EmployeeId]);
+  }
+
+  // ───────────────────── Delete ─────────────────────
+
+  handleDeleteConfirmation() {
+    const rows = this.gridApi.getSelectedRows();
+    if (rows.length !== 1) {
+      this.toastr.warning('Vui lòng chọn đúng 1 nhân viên để xóa.');
+      return;
+    }
+    const emp = rows[0];
+    this.empService.DeleteEmployee(emp.EmployeeId).subscribe({
+      next: () => {
+        this.toastr.success('Đã xóa nhân viên thành công!');
+        this.loadEmployee();
+        this.loadStats();
+      },
+      error: () => this.toastr.error('Xóa nhân viên thất bại.')
+    });
+  }
+
+  // ───────────────────── Row Click ─────────────────────
+
+  onRowClicked(event: RowClickedEvent<Employee>) {
+    if (!event.data?.EmployeeId) return;
+    this.router.navigate(['/employee', event.data.EmployeeId]);
+  }
 }
