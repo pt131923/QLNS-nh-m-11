@@ -38,6 +38,10 @@ namespace API.Data
             var departments = await _departments.Find(_ => true).ToListAsync();
             return _mapper.Map<IEnumerable<DepartmentDto>>(departments);
         }
+        public async Task<List<AppDepartment>> GetFilteredDepartmentsAsync(FilterDefinition<AppDepartment> filter)
+        {
+           return await _departments.Find(filter).ToListAsync();
+        }
 
         public async Task<bool> SaveAllAsync()
         {

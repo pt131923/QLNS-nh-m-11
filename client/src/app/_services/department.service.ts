@@ -1,8 +1,17 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Department} from '../_model/department';
 import { map, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
+
+// Thêm cái này vào, ở đâu cũng được miễn là bên ngoài class
+export interface DepartmentFilter {
+  name?: string;
+  description?: string;
+  addresses?: string;
+  slNhanVien?: number;
+  notes?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -54,11 +63,29 @@ export class DepartmentService {
       return this.http.delete<void>(`${this.baseUrl1}/delete-department/${id}`);
     }
 
-  SearchDepartment(departName: string): Observable<Department[]> {
-    return this.http.get<Department[]>(this.baseUrl1 + '?departName=' + departName).pipe(
-      map((response: Department[]) => {
-        return response;
-      })
-    );
+    searchDepartments(filter: DepartmentFilter): Observable<Department[]> {
+      let params = new HttpParams();
+      if (filter.name) params = params.set('name', filter.name);
+      if (filter.description) params = params.set('description', filter.description);
+      if (filter.addresses) params = params.set('diaDiem', filter.addresses);
+      if (filter.notes) params = params.set('notes', filter.notes);
+      return this.http.get<Department[]>(`${this.baseUrl1}/search`, { params });
+    }
+
+  exportExcel(filter: DepartmentFilter = {}): Observable<Blob> {
+    let params = new HttpParams();
+    if (filter.name) params = params.set('name', filter.name);
+    if (filter.description) params = params.set('description', filter.description);
+    if (filter.slNhanVien != null) params = params.set('slNhanVien', filter.slNhanVien.toString());
+    if (filter.addresses) params = params.set('addresses', filter.addresses);
+    if (filter.notes) params = params.set('notes', filter.notes);
+    return this.http.get(`${this.baseUrl1}/export-excel`, { params, responseType: 'blob' });
   }
+  
+  uploadExcel(file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<void>(`${this['baseUrl']}/import`, formData);
+  }
+  
 }

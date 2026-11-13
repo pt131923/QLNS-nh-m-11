@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ColDef, GridApi, GridReadyEvent, GridOptions } from 'ag-grid-community';
-import { DepartmentService } from 'src/app/_services/department.service';
+import { DepartmentFilter, DepartmentService } from 'src/app/_services/department.service';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { Router } from '@angular/router';
 import { Department } from 'src/app/_model/department';
 import { ToastrService } from 'ngx-toastr';
+import saveAs from 'file-saver';
 
 @Component({
   selector: 'app-department-list',
@@ -53,6 +54,14 @@ export class DepartmentListComponent implements OnInit {
     filter: true
   };
 
+  filter: DepartmentFilter = {
+    name: '',
+    description: '',
+    slNhanVien: undefined,
+    addresses: '',
+    notes: ''
+  };
+
   pagination = true;
   paginationPageSize = 5;
   paginationPageSizeSelector = [5, 10, 15, 20, 25, 30, 35, 40];
@@ -80,16 +89,77 @@ export class DepartmentListComponent implements OnInit {
     this.gridApi = event.api;
   }
 
-  onBtExport() {
-    if (this.gridApi) {
-      this.gridApi.exportDataAsCsv({
-        fileName: 'Danh sách phòng ban_' + new Date().toLocaleDateString('vi-VN') + '.csv',
-        columnKeys: ['DepartmentId', 'Name', 'Description', 'SlNhanVien', 'Addresses', 'Notes']
-      });
-    } else {
-      alert('Grid API chưa sẵn sàng.');
-    }
+  // ===== XUẤT EXCEL =====
+  onExportExcel(): void {
+  this.deptService.exportExcel(this.filter).subscribe({
+    next: (blob: Blob) => {
+      const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      saveAs(blob, `DanhSachPhongBan_${date}.xlsx`);
+      this.toastr.success('Xuất Excel thành công!');
+    },
+    error: () => this.toastr.error('Xuất Excel thất bại!')
+  });
+}
+
+// ===== XUẤT PDF =====
+onExportPDF(): void {
+  const rows = this.rowData;
+  const headers = ['STT', 'Mã PB', 'Tên phòng ban', 'Mô tả', 'Số NV', 'Địa điểm', 'Ghi chú'];
+  
+  const tableRows = rows.map((dept: { DepartmentId: any; Name: any; Description: any; SlNhanVien: any; Addresses: any; Notes: any; }, i: number) => [
+    i + 1,
+    dept.DepartmentId,
+    dept.Name || '',
+    dept.Description || '',
+    dept.SlNhanVien,
+    dept.Addresses || '',
+    dept.Notes || ''
+  ]);
+
+  const html = this.buildPDFHtml(headers, tableRows, rows.length);
+  this.openAndPrintPDF(html);
+}
+
+private buildPDFHtml(headers: string[], rows: (string | number)[][], total: number): string {
+  const headerHtml = headers.map(h => `<th>${h}</th>`).join('');
+  const rowHtml = rows.map(r => r.map(c => `<td>${c}</td>`).join('')).map(tr => `<tr>${tr}</tr>`).join('');
+  const exportDate = new Date().toLocaleDateString('vi-VN');
+
+  return `
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách phòng ban</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;padding:20px}
+    h2{text-align:center;color:#1f497d;margin-bottom:10px}
+    .info{text-align:right;font-size:11px;color:#555;margin-bottom:8px}
+    table{width:100%;border-collapse:collapse}
+    th{background:#1f497d;color:#fff;padding:6px;text-align:left;border:1px solid #ddd}
+    td{padding:6px;border:1px solid #ddd}
+    tr:nth-child(even){background:#f2f2f2}
+  </style>
+</head>
+<body>
+  <h2>DANH SÁCH PHÒNG BAN</h2>
+  <div class="info">Ngày xuất: ${exportDate} | Tổng: ${total} phòng ban</div>
+  <table><thead><tr>${headerHtml}</tr></thead><tbody>${rowHtml}</tbody></table>
+</body>
+</html>`;
+}
+
+private openAndPrintPDF(html: string): void {
+  const win = window.open('', '_blank');
+  if (!win) {
+    this.toastr.warning('Vui lòng cho phép pop-up để in');
+    return;
   }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.close(); }, 400);
+}
+
 
   loadDepartments() {
     this.deptService.getDepartments().subscribe({

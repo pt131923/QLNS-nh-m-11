@@ -157,7 +157,6 @@ export class EmployeeListComponent implements OnInit {
     this.rowData.set([...this.employees()]);
   }
 
-  // ───────────────────── Export Excel (server-side) ─────────────────────
 
   onExportExcel() {
     this.empService.exportExcel(this.filter).subscribe({
@@ -170,7 +169,6 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
-  // ───────────────────── Export PDF (client-side print) ─────────────────────
 
   onExportPDF() {
     const depMap = new Map<number, string>();
@@ -229,8 +227,6 @@ export class EmployeeListComponent implements OnInit {
     }
   }
 
-  // ───────────────────── Batch Department Transfer ─────────────────────
-
   openBatchModal() {
     const rows = this.gridApi.getSelectedRows();
     if (rows.length < 2) {
@@ -271,7 +267,6 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
-  // ───────────────────── Statistics ─────────────────────
 
   toggleStats() {
     this.showStats = !this.showStats;
@@ -283,7 +278,6 @@ export class EmployeeListComponent implements OnInit {
     return Math.round((count / total) * 100);
   }
 
-  // ───────────────────── Edit ─────────────────────
 
   onEditRow() {
     const rows = this.gridApi.getSelectedRows();
@@ -295,8 +289,6 @@ export class EmployeeListComponent implements OnInit {
     this.empService.setEmployeeData(emp);
     this.router.navigate(['/employee-edit', emp.EmployeeId]);
   }
-
-  // ───────────────────── Delete ─────────────────────
 
   handleDeleteConfirmation() {
     const rows = this.gridApi.getSelectedRows();
@@ -315,7 +307,6 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
-  // ───────────────────── Row Click ─────────────────────
 
   onRowClicked(event: RowClickedEvent<Employee>) {
     if (!event.data?.EmployeeId) return;

@@ -1,5 +1,6 @@
 using API.DTOs;
 using API.Entities;
+using MongoDB.Driver;
 
 namespace API.Interfaces
 {
@@ -13,5 +14,6 @@ namespace API.Interfaces
         void Delete(AppDepartment department);
         void Update(AppDepartment department);
         Task<bool> DepartmentExists(string departmentName);
+        Task<List<AppDepartment>> GetFilteredDepartmentsAsync(FilterDefinition<AppDepartment> filter);
     }
 }

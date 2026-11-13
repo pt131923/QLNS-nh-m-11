@@ -96,7 +96,7 @@
                   <i class="bi bi-search"></i> Tìm kiếm
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" (click)="onClearFilter()">
-                  <i class="bi bi-x-lg"></i>
+                  <i class="bi bi-x-lg">Làm mới</i>
                 </button>
               </div>
             </div>
@@ -217,7 +217,7 @@
       </div>
       <div class="modal-body">
         <p class="text-muted mb-3">
-          Đã chọn <strong>{{ gridApi?.getSelectedRows()?.length || 0 }}</strong> nhân viên.
+          Đã chọn <strong>{{ gridApi.getSelectedRows().length || 0 }}</strong> nhân viên.
           Chọn phòng ban đích:
         </p>
         <select class="form-select" [(ngModel)]="batchTargetDeptId">
