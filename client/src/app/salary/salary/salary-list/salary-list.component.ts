@@ -4,6 +4,9 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Salary } from 'src/app/_model/salary';
 import { SalaryService } from 'src/app/_services/salary.service';
+import { Department } from 'src/app/_model/department';
+import { DepartmentService } from 'src/app/_services/department.service';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-salary-list',
@@ -14,6 +17,8 @@ export class SalaryListComponent implements OnInit {
   private gridApi!: GridApi<Salary>;
   salaries: Salary[] = [];
   rowData: Salary[] = [];
+  departments: Department[] = [];
+  selectedDepartmentId: number | null = null;
   searchText: string = '';
   payrollPeriod = this.currentPeriod();
   generating = false;
@@ -70,26 +75,128 @@ export class SalaryListComponent implements OnInit {
 
   constructor(
     private salaryService: SalaryService,
+    private departmentService: DepartmentService,
     private router: Router,
     private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
+    this.loadDepartments();
     this.loadSalaries();
+  }
+
+  loadDepartments(): void {
+    this.departmentService.getDepartments().subscribe({
+      next: (depts) => {
+        this.departments = depts;
+      },
+      error: () => {}
+    });
   }
 
   onGridReady(event: GridReadyEvent<Salary>) {
     this.gridApi = event.api;
   }
 
-  onBtExport() {
-    if (this.gridApi) {
-      this.gridApi.exportDataAsCsv({
-        fileName: 'Bảng lương_' + new Date().toLocaleDateString('vi-VN') + '.csv'
-      });
-    } else {
-      this.toastr.error('Grid API chưa khởi tạo');
+  exportExcel(): void {
+    const [year, month] = this.parsePeriod(this.payrollPeriod);
+    this.salaryService.exportExcel(this.searchText, month || undefined, year || undefined).subscribe({
+      next: (blob) => {
+        saveAs(blob, `BangLuong_${this.payrollPeriod || 'all'}.xlsx`);
+        this.toastr.success('Xuất file Excel bảng lương thành công');
+      },
+      error: () => {
+        this.toastr.error('Xuất file Excel thất bại');
+      }
+    });
+  }
+
+  exportPdf(): void {
+    const rows = this.rowData;
+    if (!rows || rows.length === 0) {
+      this.toastr.warning('Không có dữ liệu để in PDF');
+      return;
     }
+
+    const tableRows = rows.map((s, idx) => `
+      <tr>
+        <td style="text-align: center;">${idx + 1}</td>
+        <td>${s.EmployeeId}</td>
+        <td><strong>${s.EmployeeName || ''}</strong></td>
+        <td style="text-align: center;">${this.periodLabel(s)}</td>
+        <td style="text-align: center;">${s.WorkedDays ?? '-'}</td>
+        <td style="text-align: right;">${(s.BasicSalary || 0).toLocaleString('vi-VN')}</td>
+        <td style="text-align: right;">${(s.Allowance || 0).toLocaleString('vi-VN')}</td>
+        <td style="text-align: right;">${(s.OvertimePay || 0).toLocaleString('vi-VN')}</td>
+        <td style="text-align: right;">${(s.GrossSalary || 0).toLocaleString('vi-VN')}</td>
+        <td style="text-align: right;">${((s.BhxhEmployee || 0) + (s.BhytEmployee || 0) + (s.BhtnEmployee || 0)).toLocaleString('vi-VN')}</td>
+        <td style="text-align: right;">${(s.PersonalIncomeTax || 0).toLocaleString('vi-VN')}</td>
+        <td style="text-align: right; font-weight: bold; color: #1f497d;">${(s.NetSalary || 0).toLocaleString('vi-VN')}</td>
+      </tr>
+    `).join('');
+
+    const html = `
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Bảng lương nhân viên - ${this.payrollPeriod}</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; font-size: 11px; }
+          h2 { text-align: center; color: #1f497d; margin-bottom: 5px; }
+          .sub { text-align: center; color: #666; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th { background: #1f497d; color: white; padding: 6px; border: 1px solid #ccc; font-size: 11px; }
+          td { padding: 5px; border: 1px solid #ddd; font-size: 10px; }
+          tr:nth-child(even) { background-color: #f9f9f9; }
+          .summary { margin-top: 15px; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <h2>BẢNG LƯƠNG NHÂN VIÊN DOANH NGHIỆP</h2>
+        <div class="sub">Kỳ lương: ${this.payrollPeriod} | Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}</div>
+        <table>
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Mã NV</th>
+              <th>Họ và tên</th>
+              <th>Kỳ</th>
+              <th>Công</th>
+              <th>Lương CB</th>
+              <th>Phụ cấp</th>
+              <th>Lương OT</th>
+              <th>Tổng thu nhập (Gross)</th>
+              <th>BHXH, YT, TN</th>
+              <th>Thuế TNCN</th>
+              <th>Thực lĩnh (Net)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+        <div class="summary">
+          <strong>Tổng số nhân viên:</strong> ${rows.length} | 
+          <strong>Tổng chi trả thực lĩnh:</strong> ${rows.reduce((sum, r) => sum + (r.NetSalary || 0), 0).toLocaleString('vi-VN')} đ
+        </div>
+      </body>
+      </html>
+    `;
+
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(() => {
+        win.print();
+        win.close();
+      }, 500);
+    }
+  }
+
+  onBtExport() {
+    this.exportExcel();
   }
 
   loadSalaries() {
@@ -112,11 +219,15 @@ export class SalaryListComponent implements OnInit {
       return;
     }
 
+    const scopeText = this.selectedDepartmentId 
+      ? `phòng ban đã chọn` 
+      : `toàn bộ nhân viên công ty`;
+
     this.generating = true;
-    this.salaryService.generateMonth(year, month).subscribe({
+    this.salaryService.generateMonth(year, month, this.selectedDepartmentId).subscribe({
       next: (res) => {
         this.generating = false;
-        this.toastr.success(`Đã lập ${res.generatedCount || 0} phiếu lương kỳ ${res.period}`);
+        this.toastr.success(`Đã tự động tính & lập ${res.generatedCount || 0} phiếu lương cho ${scopeText} kỳ ${res.period}!`);
         this.loadSalaries();
       },
       error: (err) => {

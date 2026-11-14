@@ -13,18 +13,39 @@
     <div class="card-body">
 
       <!-- Payroll Period & Generate Button -->
-      <div class="d-flex flex-wrap gap-3 align-items-center mb-4 p-3 bg-light rounded">
-        <div>
-          <label class="form-label small mb-1 fw-semibold">Kỳ lương</label>
-          <input type="month" class="form-control" [(ngModel)]="payrollPeriod">
-        </div>
-        <div class="mt-auto">
-          <button class="btn btn-warning text-dark" (click)="generatePayroll()" [disabled]="generating">
-            <span *ngIf="generating" class="spinner-border spinner-border-sm me-1"></span>
-            <i *ngIf="!generating" class="bi bi-calculator me-1"></i>
-            Tính lương tháng
-          </button>
-          <small class="text-muted ms-2">Sử dụng lương hợp đồng, ngày công, tính bảo hiểm & thuế TNCN</small>
+      <div class="card border-0 bg-light mb-4 shadow-sm">
+        <div class="card-body p-3">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label small mb-1 fw-bold text-dark">
+                <i class="bi bi-calendar3 me-1"></i> Kỳ tính lương
+              </label>
+              <input type="month" class="form-control" [(ngModel)]="payrollPeriod">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small mb-1 fw-bold text-dark">
+                <i class="bi bi-building me-1"></i> Phạm vi tính lương
+              </label>
+              <select class="form-select" [(ngModel)]="selectedDepartmentId">
+                <option [ngValue]="null">Toàn bộ công ty (Tất cả nhân viên)</option>
+                <option *ngFor="let dept of departments" [ngValue]="dept.DepartmentId">
+                  Phòng ban: {{ dept.Name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-5 d-flex align-items-center">
+              <button class="btn btn-warning text-dark fw-bold px-3 py-2" (click)="generatePayroll()" [disabled]="generating">
+                <span *ngIf="generating" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="!generating" class="bi bi-play-circle-fill me-1 text-danger"></i>
+                Tính lương tự động
+              </button>
+              <div class="ms-3 small text-muted lh-sm">
+                Tự động lấy lương HĐ, ngày công chấm công, OT, trích nộp BHXH & Thuế TNCN cho <strong>{{ selectedDepartmentId ? 'phòng ban đã chọn' : 'toàn bộ nhân viên công ty' }}</strong>.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -39,8 +60,11 @@
         <button class="btn btn-danger" (click)="onDeleteRow()">
           <i class="bi bi-trash me-1"></i> Xóa
         </button>
-        <button class="btn btn-success" (click)="onBtExport()">
+        <button class="btn btn-success" (click)="exportExcel()">
           <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        </button>
+        <button class="btn btn-danger text-white" (click)="exportPdf()">
+          <i class="bi bi-file-earmark-pdf me-1"></i> Xuất PDF
         </button>
         <button class="btn btn-info text-white" (click)="toggleStats()">
           <i class="bi bi-bar-chart-line me-1"></i>

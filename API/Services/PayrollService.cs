@@ -87,7 +87,11 @@ namespace API.Services
 
         public async Task<IReadOnlyList<Salary>> GenerateMonthAsync(PayrollGenerateMonthRequest request, CancellationToken ct = default)
         {
-            var employees = await _employees.Find(_ => true).ToListAsync(ct);
+            var filter = request.DepartmentId.HasValue && request.DepartmentId.Value > 0
+                ? Builders<Employee>.Filter.Eq(e => e.DepartmentId, request.DepartmentId.Value)
+                : Builders<Employee>.Filter.Empty;
+
+            var employees = await _employees.Find(filter).ToListAsync(ct);
             var saved = new List<Salary>();
 
             foreach (var employee in employees)

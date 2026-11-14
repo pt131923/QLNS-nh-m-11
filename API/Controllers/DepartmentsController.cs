@@ -89,13 +89,13 @@ namespace API.Controllers
 			return BadRequest("Failed to delete the Department");
 		}
 
-		[HttpGet("export-excel")]
-        public async Task<IActionResult> ExportExcel(
-           string name = null,
-           string description = null,
-           int? soNhanVien = null,
-           string address = null,
-           string note = null)
+	[HttpGet("export-excel")]
+    public async Task<IActionResult> ExportExcel(
+        string name = null,
+        string description = null,
+        int? soNhanVien = null,
+        string address = null,
+        string note = null)
     {
     // ✅ 1. Xây dựng bộ lọc đúng cho AppDepartment
     var filter = Builders<AppDepartment>.Filter.Empty;

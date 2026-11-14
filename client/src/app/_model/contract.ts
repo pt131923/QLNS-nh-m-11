@@ -2,6 +2,7 @@ export interface Contract {
   ContractId: number;
   ContractName: string;
   ContractType: string;
+  EmployeeId?: number;
   EmployeeName: string;
   StartDate: Date | undefined;
   EndDate: Date | undefined;
@@ -12,5 +13,7 @@ export interface Contract {
   JobDescription: string;
   ContractTerm: string;
   WorkLocation: string;
-  Leaveofabsence: string
+  Leaveofabsence: string;
+  Status?: string;
+  AnnualLeaveDays?: number;
 }

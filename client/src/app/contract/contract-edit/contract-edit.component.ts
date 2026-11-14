@@ -74,7 +74,7 @@ export class ContractEditComponent implements OnInit {
     };
 
     // validate ngày
-    if (new Date(updatedContract.StartDate!) >= new Date(updatedContract.EndDate!)) {
+    if (updatedContract.StartDate && updatedContract.EndDate && new Date(updatedContract.StartDate) >= new Date(updatedContract.EndDate)) {
       this.toastr.error('Start date must be before end date');
       return;
     }

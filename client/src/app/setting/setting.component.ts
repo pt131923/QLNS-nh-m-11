@@ -165,18 +165,16 @@ export class SettingComponent implements OnInit {
  //          SAVE ALL
  // ==============================
  onSaveSettings() {
-   // Lưu ngôn ngữ (GIỮ NGUYÊN)
     this.settings.defaultLanguage = this.draftLanguage;
     localStorage.setItem('app-settings', JSON.stringify(this.settings));
     localStorage.setItem('language', this.settings.defaultLanguage);
     
-    // Apply language change immediately - this will trigger change detection for all components using translate pipe
     this.translate.use(this.settings.defaultLanguage).subscribe(() => {
-      // Language has been changed, all components using translate pipe will automatically update
-      console.log('Language changed to:', this.settings.defaultLanguage);
+      this.translate.get('settings.saveSuccess').subscribe(msg => {
+        this.toastr.success(msg || 'Đã cập nhật cài đặt thành công!');
+      });
     });
     
-    // Dispatch custom event to notify all components about language change
     window.dispatchEvent(new CustomEvent('languageChanged', {
       detail: { language: this.settings.defaultLanguage }
     }));

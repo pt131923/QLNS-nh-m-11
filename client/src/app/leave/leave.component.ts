@@ -14,41 +14,37 @@ import { LeaveService }from '../_services/leave.service';
 export class LeaveComponent implements OnInit {
   contract: Contract | null = null;
   leaves: Leave[] = [];
-  loading: boolean | undefined;
-  errorMessage: string | undefined;
-  leaveService: any;
+  loading = false;
+  errorMessage = '';
 
   constructor(
     private contractService: ContractService,
+    private leaveService: LeaveService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.contract = this.contractService.getContractDataForLeave();
-    if (!this.contract) {
-      // Nếu không có contract nào được truyền thì điều hướng về lại contract list
-      this.router.navigate(['/contracts']);
-      return;
-    }
-
     this.LoadLeaves();
   }
 
-  LoadLeaves(): void{
-    if(!this.contract){
-      return;
-    }
-
+  LoadLeaves(): void {
     this.loading = true;
     this.errorMessage = '';
 
-    this.leaveService.getLeaveList().subscribe({
+    this.leaveService.getLeaveRecords().subscribe({
       next: (data: Leave[]) => {
-        // Controller lưu ContractId vào trường EmployeeId
-        this.leaves = data.filter(
-          leave => leave.EmployeeId === this.contract!.ContractId
-        );
-
+        if (this.contract) {
+          const empId = this.contract.EmployeeId || this.contract.ContractId;
+          const empName = this.contract.EmployeeName?.toLowerCase().trim();
+          this.leaves = data.filter(
+            leave => leave.EmployeeId === empId || 
+                     leave.EmployeeId === this.contract!.ContractId ||
+                     (leave.EmployeeName && empName && leave.EmployeeName.toLowerCase().trim() === empName)
+          );
+        } else {
+          this.leaves = data;
+        }
         this.loading = false;
       },
       error: (error: any) => {

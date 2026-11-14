@@ -299,27 +299,23 @@ export class ContractListComponent implements OnInit {
 
     if (selectedRows.length === 1) {
       const selected = selectedRows[0];
+      if (!confirm(`Bạn có chắc muốn chuyển hợp đồng của "${selected.EmployeeName}" sang trạng thái Chấm dứt / Nghỉ việc?`)) {
+        return;
+      }
 
-      this.contractService.addLeave(selected).subscribe({
-        next: () => {
-          this.contractService.DeleteContract(selected.ContractId).subscribe({
-            next: () => {
-              this.toastr.success('Chuyển sang bảng Phép thành công');
-              this.contracts = this.contracts.filter(c => c.ContractId !== selected.ContractId);
-              this.rowData = [...this.contracts];
-              this.updateStats();
-
-              this.router.navigate(['/leave'], {
-                queryParams: { contractId: selected.ContractId }
-              });
-            },
-            error: () => this.toastr.error('Xóa hợp đồng thất bại')
-          });
+      this.contractService.convertToLeave(selected.ContractId).subscribe({
+        next: (res) => {
+          this.toastr.success(res.message || 'Chuyển sang theo dõi nghỉ phép / thôi việc thành công');
+          selected.Status = 'Đã thanh lý';
+          this.rowData = [...this.contracts];
+          this.gridApi?.setGridOption('rowData', this.rowData);
+          this.contractService.setContractDataForLeave(selected);
+          this.router.navigate(['/leaves']);
         },
-        error: () => this.toastr.error('Lưu thông tin phép thất bại')
+        error: () => this.toastr.error('Lưu thông tin thất bại')
       });
     } else {
-      alert('Vui lòng chọn một hợp đồng để chuyển sang bảng Phép.');
+      this.toastr.warning('Vui lòng chọn một hợp đồng để chuyển sang bảng Phép/Thôi việc.');
     }
   }
 }

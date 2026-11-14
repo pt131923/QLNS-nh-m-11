@@ -27,25 +27,30 @@ export class ContractAddComponent implements OnInit {
 
   AddContract(): void {
     if (this.addForm.invalid) {
-      this.toastr.error('Please fill in all required fields');
+      this.toastr.error('Vui lòng điền đầy đủ các thông tin bắt buộc');
       return;
     }
 
+    const val = this.addForm.value;
+    const now = new Date();
+
     let contractData: Contract = {
       ContractId: 0,
-      ContractName: this.addForm.value.ContractName?.trim(),
-      ContractType: this.addForm.value.ContractType?.trim(),
-      EmployeeName: this.addForm.value.EmployeeName?.trim(),
-      StartDate: this.addForm.value.StartDate,
-      EndDate: this.addForm.value.EndDate,
-      BasicSalary: this.addForm.value.BasicSalary,
-      Allowance: this.addForm.value.Allowance,
-      CreateAt: this.addForm.value.CreateAt,
-      UpdateAt: this.addForm.value.UpdateAt,
-      JobDescription: this.addForm.value.JobDescription?.trim() || '',
-      ContractTerm: this.addForm.value.ContractTerm?.trim() || '',
-      WorkLocation: this.addForm.value.WorkLocation?.trim() || '',
-      Leaveofabsence: this.addForm.value.Leaveofabsence?.trim() || ''
+      ContractName: val.ContractName?.trim(),
+      ContractType: val.ContractType?.trim(),
+      EmployeeName: val.EmployeeName?.trim(),
+      StartDate: val.StartDate ? new Date(val.StartDate) : undefined,
+      EndDate: val.EndDate ? new Date(val.EndDate) : undefined,
+      BasicSalary: Number(val.BasicSalary) || 0,
+      Allowance: Number(val.Allowance) || 0,
+      CreateAt: now,
+      UpdateAt: now,
+      JobDescription: val.JobDescription?.trim() || '',
+      ContractTerm: val.ContractTerm?.trim() || '',
+      WorkLocation: val.WorkLocation?.trim() || '',
+      Leaveofabsence: val.Leaveofabsence?.trim() || '',
+      AnnualLeaveDays: Number(val.AnnualLeaveDays) || 12,
+      Status: 'Hiệu lực'
     };
 
     console.log(contractData);

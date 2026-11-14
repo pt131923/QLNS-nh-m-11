@@ -1,9 +1,12 @@
 export interface Leave {
   LeaveId: number;
-  EmployeeId:number;
+  EmployeeId: number;
   EmployeeName: string;
   StartDate: Date;
   EndDate: Date;
   Reason: string;
   Status: string;
+  LeaveType?: string;
+  ContractEndDate?: Date;
+  Note?: string;
 }

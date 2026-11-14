@@ -80,41 +80,16 @@
       </div>
     </div>
     <div class="mb-3">
-      <!-- 
-        Label sử dụng Pipe dịch tự động để luôn hiển thị đúng ngôn ngữ hiện tại.
-        (Giả định bạn có thiết lập Angular Translate)
-      -->
-      <label class="form-label">{{ 'settings.language' | translate }}</label>
-      
-      <!-- 
-        LỰA CHỌN 1: Hiển thị khi ngôn ngữ ứng dụng hiện tại là Tiếng Anh (en)
-        *ngIf vẫn kiểm tra ngôn ngữ hiện tại (settings.defaultLanguage) để hiển thị đúng kiểu dropdown.
-        [(ngModel)]="draftLanguage" giữ giá trị tạm thời.
-      -->
+      <label class="form-label fw-bold">{{ 'settings.language' | translate }}</label>
       <select 
-          *ngIf="settings.defaultLanguage === 'en'"
           [(ngModel)]="draftLanguage" 
           name="defaultLanguage" 
           class="form-select"
       >
-          <option value="en">English</option>
-          <option value="vi">Vietnamese</option>
+          <option value="vi">Tiếng Việt (Vietnamese)</option>
+          <option value="en">Tiếng Anh (English)</option>
       </select>
-  
-      <!-- 
-        LỰA CHỌN 2: Hiển thị khi ngôn ngữ ứng dụng hiện tại là Tiếng Việt (vi)
-        [(ngModel)]="draftLanguage" giữ giá trị tạm thời.
-      -->
-      <select 
-          *ngIf="settings.defaultLanguage === 'vi'"
-          [(ngModel)]="draftLanguage" 
-          name="defaultLanguage" 
-          class="form-select"
-      >
-          <option value="vi">Tiếng Việt</option>
-          <option value="en">Tiếng Anh</option>
-      </select>
-  </div>
+    </div>
 
     <!-- NÚT LƯU TẤT CẢ -->
     <button type="submit" class="btn btn-primary w-100 mb-3">

@@ -12,8 +12,20 @@ export class SalaryService {
 
   constructor(private http: HttpClient) {}
 
-  getSalaries(): Observable<Salary[]> {
-    return this.http.get<Salary[]>(this.baseUrl);
+  getSalaries(name?: string, month?: number, year?: number): Observable<Salary[]> {
+    let params: any = {};
+    if (name) params.name = name;
+    if (month) params.month = month;
+    if (year) params.year = year;
+    return this.http.get<Salary[]>(this.baseUrl, { params });
+  }
+
+  exportExcel(name?: string, month?: number, year?: number): Observable<Blob> {
+    let params: any = {};
+    if (name) params.name = name;
+    if (month) params.month = month;
+    if (year) params.year = year;
+    return this.http.get(`${this.baseUrl}/export-excel`, { params, responseType: 'blob' });
   }
 
   getSalariesWithEmployees(): Observable<any[]> {
@@ -50,10 +62,11 @@ export class SalaryService {
     return this.http.post<Salary>(`${this.baseUrl}/calculate`, request);
   }
 
-  generateMonth(year: number, month: number, dependentCount = 0, deductUnionFee = false): Observable<any> {
+  generateMonth(year: number, month: number, departmentId?: number | null, dependentCount = 0, deductUnionFee = false): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/generate-month`, {
       Year: year,
       Month: month,
+      DepartmentId: departmentId || null,
       DependentCount: dependentCount,
       DeductUnionFee: deductUnionFee
     });

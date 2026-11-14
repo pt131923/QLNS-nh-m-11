@@ -62,9 +62,13 @@ export class ContractService {
       map((response: Contract[]) => response)
     );
   }
+  convertToLeave(contractId: number): Observable<any> {
+    return this.http.post(`${this.baseUrl3}/convert-to-leave/${contractId}`, {});
+  }
+
   addLeave(contract: Contract): Observable<any> {
-  return this.http.post(`${this.baseUrl3}/leave`, contract);
- }
+    return this.http.post(`${this.baseUrl3}/convert-to-leave/${contract.ContractId}`, {});
+  }
 
   setContractDataForLeave(contract: Contract): void {
   this.contractDataForLeave = contract;

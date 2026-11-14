@@ -39,5 +39,9 @@ namespace API.Entities
         public string Leaveofabsence { get; set; }
 
         public string Status { get; set; }
+
+        public int? EmployeeId { get; set; }
+
+        public int AnnualLeaveDays { get; set; } = 12;
     }
 }

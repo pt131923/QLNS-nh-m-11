@@ -1,33 +1,68 @@
-<div class="container mt-5" *ngIf="contract">
-  <div class="mb-3">
+<div class="container-fluid py-4">
+  <div class="mb-3 d-flex gap-2">
     <button class="btn btn-secondary" [routerLink]="['/dashboard']">
-      <i class="bi bi-arrow-left-short me-1"></i> Back to Dashboard
+      <i class="bi bi-arrow-left-short me-1"></i> {{ 'common.backToDashboard' | translate }}
+    </button>
+    <button class="btn btn-outline-primary" [routerLink]="['/contracts']">
+      <i class="bi bi-file-earmark-text me-1"></i> {{ 'common.backToContracts' | translate }}
     </button>
   </div>
-  <h2>List of Leaves</h2>
-  <div>
-    <table class="table table-bordered">
-      <thead class="table-dark">
-        <tr>
-          <th>Leave ID</th>
-          <th>Employee ID</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Reason</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let leave of leaves">
-          <td>{{ leave.LeaveId }}</td>
-          <td>{{ leave.EmployeeName }}</td>
-          <td>{{ leave.StartDate | date }}</td>
-          <td>{{ leave.EndDate | date }}</td>
-          <td>{{ leave.Reason }}</td>
-          <td>{{ leave.Status }}</td>
-        </tr>
-      </tbody>
-    </table>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="bi bi-calendar2-check me-2"></i>{{ 'leave.title' | translate }}
+        <span *ngIf="contract" class="badge bg-light text-primary ms-2">Hợp đồng: {{ contract.ContractName }} ({{ contract.EmployeeName }})</span>
+      </h5>
+    </div>
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="text-muted mt-2">{{ 'common.loading' | translate }}</div>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger py-2">
+        {{ errorMessage }}
+      </div>
+
+      <div class="table-responsive" *ngIf="!loading">
+        <table class="table table-hover table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 80px;">Mã</th>
+              <th>{{ 'leave.employeeName' | translate }}</th>
+              <th>Loại nghỉ / Thôi việc</th>
+              <th>{{ 'leave.startDate' | translate }}</th>
+              <th>{{ 'leave.endDate' | translate }}</th>
+              <th>{{ 'leave.reason' | translate }}</th>
+              <th>{{ 'leave.status' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let leave of leaves">
+              <td class="text-center fw-bold">{{ leave.LeaveId }}</td>
+              <td>{{ leave.EmployeeName }}</td>
+              <td>
+                <span class="badge bg-info text-dark">{{ leave.LeaveType || 'Nghỉ phép' }}</span>
+              </td>
+              <td>{{ leave.StartDate | date:'dd/MM/yyyy' }}</td>
+              <td>{{ (leave.EndDate || leave.ContractEndDate) ? ((leave.EndDate || leave.ContractEndDate) | date:'dd/MM/yyyy') : '-' }}</td>
+              <td>{{ leave.Reason || leave.Note || '-' }}</td>
+              <td>
+                <span class="badge" [ngClass]="leave.Status === 'Đã duyệt' || leave.Status === 'Da xac nhan' ? 'bg-success' : 'bg-warning text-dark'">
+                  {{ leave.Status }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="leaves.length === 0">
+              <td colspan="7" class="text-center py-4 text-muted">
+                Chưa có dữ liệu nghỉ phép / thôi việc liên quan
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 

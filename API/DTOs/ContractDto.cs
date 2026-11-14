@@ -5,6 +5,7 @@ namespace API.DTOs
         public int ContractId { get; set; }
         public string ContractName { get; set; }
 
+        public int? EmployeeId { get; set; }
         public string EmployeeName { get; set; }
 
         public string ContractType { get; set; }
@@ -21,5 +22,7 @@ namespace API.DTOs
         public DateTime EndDate { get; set; }
         public string WorkLocation { get; set; }
         public string Leaveofabsence { get; set; }
+        public string Status { get; set; }
+        public int AnnualLeaveDays { get; set; } = 12;
     }
 }

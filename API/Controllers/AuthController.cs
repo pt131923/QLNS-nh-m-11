@@ -99,7 +99,7 @@ namespace API.Controllers
             var authHeader = Request.Headers.Authorization.FirstOrDefault();
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
             {
-                return Unauthorized(new { message = "No token providedmâu." });
+                return Unauthorized(new { message = "No token provideded." });
             }
 
             var token = authHeader["Bearer ".Length..];
