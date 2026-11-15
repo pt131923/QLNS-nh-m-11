@@ -4,10 +4,12 @@ using API.Interfaces;
 using API.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace API.Controllers
 {
@@ -33,30 +35,51 @@ namespace API.Controllers
             [FromQuery] int? month = null,
             [FromQuery] int? year = null)
         {
-            var filter = Builders<Salary>.Filter.Empty;
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                filter &= Builders<Salary>.Filter.Regex(
-                    x => x.EmployeeName,
-                    new MongoDB.Bson.BsonRegularExpression(System.Text.RegularExpressions.Regex.Escape(name.Trim()), "i"));
-            }
-            if (year.HasValue && year.Value > 0)
-            {
-                filter &= Builders<Salary>.Filter.Or(
-                    Builders<Salary>.Filter.Eq(x => x.PeriodYear, year.Value),
-                    Builders<Salary>.Filter.Where(x => x.PeriodYear == 0 && x.Date.Year == year.Value)
-                );
-            }
-            if (month.HasValue && month.Value > 0)
-            {
-                filter &= Builders<Salary>.Filter.Or(
-                    Builders<Salary>.Filter.Eq(x => x.PeriodMonth, month.Value),
-                    Builders<Salary>.Filter.Where(x => x.PeriodMonth == 0 && x.Date.Month == month.Value)
-                );
-            }
+            // ✅ Kiểm tra giá trị hợp lý trước
+            if (month.HasValue && (month.Value < 1 || month.Value > 12))
+                return BadRequest("Tháng phải trong khoảng 1-12");
+    
+            if (year.HasValue && year.Value < 2000 || year.Value > DateTime.Now.Year + 1)
+                return BadRequest("Năm không hợp lệ");
 
-            var list = await _salaries.Find(filter).ToListAsync();
-            return Ok(_mapper.Map<IEnumerable<SalaryDto>>(list));
+            var filter = Builders<Salary>.Filter.Empty;
+
+         // Lọc theo tên
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            filter &= Builders<Salary>.Filter.Regex(
+                x => x.EmployeeName,
+                new BsonRegularExpression(Regex.Escape(name.Trim()), "i"));
+        }
+
+        // Lọc theo năm 
+        if (year.HasValue && year.Value > 0)
+        {
+            var yearFilter = Builders<Salary>.Filter.Or(
+                Builders<Salary>.Filter.Eq(x => x.PeriodYear, year.Value),
+                Builders<Salary>.Filter.And(
+                    Builders<Salary>.Filter.Eq(x => x.PeriodYear, 0),
+                    Builders<Salary>.Filter.Eq(x => x.Date.Year, year.Value)
+                )
+            );
+            filter &= yearFilter;
+        }
+
+        // Lọc theo tháng 
+        if (month.HasValue && month.Value > 0)
+        {
+            var monthFilter = Builders<Salary>.Filter.Or(
+                Builders<Salary>.Filter.Eq(x => x.PeriodMonth, month.Value),
+                Builders<Salary>.Filter.And(
+                    Builders<Salary>.Filter.Eq(x => x.PeriodMonth, 0),
+                    Builders<Salary>.Filter.Eq(x => x.Date.Month, month.Value)
+                )
+            );
+            filter &= monthFilter;
+        }
+
+        var list = await _salaries.Find(filter).ToListAsync();
+        return Ok(_mapper.Map<IEnumerable<SalaryDto>>(list));
         }
 
         [HttpGet("{id}", Name = "GetSalaryById")]

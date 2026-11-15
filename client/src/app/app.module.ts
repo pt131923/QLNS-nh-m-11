@@ -1,10 +1,10 @@
-import {DepartmentListComponent} from './departments/department-list/department-list.component';
+import { DepartmentListComponent } from './departments/department-list/department-list.component';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NavComponent } from './nav/nav.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EmployeeListComponent } from './employees/employee-list/employee-list.component';
@@ -32,7 +32,6 @@ import { DepartmentDetailComponent } from './departments/department-detail/depar
 import { ContractDetailComponent } from './contract/contract-detail/contract-detail.component';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { HttpClient } from '@angular/common/http';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { BenefitsComponent } from './benefits/benefits.component';
 import { LeaveComponent } from './leave/leave.component';
@@ -44,9 +43,8 @@ import { JobDetailComponent } from './recruitment/job-detail/job-detail.componen
 import { CourseDetailComponent } from './training/course-detail/course-detail.component';
 import { HistoryComponent } from './history/history.component';
 import { AuthInterceptor } from './_interceptors/auth.interceptor';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
-
+// Factory function cho TranslateLoader
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
@@ -96,23 +94,26 @@ export function HttpLoaderFactory(http: HttpClient) {
     AgGridAngular,
     ReactiveFormsModule,
     SharedModule,
-    ToastrModule.forRoot(),
+    ToastrModule.forRoot({
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+    }),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
         useFactory: HttpLoaderFactory,
-        deps: [HttpClient]
-      }
+        deps: [HttpClient],
+      },
     }),
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
-      multi: true
-    }
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule { }

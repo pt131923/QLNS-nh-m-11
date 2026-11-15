@@ -3,6 +3,7 @@ import { ColDef, GridApi, GridReadyEvent, GridOptions, RowClickedEvent } from 'a
 import { EmployeeService, EmployeeFilter, EmployeeStats } from 'src/app/_services/employee.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { TranslateService } from '@ngx-translate/core';
 import { Employee } from 'src/app/_model/employee';
 import { Department } from 'src/app/_model/department';
 import { saveAs } from 'file-saver';
@@ -19,6 +20,7 @@ export class EmployeeListComponent implements OnInit {
   private empService = inject(EmployeeService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
+  private translate = inject(TranslateService);
 
   public gridApi!: GridApi<Employee>;
 
@@ -52,36 +54,7 @@ export class EmployeeListComponent implements OnInit {
   paginationPageSizeSelector = [5, 10, 15, 20, 25, 30, 35, 40];
 
   // Column definitions
-  columnDefs: ColDef<Employee>[] = [
-    {
-      headerName: '',
-      checkboxSelection: true,
-      width: 40,
-      headerCheckboxSelection: true,
-      headerCheckboxSelectionFilteredOnly: true,
-      pinned: 'left'
-    },
-    { field: 'EmployeeId', headerName: 'Mã NV', maxWidth: 100 },
-    { field: 'EmployeeName', headerName: 'Họ và tên', filter: true, minWidth: 150 },
-    {
-      field: 'DepartmentId',
-      headerName: 'Phòng ban',
-      filter: true,
-      valueFormatter: (params) => {
-        const dep = this.departments().find(d => d.DepartmentId === params.value);
-        return dep ? dep.Name : 'N/A';
-      },
-      minWidth: 150,
-    },
-    { field: 'EmployeeEmail', headerName: 'Email', filter: true, minWidth: 150 },
-    { field: 'EmployeePhone', headerName: 'Điện thoại', filter: true, minWidth: 120 },
-    { field: 'Gender', headerName: 'Giới tính', filter: true, minWidth: 100 },
-    { field: 'BirthDate', headerName: 'Ngày sinh', filter: true, minWidth: 120,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('vi-VN') : '' },
-    { field: 'EmployeeAddress', headerName: 'Địa chỉ', filter: true, minWidth: 200 },
-    { field: 'IdentityNumber', headerName: 'CCCD', filter: true },
-    { field: 'EducationLevel', headerName: 'Trình độ', filter: true }
-  ];
+  columnDefs: ColDef<Employee>[] = [];
 
   defaultColDef: ColDef = {
     flex: 1,
@@ -90,6 +63,42 @@ export class EmployeeListComponent implements OnInit {
     resizable: true,
     filter: true,
   };
+
+  initColumnDefs() {
+    this.columnDefs = [
+      {
+        headerName: '',
+        checkboxSelection: true,
+        width: 40,
+        headerCheckboxSelection: true,
+        headerCheckboxSelectionFilteredOnly: true,
+        pinned: 'left'
+      },
+      { field: 'EmployeeId', headerName: 'ID', maxWidth: 100 },
+      { field: 'EmployeeName', headerName: this.translate.instant('employee.employeeName') || 'Họ và tên', filter: true, minWidth: 150 },
+      {
+        field: 'DepartmentId',
+        headerName: this.translate.instant('employee.department') || 'Phòng ban',
+        filter: true,
+        valueFormatter: (params) => {
+          const dep = this.departments().find(d => d.DepartmentId === params.value);
+          return dep ? dep.Name : 'N/A';
+        },
+        minWidth: 150,
+      },
+      { field: 'EmployeeEmail', headerName: this.translate.instant('employee.employeeEmail') || 'Email', filter: true, minWidth: 150 },
+      { field: 'EmployeePhone', headerName: this.translate.instant('employee.employeePhone') || 'Điện thoại', filter: true, minWidth: 120 },
+      { field: 'Gender', headerName: this.translate.instant('employee.gender') || 'Giới tính', filter: true, minWidth: 100 },
+      { field: 'BirthDate', headerName: this.translate.instant('employee.dateOfBirth') || 'Ngày sinh', filter: true, minWidth: 120,
+        valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('vi-VN') : '' },
+      { field: 'EmployeeAddress', headerName: this.translate.instant('employee.employeeAddress') || 'Địa chỉ', filter: true, minWidth: 200 },
+      { field: 'IdentityNumber', headerName: this.translate.instant('employee.identityNumber') || 'CCCD', filter: true },
+      { field: 'EducationLevel', headerName: this.translate.instant('employee.educationLevel') || 'Trình độ', filter: true }
+    ];
+    if (this.gridApi) {
+      this.gridApi.setGridOption('columnDefs', this.columnDefs);
+    }
+  }
 
   genderOptions = ['', 'Nam', 'Nữ', 'Khác'];
   educationOptions = ['', 'Trung học', 'Trung cấp', 'Cao đẳng', 'Đại học', 'Thạc sĩ', 'Tiến sĩ'];
@@ -101,6 +110,10 @@ export class EmployeeListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.initColumnDefs();
+    this.translate.onLangChange.subscribe(() => {
+      this.initColumnDefs();
+    });
     this.loadDepartments();
     this.loadEmployee();
     this.loadStats();

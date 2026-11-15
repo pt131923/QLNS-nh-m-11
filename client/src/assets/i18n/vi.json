@@ -26,7 +26,14 @@
     "yes": "Có",
     "no": "Không",
     "backToDashboard": "Quay lại Bảng điều khiển",
-    "backToContracts": "Quay lại Hợp đồng"
+    "backToContracts": "Quay lại Hợp đồng",
+    "Back To Dashboard": "Quay lại Bảng điều khiển",
+    "exportToPdf": "Xuất PDF",
+    "showStats": "Thống kê",
+    "hideStats": "Ẩn thống kê",
+    "all": "-- Tất cả --",
+    "reset": "Làm mới",
+    "logout": "Đăng xuất"
   },
   "login": {
     "title": "Đăng nhập",
@@ -34,7 +41,10 @@
     "password": "Mật khẩu",
     "rememberMe": "Ghi nhớ đăng nhập",
     "usernameRequired": "Vui lòng nhập tên đăng nhập",
-    "passwordRequired": "Vui lòng nhập mật khẩu"
+    "passwordRequired": "Vui lòng nhập mật khẩu",
+    "username_required": "Vui lòng nhập tên đăng nhập",
+    "password_required": "Vui lòng nhập mật khẩu",
+    "remember": "Ghi nhớ đăng nhập"
   },
   "register": {
     "title": "Đăng ký",
@@ -46,13 +56,14 @@
     "passwordRequired": "Vui lòng nhập mật khẩu",
     "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
     "emailRequired": "Vui lòng nhập địa chỉ email hợp lệ",
-    "backToDashboard": "Quay lại Bảng điều khiển"
+    "backToDashboard": "Quay lại Bảng điều khiển",
+    "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp."
   },
   "employee": {
     "title": "Quản lý nhân viên",
     "add": "Thêm nhân viên",
     "name": "Tên",
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "addNew": "Thêm mới",
     "edit": "Sửa",
     "delete": "Xóa",
@@ -75,19 +86,30 @@
     "religion": "Tôn giáo",
     "ethnicity": "Dân tộc",
     "nationality": "Quốc tịch",
-    "educationLevel": "Trình độ học vấn",
+    "educationLevel": "Trình độ",
     "specialization": "Chuyên ngành",
     "importFromExcel": "Nhập nhân viên từ Excel",
     "uploadExcel": "Tải lên Excel",
     "importEmployees": "Nhập nhân viên",
     "fileSelected": "Đã chọn",
     "noFileSelected": "Chưa chọn file",
-    "previewRows": "Xem trước {{count}} dòng đầu tiên"
+    "previewRows": "Xem trước {{count}} dòng đầu tiên",
+    "transferDepartment": "Chuyển phòng ban",
+    "searchByName": "Tìm theo tên",
+    "department": "Phòng ban",
+    "totalEmployees": "Tổng số nhân viên",
+    "byDepartment": "Theo phòng ban",
+    "byGender": "Theo giới tính",
+    "byAgeGroup": "Theo độ tuổi",
+    "batchTransferTitle": "Chuyển phòng ban hàng loạt",
+    "selected": "Đã chọn",
+    "selectTargetDept": "nhân viên. Chọn phòng ban đích:",
+    "confirmTransfer": "Xác nhận chuyển"
   },
   "department": {
     "title": "Quản lý phòng ban",
     "addNew": "Thêm mới",
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "edit": "Sửa",
     "delete": "Xóa",
     "exportToExcel": "Xuất ra Excel",
@@ -98,13 +120,16 @@
     "description": "Mô tả",
     "slNhanVien": "Số lượng nhân viên",
     "addresses": "Địa chỉ",
-    "notes": "Ghi chú"
+    "notes": "Ghi chú",
+    "totalDepartments": "Tổng số phòng ban",
+    "staffScale": "Quy mô nhân sự",
+    "staffRatio": "Tỷ lệ nhân sự theo phòng ban"
   },
   "contract": {
     "title": "Quản lý hợp đồng",
     "addNew": "Thêm mới",
     "edit": "Sửa",
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "delete": "Xóa",
     "exportToExcel": "Xuất ra Excel",
     "searchPlaceholder": "Tìm kiếm...",
@@ -130,7 +155,7 @@
     "addNew": "Thêm mới",
     "edit": "Sửa",
     "delete": "Xóa",
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "exportToExcel": "Xuất ra Excel",
     "searchPlaceholder": "Tìm kiếm...",
     "loading": "Đang tải bảng lương",
@@ -180,10 +205,13 @@
     "employerBhyt": "BHYT 3% (công ty)",
     "employerBhtn": "BHTN 1% (công ty)",
     "employerUnion": "KPCĐ 2% (công ty)",
-    "companyCost": "Tổng chi phí công ty"
+    "companyCost": "Tổng chi phí công ty",
+    "payrollScope": "Phạm vi tính lương",
+    "allCompany": "Toàn bộ công ty (Tất cả nhân viên)",
+    "autoCalculate": "Tính lương tự động"
   },
   "contact": {
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "title": "Liên hệ",
     "contactInfo": "Nếu bạn có vấn đề hoặc cần hỗ trợ, vui lòng liên hệ:",
     "email": "Email",
@@ -274,7 +302,9 @@
     "upcomingLeave1": "Đơn nghỉ phép",
     "upcomingLeave1Desc": "Chờ duyệt",
     "days": "ngày",
-    "lastUpdated": "Cập nhật lúc"
+    "lastUpdated": "Cập nhật lúc",
+    "Logout": "Đăng xuất",
+    "logout": "Đăng xuất"
   },
   "nav": {
     "dashboard": "Bảng điều khiển",
@@ -308,10 +338,11 @@
     "saveSuccess": "Đã lưu thành công!",
     "logout": "Đăng xuất",
     "passwordUpdateSuccess": "Cập nhật mật khẩu thành công!",
-    "updateError": "Lỗi cập nhật"
+    "updateError": "Lỗi cập nhật",
+    "changePassword": "Đổi mật khẩu"
   },
   "training": {
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "title": "Khóa học đào tạo",
     "trainingCourses": "Khóa học",
     "titleLabel": "Tiêu đề",
@@ -326,10 +357,15 @@
     "hrSpecialist": "Chuyên viên nhân sự",
     "hrDescription": "Quản lý tuyển dụng và quan hệ nhân viên.",
     "fullstackDeveloper": "Lập trình viên Fullstack",
-    "fullstackDescription": "Phát triển cả thành phần frontend và backend bằng Java và ReactJS."
+    "fullstackDescription": "Phát triển cả thành phần frontend và backend bằng Java và ReactJS.",
+    "historyPageTitle": "Lịch sử đào tạo",
+    "historyTraining": "Khóa đào tạo",
+    "historyDate": "Thời gian học",
+    "historyStatus": "Trạng thái",
+    "historyRegisteredAt": "Thời gian đăng ký"
   },
   "timekeeping": {
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "title": "Chấm công nhận diện khuôn mặt",
     "captureAndCheckIn": "Chụp ảnh và Chấm công",
     "attendanceHistory": "Lịch sử chấm công",
@@ -350,10 +386,39 @@
     "present": "Có mặt",
     "absent": "Vắng mặt",
     "late": "Đi muộn",
-    "earlyLeave": "Về sớm"
+    "earlyLeave": "Về sớm",
+    "pageTitle": "Chấm công nhân viên",
+    "pageSubtitle": "Theo dõi giờ làm việc và lịch sử chấm công",
+    "currentTime": "Thời gian hiện tại",
+    "todayAttendance": "Chấm công hôm nay",
+    "working": "Đang làm việc",
+    "completed": "Đã kết thúc",
+    "notCheckedIn": "Chưa chấm công",
+    "noRecordToday": "Hôm nay bạn chưa có bản ghi chấm công.",
+    "loading": "Đang tải dữ liệu chấm công...",
+    "retry": "Thử lại",
+    "totalHours": "Tổng giờ làm",
+    "currentDuration": "Thời gian làm việc hiện tại",
+    "checkIn": "Chấm công vào",
+    "checkOut": "Chấm công ra",
+    "processing": "Đang xử lý...",
+    "historyLoading": "Đang tải lịch sử chấm công...",
+    "historyError": "Không thể hiển thị đầy đủ lịch sử chấm công.",
+    "noHistory": "Chưa có dữ liệu chấm công",
+    "noHistoryDesc": "Lịch sử chấm công của bạn sẽ hiển thị tại đây.",
+    "stt": "STT",
+    "hoursUnit": "giờ",
+    "checkInSuccess": "Chấm công vào thành công.",
+    "checkInFailed": "Chấm công vào thất bại. Vui lòng thử lại.",
+    "checkOutSuccess": "Chấm công ra thành công.",
+    "checkOutFailed": "Chấm công ra thất bại. Vui lòng thử lại.",
+    "historyPageTitle": "Lịch sử yêu cầu chấm công",
+    "newCheckIn": "Giờ vào mới",
+    "newCheckOut": "Giờ ra mới",
+    "result": "Kết quả"
   },
   "recruitment": {
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "title": "Hệ thống quản lý tuyển dụng",
     "welcome": "Chào mừng đến với Hệ thống quản lý tuyển dụng. Vui lòng đăng nhập để tiếp tục.",
     "currentJobOpenings": "Cơ hội việc làm hiện tại",
@@ -365,7 +430,7 @@
     "backendDescription": "Làm việc với API và cơ sở dữ liệu ASP.NET Core."
   },
   "benefits": {
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "title": "Quản lý phúc lợi nhân viên",
     "welcome": "Chào mừng đến với phần Quản lý phúc lợi nhân viên. Tại đây bạn có thể xem và quản lý các phúc lợi nhân viên khác nhau.",
     "navigateOptions": "Sử dụng các tùy chọn bên dưới để điều hướng qua các danh mục phúc lợi khác nhau:",
@@ -390,7 +455,7 @@
     "developedBy": "Phát triển bởi PhongNH"
   },
   "leave": {
-    "backToDashboard":"Quay lại Bảng điều khiển",
+    "backToDashboard": "Quay lại Bảng điều khiển",
     "title": "Danh sách nghỉ phép",
     "leaveId": "Mã nghỉ phép",
     "employeeId": "Mã nhân viên",
@@ -400,47 +465,34 @@
     "reason": "Lý do",
     "status": "Trạng thái"
   },
-    "help": {
-      "backToDashboard":"Quay lại Bảng điều khiển",
-      "title": "Câu hỏi thường gặp",
-  
-      "q1": "Làm sao để chấm công đúng giờ?",
-      "a1": "Bạn cần chấm công trong ca làm việc bằng nút 'Chấm công' hoặc sử dụng máy chấm công vân tay/khuôn mặt tại công ty.",
-  
-      "q2": "Nếu quên chấm công thì phải làm sao?",
-      "a2": "Bạn cần gửi yêu cầu điều chỉnh chấm công hoặc báo cho quản lý trực tiếp để xác nhận.",
-  
-      "q3": "Liên hệ bộ phận kỹ thuật ở đâu?",
-      "a3": "Gửi email tới bộ phận IT hoặc liên hệ hotline nội bộ 1234 trong giờ làm việc.",
-  
-      "q4": "Chấm công sai giờ có được sửa không?",
-      "a4": "Có. Bạn gửi yêu cầu điều chỉnh chấm công kèm lý do và sẽ được quản lý duyệt.",
-  
-      "q5": "Khi nào nhân viên được tính tăng ca?",
-      "a5": "Tăng ca chỉ hợp lệ khi được quản lý phê duyệt và bạn chấm công ra sau giờ quy định.",
-  
-      "q6": "Lương được tính và phát hành khi nào?",
-      "a6": "Lương được chốt từ ngày 21 đến 20 hàng tháng và phát vào ngày 25.",
-  
-      "q7": "Tôi thấy lương bị giảm thì kiểm tra ở đâu?",
-      "a7": "Bạn có thể xem khấu trừ chi tiết trong mục 'Bảng lương'. Nếu sai, hãy liên hệ HR.",
-  
-      "q8": "Nhân viên bao lâu thì được ký hợp đồng chính thức?",
-      "a8": "Thử việc 2 tháng. Sau khi đạt yêu cầu, hợp đồng được ký trong vòng 5 ngày.",
-  
-      "q9": "Hợp đồng lao động được gia hạn khi nào?",
-      "a9": "Trước khi hết hạn 30 ngày, hệ thống sẽ gửi thông báo và HR sẽ liên hệ để gia hạn.",
-  
-      "q10": "Công ty đóng bảo hiểm từ thời điểm nào?",
-      "a10": "Công ty đóng BHXH–BHYT–BHTN từ tháng kế tiếp ngày ký hợp đồng chính thức.",
-  
-      "q11": "Nghỉ phép năm được tính như thế nào?",
-      "a11": "Nhân viên có 12 ngày phép mỗi năm và thêm 1 ngày theo thâm niên mỗi năm.",
-  
-      "q12": "Làm sao đăng ký khóa đào tạo mới?",
-      "a12": "Bạn có thể đăng ký trong mục ‘Đào tạo’. Khóa bắt buộc sẽ tự động được thêm.",
-  
-      "q13": "Làm thế nào để cập nhật thông tin cá nhân?",
-      "a13": "Vào mục 'Hồ sơ cá nhân', cập nhật và gửi HR phê duyệt đối với thông tin quan trọng."
-    }  
+  "help": {
+    "backToDashboard": "Quay lại Bảng điều khiển",
+    "title": "Câu hỏi thường gặp",
+    "q1": "Làm sao để chấm công đúng giờ?",
+    "a1": "Bạn cần chấm công trong ca làm việc bằng nút 'Chấm công' hoặc sử dụng máy chấm công vân tay/khuôn mặt tại công ty.",
+    "q2": "Nếu quên chấm công thì phải làm sao?",
+    "a2": "Bạn cần gửi yêu cầu điều chỉnh chấm công hoặc báo cho quản lý trực tiếp để xác nhận.",
+    "q3": "Liên hệ bộ phận kỹ thuật ở đâu?",
+    "a3": "Gửi email tới bộ phận IT hoặc liên hệ hotline nội bộ 1234 trong giờ làm việc.",
+    "q4": "Chấm công sai giờ có được sửa không?",
+    "a4": "Có. Bạn gửi yêu cầu điều chỉnh chấm công kèm lý do và sẽ được quản lý duyệt.",
+    "q5": "Khi nào nhân viên được tính tăng ca?",
+    "a5": "Tăng ca chỉ hợp lệ khi được quản lý phê duyệt và bạn chấm công ra sau giờ quy định.",
+    "q6": "Lương được tính và phát hành khi nào?",
+    "a6": "Lương được chốt từ ngày 21 đến 20 hàng tháng và phát vào ngày 25.",
+    "q7": "Tôi thấy lương bị giảm thì kiểm tra ở đâu?",
+    "a7": "Bạn có thể xem khấu trừ chi tiết trong mục 'Bảng lương'. Nếu sai, hãy liên hệ HR.",
+    "q8": "Nhân viên bao lâu thì được ký hợp đồng chính thức?",
+    "a8": "Thử việc 2 tháng. Sau khi đạt yêu cầu, hợp đồng được ký trong vòng 5 ngày.",
+    "q9": "Hợp đồng lao động được gia hạn khi nào?",
+    "a9": "Trước khi hết hạn 30 ngày, hệ thống sẽ gửi thông báo và HR sẽ liên hệ để gia hạn.",
+    "q10": "Công ty đóng bảo hiểm từ thời điểm nào?",
+    "a10": "Công ty đóng BHXH–BHYT–BHTN từ tháng kế tiếp ngày ký hợp đồng chính thức.",
+    "q11": "Nghỉ phép năm được tính như thế nào?",
+    "a11": "Nhân viên có 12 ngày phép mỗi năm và thêm 1 ngày theo thâm niên mỗi năm.",
+    "q12": "Làm sao đăng ký khóa đào tạo mới?",
+    "a12": "Bạn có thể đăng ký trong mục ‘Đào tạo’. Khóa bắt buộc sẽ tự động được thêm.",
+    "q13": "Làm thế nào để cập nhật thông tin cá nhân?",
+    "a13": "Vào mục 'Hồ sơ cá nhân', cập nhật và gửi HR phê duyệt đối với thông tin quan trọng."
+  }
 }

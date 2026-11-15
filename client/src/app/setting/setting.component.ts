@@ -12,13 +12,13 @@ import { AuthService } from '../_services/auth.service';
 })
 export class SettingComponent implements OnInit {
 
- // Ngôn ngữ tạm chọn
- draftLanguage: string = 'en';
+  // Ngôn ngữ tạm chọn
+  draftLanguage: string = 'vi';
 
- // Chỉ giữ phần ngôn ngữ
- settings = {
+  // Chỉ giữ phần ngôn ngữ
+  settings = {
     defaultLanguage: 'vi'
- };
+  };
 
  // Hồ sơ người dùng (Profile)
  profile = {

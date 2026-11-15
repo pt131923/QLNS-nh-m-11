@@ -1,9 +1,9 @@
 <div class="login-container">
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-    <h2>Đăng nhập</h2>
+    <h2>{{ 'login.title' }}</h2>
 
     <div class="form-group">
-      <label for="username">Username</label>
+      <label for="username">{{ 'login.username'}}</label>
       <input
         type="text"
         id="username"
@@ -12,12 +12,12 @@
         [class.invalid]="submitted && loginForm.controls['username'].invalid"
       />
       <div class="error" *ngIf="submitted && loginForm.controls['username'].invalid">
-        Please enter your username.
+        {{ 'login.username_required'  }}
       </div>
     </div>
 
     <div class="form-group">
-      <label for="password">Password</label>
+      <label for="password">{{ 'login.password'}}</label>
       <input
         type="password"
         id="password"
@@ -26,7 +26,7 @@
         [class.invalid]="submitted && loginForm.controls['password'].invalid"
       />
       <div class="error" *ngIf="submitted && loginForm.controls['password'].invalid">
-        Please enter your password.
+        {{ 'login.password_required'}}
       </div>
     </div>
 
@@ -37,7 +37,7 @@
           id="rememberMe"
           formControlName="rememberMe"
         />
-        Remember Me
+        {{ 'login.remember }}
       </label>
     </div>
 
@@ -45,11 +45,9 @@
     <div class="success" *ngIf="successMessage">{{ successMessage }}</div>
 
     <button type="submit" class="btn btn-primary" [disabled]="loading">
-      {{ loading ? 'Đang đăng nhập...' : 'Login' }}
+      {{ loading ? ('common.loading') : ('dashboard.login') }}
     </button>
 
     <p class="login-hint">Demo: admin / admin123</p>
   </form>
 </div>
-
-

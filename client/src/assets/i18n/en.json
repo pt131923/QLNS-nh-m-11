@@ -26,7 +26,14 @@
     "yes": "Yes",
     "no": "No",
     "backToDashboard": "Back to Dashboard",
-    "backToContracts": "Back to Contracts"
+    "backToContracts": "Back to Contracts",
+    "Back To Dashboard": "Back to Dashboard",
+    "exportToPdf": "Export to PDF",
+    "showStats": "Statistics",
+    "hideStats": "Hide Statistics",
+    "all": "-- All --",
+    "reset": "Reset",
+    "Logout": "Logout"
   },
   "login": {
     "title": "Login",
@@ -34,7 +41,10 @@
     "password": "Password",
     "rememberMe": "Remember Me",
     "usernameRequired": "Please enter your username",
-    "passwordRequired": "Please enter your password"
+    "passwordRequired": "Please enter your password",
+    "username_required": "Please enter your username",
+    "password_required": "Please enter your password",
+    "remember": "Remember Me"
   },
   "register": {
     "title": "Register",
@@ -46,7 +56,8 @@
     "passwordRequired": "Please enter your password",
     "confirmPasswordRequired": "Please confirm your password",
     "emailRequired": "Please enter a valid email address",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "confirmPasswordMismatch": "Passwords do not match."
   },
   "employee": {
     "title": "Employee Management",
@@ -81,7 +92,19 @@
     "importEmployees": "Import employees",
     "fileSelected": "Selected",
     "noFileSelected": "No file selected",
-    "previewRows": "Preview first {{count}} rows"
+    "previewRows": "Preview first {{count}} rows",
+    "transferDepartment": "Transfer Department",
+    "searchByName": "Search by Name",
+    "department": "Department",
+    "totalEmployees": "Total Employees",
+    "byDepartment": "By Department",
+    "byGender": "By Gender",
+    "byAgeGroup": "By Age Group",
+    "batchTransferTitle": "Batch Department Transfer",
+    "selected": "Selected",
+    "selectTargetDept": "employees. Select target department:",
+    "confirmTransfer": "Confirm Transfer",
+    "backToDashboard": "Back to Dashboard"
   },
   "department": {
     "title": "Department Management",
@@ -96,7 +119,11 @@
     "description": "Description",
     "slNhanVien": "Number of Employees",
     "addresses": "Addresses",
-    "notes": "Notes"
+    "notes": "Notes",
+    "totalDepartments": "Total Departments",
+    "staffScale": "Staff Scale",
+    "staffRatio": "Staff Ratio by Department",
+    "backToDashboard": "Back to Dashboard"
   },
   "contract": {
     "title": "Contract Management",
@@ -120,7 +147,8 @@
     "updateAt": "Updated At",
     "contractTerm": "Contract Term",
     "workLocation": "Work Location",
-    "leaveOfAbsence": "Leave of Absence"
+    "leaveOfAbsence": "Leave of Absence",
+    "backToDashboard": "Back to Dashboard"
   },
   "salary": {
     "title": "Salary Management",
@@ -176,7 +204,11 @@
     "employerBhyt": "HI 3% (employer)",
     "employerBhtn": "UI 1% (employer)",
     "employerUnion": "Union 2% (employer)",
-    "companyCost": "Total company cost"
+    "companyCost": "Total company cost",
+    "payrollScope": "Payroll Scope",
+    "allCompany": "Entire Company (All Employees)",
+    "autoCalculate": "Auto Calculate Payroll",
+    "backToDashboard": "Back to Dashboard"
   },
   "contact": {
     "title": "Contact",
@@ -269,7 +301,9 @@
     "upcomingLeave1": "Leave request",
     "upcomingLeave1Desc": "Pending approval",
     "days": "days",
-    "lastUpdated": "Last updated"
+    "lastUpdated": "Last updated",
+    "Logout": "Logout",
+    "logout": "Logout"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -321,15 +355,21 @@
     "hrSpecialist": "HR Specialist",
     "hrDescription": "Manage recruitment and employee relations.",
     "fullstackDeveloper": "Fullstack Developer",
-    "fullstackDescription": "Develop both frontend and backend components with Java and ReactJS."
+    "fullstackDescription": "Develop both frontend and backend components with Java and ReactJS.",
+    "historyPageTitle": "Training History",
+    "historyTraining": "Training Course",
+    "historyDate": "Course Time",
+    "historyStatus": "Status",
+    "historyRegisteredAt": "Registered At",
+    "backToDashboard": "Back to Dashboard"
   },
   "timekeeping": {
     "title": "Face Recognition Attendance",
     "captureAndCheckIn": "Capture & Check In",
     "attendanceHistory": "Attendance History",
     "date": "Date",
-    "checkInTime": "Check-In Time",
-    "checkOutTime": "Check-Out Time",
+    "checkInTime": "Check-In",
+    "checkOutTime": "Check-Out",
     "totalHoursWorked": "Total Hours Worked",
     "status": "Status",
     "manualAttendanceEntry": "Manual Attendance Entry",
@@ -344,7 +384,37 @@
     "present": "Present",
     "absent": "Absent",
     "late": "Late",
-    "earlyLeave": "Early Leave"
+    "earlyLeave": "Early Leave",
+    "pageTitle": "Employee Attendance",
+    "pageSubtitle": "Track working hours and attendance history",
+    "currentTime": "Current Time",
+    "todayAttendance": "Today's Attendance",
+    "working": "Working",
+    "completed": "Completed",
+    "notCheckedIn": "Not Checked In",
+    "noRecordToday": "You have no attendance records today.",
+    "loading": "Loading attendance data...",
+    "retry": "Retry",
+    "totalHours": "Total Hours",
+    "currentDuration": "Current Working Time",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "processing": "Processing...",
+    "historyLoading": "Loading attendance history...",
+    "historyError": "Unable to load attendance history.",
+    "noHistory": "No attendance data yet",
+    "noHistoryDesc": "Your attendance history will appear here.",
+    "stt": "#",
+    "hoursUnit": "hours",
+    "checkInSuccess": "Checked in successfully.",
+    "checkInFailed": "Check-in failed. Please try again.",
+    "checkOutSuccess": "Checked out successfully.",
+    "checkOutFailed": "Check-out failed. Please try again.",
+    "historyPageTitle": "Attendance Request History",
+    "newCheckIn": "New Check-In",
+    "newCheckOut": "New Check-Out",
+    "result": "Result",
+    "backToDashboard": "Back to Dashboard"
   },
   "recruitment": {
     "title": "Recruitment Management System",
@@ -391,47 +461,33 @@
     "reason": "Reason",
     "status": "Status"
   },
-    "help": {
-      "title": "Frequently Asked Questions",
-  
-      "q1": "How do I clock in correctly?",
-      "a1": "You need to clock in during your assigned shift using the 'Clock In' button or use the biometric attendance machine at the office.",
-  
-      "q2": "What should I do if I forget to clock in?",
-      "a2": "Submit an attendance adjustment request or inform your direct manager for confirmation.",
-  
-      "q3": "How can I contact technical support?",
-      "a3": "Send an email to the IT department or call the internal hotline 1234 during working hours.",
-  
-      "q4": "Can incorrect attendance records be corrected?",
-      "a4": "Yes. You can submit a correction request with a reason, and your manager will review it.",
-  
-      "q5": "When is overtime counted?",
-      "a5": "Overtime is valid only when pre-approved by the manager and when you clock out after regular working hours.",
-  
-      "q6": "When is salary calculated and paid?",
-      "a6": "Salary is calculated from the 21st to the 20th of each month and paid on the 25th.",
-  
-      "q7": "Where can I check the details if my salary is lower than expected?",
-      "a7": "You can view deduction details in the 'Payroll' section. If something seems incorrect, contact the HR department.",
-  
-      "q8": "When do employees become eligible for official employment?",
-      "a8": "The probation period is 2 months. After meeting the requirements, the official contract will be issued within 5 days.",
-  
-      "q9": "When will my employment contract be renewed?",
-      "a9": "Thirty days before the contract expires, the system sends a reminder and HR will contact you for renewal.",
-  
-      "q10": "When does the company start paying insurance for employees?",
-      "a10": "The company pays social, health, and unemployment insurance from the month following the official contract date.",
-  
-      "q11": "How is annual leave calculated?",
-      "a11": "Employees receive 12 days of annual leave per year plus one extra day for each year of seniority.",
-  
-      "q12": "How do I register for a training course?",
-      "a12": "You can register in the 'Training' section. Mandatory courses will automatically be assigned to you.",
-  
-      "q13": "How can I update my personal information?",
-      "a13": "Go to the 'Personal Profile' section, update the information, and submit for HR approval if required."
-    }
-    
+  "help": {
+    "title": "Frequently Asked Questions",
+    "q1": "How do I clock in correctly?",
+    "a1": "You need to clock in during your assigned shift using the 'Clock In' button or use the biometric attendance machine at the office.",
+    "q2": "What should I do if I forget to clock in?",
+    "a2": "Submit an attendance adjustment request or inform your direct manager for confirmation.",
+    "q3": "How can I contact technical support?",
+    "a3": "Send an email to the IT department or call the internal hotline 1234 during working hours.",
+    "q4": "Can incorrect attendance records be corrected?",
+    "a4": "Yes. You can submit a correction request with a reason, and your manager will review it.",
+    "q5": "When is overtime counted?",
+    "a5": "Overtime is valid only when pre-approved by the manager and when you clock out after regular working hours.",
+    "q6": "When is salary calculated and paid?",
+    "a6": "Salary is calculated from the 21st to the 20th of each month and paid on the 25th.",
+    "q7": "Where can I check the details if my salary is lower than expected?",
+    "a7": "You can view deduction details in the 'Payroll' section. If something seems incorrect, contact the HR department.",
+    "q8": "When do employees become eligible for official employment?",
+    "a8": "The probation period is 2 months. After meeting the requirements, the official contract will be issued within 5 days.",
+    "q9": "When will my employment contract be renewed?",
+    "a9": "Thirty days before the contract expires, the system sends a reminder and HR will contact you for renewal.",
+    "q10": "When does the company start paying insurance for employees?",
+    "a10": "The company pays social, health, and unemployment insurance from the month following the official contract date.",
+    "q11": "How is annual leave calculated?",
+    "a11": "Employees receive 12 days of annual leave per year plus one extra day for each year of seniority.",
+    "q12": "How do I register for a training course?",
+    "a12": "You can register in the 'Training' section. Mandatory courses will automatically be assigned to you.",
+    "q13": "How can I update my personal information?",
+    "a13": "Go to the 'Personal Profile' section, update the information, and submit for HR approval if required."
+  }
 }

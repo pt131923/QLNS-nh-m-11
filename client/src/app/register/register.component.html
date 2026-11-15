@@ -2,7 +2,7 @@
     
   <!-- Username Field -->
   <div class="form-group">
-    <label>Username</label>
+    <label>{{ 'register.username' | translate }}</label>
     <input 
       type="text" 
       formControlName="username" 
@@ -13,14 +13,14 @@
     <!-- Lỗi Username -->
     <div *ngIf="f['username'].errors && (f['username'].touched || submitted)" class="error-message">
         <div *ngIf="f['username'].errors['required']">
-            Username cannot be empty.
+            {{ 'register.usernameRequired' | translate }}
         </div>
     </div>
   </div>
   
   <!-- Password Field -->
   <div class="form-group">
-    <label>Password</label>
+    <label>{{ 'register.password' | translate }}</label>
     <input 
       type="password" 
       formControlName="password" 
@@ -31,17 +31,17 @@
     <!-- Lỗi Password -->
     <div *ngIf="f['password'].errors && (f['password'].touched || submitted)" class="error-message">
         <div *ngIf="f['password'].errors['required']">
-            Password is required.
+            {{ 'register.passwordRequired' | translate }}
         </div>
         <div *ngIf="f['password'].errors['minlength']">
-            Password must be at least 6 characters.
+            {{ 'register.passwordRequired' | translate }} (min 6)
         </div>
     </div>
   </div>
 
   <!-- Confirm Password Field -->
   <div class="form-group">
-    <label>Confirm Password</label>
+    <label>{{ 'register.confirmPassword' | translate }}</label>
     <input 
       type="password" 
       formControlName="confirmPassword" 
@@ -52,17 +52,17 @@
     <!-- Lỗi Confirm Password (Required và MustMatch) -->
     <div *ngIf="f['confirmPassword'].errors && (f['confirmPassword'].touched || submitted)" class="error-message">
         <div *ngIf="f['confirmPassword'].errors['required']">
-            Confirmation is required.
+            {{ 'register.confirmPasswordRequired' | translate }}
         </div>
         <div *ngIf="f['confirmPassword'].errors['mustMatch']">
-            Passwords do not match.
+            {{ 'register.confirmPasswordMismatch' | translate }}
         </div>
     </div>
   </div>
   
   <!-- Email Field -->
   <div class="form-group">
-    <label>Email</label>
+    <label>{{ 'register.email' | translate }}</label>
     <input 
       type="email" 
       formControlName="email" 
@@ -72,11 +72,8 @@
     
     <!-- Lỗi Email -->
     <div *ngIf="f['email'].errors && (f['email'].touched || submitted)" class="error-message">
-        <div *ngIf="f['email'].errors['required']">
-            Email is required.
-        </div>
-        <div *ngIf="f['email'].errors['email']">
-            Email must be a valid email address.
+        <div *ngIf="f['email'].errors['required'] || f['email'].errors['email']">
+            {{ 'register.emailRequired' | translate }}
         </div>
     </div>
   </div>
@@ -91,8 +88,8 @@
       {{ successMessage }}
   </div>
 
-  <button type="submit" [disabled]="registerForm.invalid && submitted">Register</button>
-  <button type="button" (click)="onReset()">Reset</button>
-  <button type="button" (click)="cancel()">Cancel</button>
-  <button type="button" (click)="gotoDashboard()">Go to Dashboard</button>
+  <button type="submit" [disabled]="registerForm.invalid && submitted">{{ 'dashboard.register' | translate }}</button>
+  <button type="button" (click)="onReset()">{{ 'common.reset' | translate }}</button>
+  <button type="button" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+  <button type="button" (click)="gotoDashboard()">{{ 'common.backToDashboard' | translate }}</button>
 </form>

@@ -4,7 +4,7 @@
   <div class="mb-3">
     <button class="btn btn-secondary" [routerLink]="['/dashboard']">
       <i class="bi bi-arrow-left-short me-1"></i>
-      Quay lại Dashboard
+      {{ 'common.backToDashboard' | translate }}
     </button>
   </div>
 
@@ -15,26 +15,26 @@
       <!-- Action Buttons -->
       <div class="d-flex flex-wrap gap-2 mb-3">
         <button class="btn btn-success" [routerLink]="['/department-add']">
-          <i class="bi bi-plus-circle me-1"></i> Thêm mới
+          <i class="bi bi-plus-circle me-1"></i> {{ 'common.addNew' | translate }}
         </button>
         <button class="btn btn-primary" (click)="onEditRow()">
-          <i class="bi bi-pencil-square me-1"></i> Sửa
+          <i class="bi bi-pencil-square me-1"></i> {{ 'common.edit' | translate }}
         </button>
         <button class="btn btn-danger" (click)="onDeleteRow()">
-          <i class="bi bi-trash me-1"></i> Xóa
+          <i class="bi bi-trash me-1"></i> {{ 'common.delete' | translate }}
         </button>
         <!-- Export Excel -->
-        <button class="btn btn-success" (click)="onExportExcel()" title="Xuất Excel theo bộ lọc hiện tại">
-          <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        <button class="btn btn-success" (click)="onExportExcel()" [title]="'common.exportToExcel' | translate">
+          <i class="bi bi-file-earmark-excel me-1"></i> {{ 'common.exportToExcel' | translate }}
         </button>
 
         <!-- Export PDF -->
-        <button class="btn btn-danger text-white" (click)="onExportPDF()" title="In / xuất PDF">
-          <i class="bi bi-file-earmark-pdf me-1"></i> Xuất PDF
+        <button class="btn btn-danger text-white" (click)="onExportPDF()" [title]="'common.exportToPdf' | translate">
+          <i class="bi bi-file-earmark-pdf me-1"></i> {{ 'common.exportToPdf' | translate }}
         </button>
         <button class="btn btn-info text-white" (click)="toggleStats()">
           <i class="bi bi-bar-chart-line me-1"></i>
-          {{ showStats ? 'Ẩn thống kê' : 'Thống kê' }}
+          {{ showStats ? ('common.hideStats' | translate) : ('common.showStats' | translate) }}
         </button>
       </div>
 
@@ -43,7 +43,7 @@
         <input type="text" class="form-control form-control-sm"
                [(ngModel)]="searchText"
                (keyup.enter)="onSearch()"
-               placeholder="Tìm kiếm phòng ban...">
+               [placeholder]="'department.searchPlaceholder' | translate">
       </div>
 
       <!-- Thống kê -->
@@ -52,17 +52,17 @@
           <div class="col-md-12">
             <div class="alert alert-primary d-flex align-items-center py-2">
               <i class="bi bi-building fs-5 me-2"></i>
-              <strong>Tổng số phòng ban: {{ statsData.total }}</strong>
+              <strong>{{ 'department.totalDepartments' | translate }}: {{ statsData.total }}</strong>
             </div>
           </div>
           <div class="col-md-6">
             <div class="card h-100">
               <div class="card-header fw-semibold bg-primary text-white py-2">
-                <i class="bi bi-people me-1"></i> Thông tin chung
+                <i class="bi bi-people me-1"></i> {{ 'department.staffScale' | translate }}
               </div>
               <div class="card-body py-3">
-                <p class="mb-1">Tổng số nhân viên: <strong>{{ statsData.totalEmployees }}</strong></p>
-                <p class="mb-0">Trung bình mỗi phòng: <strong>{{ statsData.avgEmployeesPerDept }}</strong> nhân viên</p>
+                <p class="mb-1">{{ 'employee.totalEmployees' | translate }}: <strong>{{ statsData.totalEmployees }}</strong></p>
+                <p class="mb-0">{{ 'department.staffRatio' | translate }}: <strong>{{ statsData.avgEmployeesPerDept }}</strong></p>
               </div>
             </div>
           </div>

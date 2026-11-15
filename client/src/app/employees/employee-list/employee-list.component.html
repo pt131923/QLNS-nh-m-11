@@ -4,7 +4,7 @@
   <div class="mb-3">
     <button class="btn btn-secondary" [routerLink]="['/dashboard']">
       <i class="bi bi-arrow-left-short me-1"></i>
-      Quay lại Dashboard
+      {{ 'common.backToDashboard' | translate }}
     </button>
   </div>
 
@@ -15,36 +15,36 @@
       <!-- Action Buttons -->
       <div class="d-flex flex-wrap gap-2 mb-3">
         <button class="btn btn-success" [routerLink]="['/employee-add']">
-          <i class="bi bi-plus-circle me-1"></i> Thêm mới
+          <i class="bi bi-plus-circle me-1"></i> {{ 'common.addNew' | translate }}
         </button>
 
         <button class="btn btn-primary" (click)="onEditRow()">
-          <i class="bi bi-pencil-square me-1"></i> Sửa
+          <i class="bi bi-pencil-square me-1"></i> {{ 'common.edit' | translate }}
         </button>
 
         <button class="btn btn-danger" (click)="handleDeleteConfirmation()">
-          <i class="bi bi-trash me-1"></i> Xóa
+          <i class="bi bi-trash me-1"></i> {{ 'common.delete' | translate }}
         </button>
 
         <!-- Batch Transfer -->
-        <button class="btn btn-warning text-dark" (click)="openBatchModal()" title="Chuyển phòng ban hàng loạt">
-          <i class="bi bi-arrow-left-right me-1"></i> Chuyển phòng ban
+        <button class="btn btn-warning text-dark" (click)="openBatchModal()" [title]="'employee.batchTransferTitle' | translate">
+          <i class="bi bi-arrow-left-right me-1"></i> {{ 'employee.transferDepartment' | translate }}
         </button>
 
         <!-- Export Excel -->
-        <button class="btn btn-success" (click)="onExportExcel()" title="Xuất Excel theo bộ lọc hiện tại">
-          <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+        <button class="btn btn-success" (click)="onExportExcel()" [title]="'common.exportToExcel' | translate">
+          <i class="bi bi-file-earmark-excel me-1"></i> {{ 'common.exportToExcel' | translate }}
         </button>
 
         <!-- Export PDF -->
-        <button class="btn btn-danger text-white" (click)="onExportPDF()" title="In / xuất PDF">
-          <i class="bi bi-file-earmark-pdf me-1"></i> Xuất PDF
+        <button class="btn btn-danger text-white" (click)="onExportPDF()" [title]="'common.exportToPdf' | translate">
+          <i class="bi bi-file-earmark-pdf me-1"></i> {{ 'common.exportToPdf' | translate }}
         </button>
 
         <!-- Statistics Toggle -->
         <button class="btn btn-info text-white" (click)="toggleStats()">
           <i class="bi bi-bar-chart-line me-1"></i>
-          {{ showStats ? 'Ẩn thống kê' : 'Thống kê' }}
+          {{ showStats ? ('common.hideStats' | translate) : ('common.showStats' | translate) }}
         </button>
       </div>
 
@@ -54,36 +54,36 @@
           <div class="row g-2 align-items-end">
             <!-- Name search -->
             <div class="col-md-3">
-              <label class="form-label small mb-1 fw-semibold">Tìm theo tên</label>
+              <label class="form-label small mb-1 fw-semibold">{{ 'employee.searchByName' | translate }}</label>
               <input type="text" class="form-control form-control-sm"
                      [(ngModel)]="filter.name"
                      (keyup.enter)="onSearch()"
-                     placeholder="Nhập tên nhân viên...">
+                     [placeholder]="'employee.searchPlaceholder' | translate">
             </div>
 
             <!-- Department filter -->
             <div class="col-md-2">
-              <label class="form-label small mb-1 fw-semibold">Phòng ban</label>
+              <label class="form-label small mb-1 fw-semibold">{{ 'employee.department' | translate }}</label>
               <select class="form-select form-select-sm" [(ngModel)]="filter.departmentId">
-                <option [ngValue]="undefined">-- Tất cả --</option>
+                <option [ngValue]="undefined">{{ 'common.all' | translate }}</option>
                 <option *ngFor="let d of departments()" [ngValue]="d.DepartmentId">{{ d.Name }}</option>
               </select>
             </div>
 
             <!-- Gender filter -->
             <div class="col-md-2">
-              <label class="form-label small mb-1 fw-semibold">Giới tính</label>
+              <label class="form-label small mb-1 fw-semibold">{{ 'employee.gender' | translate }}</label>
               <select class="form-select form-select-sm" [(ngModel)]="filter.gender">
-                <option value="">-- Tất cả --</option>
+                <option value="">{{ 'common.all' | translate }}</option>
                 <option *ngFor="let g of genderOptions.slice(1)" [value]="g">{{ g }}</option>
               </select>
             </div>
 
             <!-- Education Level -->
             <div class="col-md-2">
-              <label class="form-label small mb-1 fw-semibold">Trình độ</label>
+              <label class="form-label small mb-1 fw-semibold">{{ 'employee.educationLevel' | translate }}</label>
               <select class="form-select form-select-sm" [(ngModel)]="filter.educationLevel">
-                <option value="">-- Tất cả --</option>
+                <option value="">{{ 'common.all' | translate }}</option>
                 <option *ngFor="let e of educationOptions.slice(1)" [value]="e">{{ e }}</option>
               </select>
             </div>
@@ -93,10 +93,10 @@
               <label class="form-label small mb-1 fw-semibold">&nbsp;</label>
               <div class="d-flex gap-1">
                 <button class="btn btn-primary btn-sm flex-fill" (click)="onSearch()">
-                  <i class="bi bi-search"></i> Tìm kiếm
+                  <i class="bi bi-search"></i> {{ 'common.search' | translate }}
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" (click)="onClearFilter()">
-                  <i class="bi bi-x-lg">Làm mới</i>
+                  <i class="bi bi-x-lg me-1"></i>{{ 'common.reset' | translate }}
                 </button>
               </div>
             </div>
@@ -112,7 +112,7 @@
           <div class="col-md-12">
             <div class="alert alert-primary d-flex align-items-center py-2">
               <i class="bi bi-people-fill fs-5 me-2"></i>
-              <strong>Tổng số nhân viên: {{ stats()!.total }}</strong>
+              <strong>{{ 'employee.totalEmployees' | translate }}: {{ stats()!.total }}</strong>
             </div>
           </div>
 
@@ -120,7 +120,7 @@
           <div class="col-md-5">
             <div class="card h-100">
               <div class="card-header fw-semibold bg-primary text-white py-2">
-                <i class="bi bi-building me-1"></i> Theo phòng ban
+                <i class="bi bi-building me-1"></i> {{ 'employee.byDepartment' | translate }}
               </div>
               <div class="card-body py-2">
                 <div *ngFor="let d of stats()!.byDepartment" class="mb-2">
@@ -141,7 +141,7 @@
           <div class="col-md-3">
             <div class="card h-100">
               <div class="card-header fw-semibold bg-info text-white py-2">
-                <i class="bi bi-gender-ambiguous me-1"></i> Theo giới tính
+                <i class="bi bi-gender-ambiguous me-1"></i> {{ 'employee.byGender' | translate }}
               </div>
               <div class="card-body py-2">
                 <div *ngFor="let g of stats()!.byGender" class="mb-2">
@@ -164,7 +164,7 @@
           <div class="col-md-4">
             <div class="card h-100">
               <div class="card-header fw-semibold bg-success text-white py-2">
-                <i class="bi bi-calendar3 me-1"></i> Theo độ tuổi
+                <i class="bi bi-calendar3 me-1"></i> {{ 'employee.byAgeGroup' | translate }}
               </div>
               <div class="card-body py-2">
                 <div *ngFor="let a of stats()!.byAgeGroup" class="mb-2">
@@ -211,26 +211,25 @@
     <div class="modal-content">
       <div class="modal-header bg-warning">
         <h5 class="modal-title fw-bold text-dark">
-          <i class="bi bi-arrow-left-right me-2"></i>Chuyển phòng ban hàng loạt
+          <i class="bi bi-arrow-left-right me-2"></i>{{ 'employee.batchTransferTitle' | translate }}
         </h5>
         <button type="button" class="btn-close" (click)="closeBatchModal()"></button>
       </div>
       <div class="modal-body">
         <p class="text-muted mb-3">
-          Đã chọn <strong>{{ gridApi.getSelectedRows().length || 0 }}</strong> nhân viên.
-          Chọn phòng ban đích:
+          {{ 'employee.selected' | translate }} <strong>{{ gridApi.getSelectedRows().length || 0 }}</strong> {{ 'employee.selectTargetDept' | translate }}
         </p>
         <select class="form-select" [(ngModel)]="batchTargetDeptId">
-          <option [ngValue]="null">-- Chọn phòng ban --</option>
+          <option [ngValue]="null">-- {{ 'common.selectDepartment' | translate }} --</option>
           <option *ngFor="let d of departments()" [ngValue]="d.DepartmentId">{{ d.Name }}</option>
         </select>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeBatchModal()">Hủy</button>
+        <button class="btn btn-secondary" (click)="closeBatchModal()">{{ 'common.cancel' | translate }}</button>
         <button class="btn btn-warning text-dark" (click)="confirmBatchTransfer()" [disabled]="!batchTargetDeptId || batchLoading">
           <span *ngIf="batchLoading" class="spinner-border spinner-border-sm me-1"></span>
           <i *ngIf="!batchLoading" class="bi bi-check-circle me-1"></i>
-          Xác nhận chuyển
+          {{ 'employee.confirmTransfer' | translate }}
         </button>
       </div>
     </div>

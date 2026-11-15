@@ -1,17 +1,19 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { TimekeepingService } from '../_services/timekeeping.service';
+import { TranslateService } from '@ngx-translate/core';
+import { ToastrService } from 'ngx-toastr';
 
-interface AttendanceRecord {
+export interface AttendanceRecord {
   id?: number;
+  timeKeepingId?: number;
+  employeeId?: number;
   date: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  totalHoursWorked: number | null;
+  totalHoursWorked: any;
+  totalHours?: number | null;
   status: string;
-}
-
-interface AttendanceResponse {
-  message?: string;
+  note?: string;
 }
 
 @Component({
@@ -38,7 +40,11 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
 
   private timerId?: ReturnType<typeof setInterval>;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private timekeepingService: TimekeepingService,
+    public translate: TranslateService,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
     this.updateClock();
@@ -55,15 +61,56 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.updateWorkDuration();
   }
 
+  hasTime(val: any): boolean {
+    if (!val) return false;
+    const s = String(val).trim();
+    return s !== '' && s !== '00:00:00' && s !== '00:00';
+  }
+
+  formatTime(val: any): string {
+    if (!this.hasTime(val)) return '--:--:--';
+    const s = String(val).trim();
+    if (s.includes('T')) {
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        return [
+          d.getHours().toString().padStart(2, '0'),
+          d.getMinutes().toString().padStart(2, '0'),
+          d.getSeconds().toString().padStart(2, '0')
+        ].join(':');
+      }
+    }
+    return s.substring(0, 8);
+  }
+
+  get isCheckedIn(): boolean {
+    return !!(this.todayRecord && this.hasTime(this.todayRecord.checkInTime) && !this.hasTime(this.todayRecord.checkOutTime));
+  }
+
+  get isCheckedOut(): boolean {
+    return !!(this.todayRecord && this.hasTime(this.todayRecord.checkInTime) && this.hasTime(this.todayRecord.checkOutTime));
+  }
+
   private updateWorkDuration(): void {
     const record = this.todayRecord;
 
-    if (!record?.checkInTime || record.checkOutTime) {
+    if (!record || !this.hasTime(record.checkInTime) || this.hasTime(record.checkOutTime)) {
       this.workDuration = '00:00:00';
       return;
     }
 
-    const startTime = new Date(record.checkInTime).getTime();
+    const timeStr = String(record.checkInTime).trim();
+    let startTime = NaN;
+
+    if (timeStr.includes(':')) {
+      const parts = timeStr.split(':');
+      const start = new Date(this.currentTime);
+      start.setHours(Number(parts[0]) || 0, Number(parts[1]) || 0, Number(parts[2]) || 0, 0);
+      startTime = start.getTime();
+    } else {
+      startTime = new Date(timeStr).getTime();
+    }
+
     const now = this.currentTime.getTime();
 
     if (!Number.isFinite(startTime) || now < startTime) {
@@ -86,29 +133,28 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
   private isToday(dateValue: string): boolean {
     if (!dateValue) return false;
 
-    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
     const today = new Date();
+    const todayY = today.getFullYear();
+    const todayM = today.getMonth() + 1;
+    const todayD = today.getDate();
 
-    if (dateOnlyMatch) {
-      const y = Number(dateOnlyMatch[1]);
-      const m = Number(dateOnlyMatch[2]);
-      const d = Number(dateOnlyMatch[3]);
-      return y === today.getFullYear() && m === today.getMonth() + 1 && d === today.getDate();
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateValue);
+    if (m) {
+      return Number(m[1]) === todayY && Number(m[2]) === todayM && Number(m[3]) === todayD;
     }
 
-    const date = new Date(dateValue);
-    if (Number.isNaN(date.getTime())) return false;
-    return (
-      date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate()
-    );
+    const d = new Date(dateValue);
+    if (!isNaN(d.getTime())) {
+      return d.getFullYear() === todayY && (d.getMonth() + 1) === todayM && d.getDate() === todayD;
+    }
+
+    return false;
   }
 
   private syncAttendanceState(records: AttendanceRecord[]): void {
     this.timekeepingRecords = records;
     this.todayRecord = records.find(r => this.isToday(r.date)) ?? null;
-    this.checkedIn = !!(this.todayRecord?.checkInTime && !this.todayRecord?.checkOutTime);
+    this.checkedIn = this.isCheckedIn;
     this.updateWorkDuration();
   }
 
@@ -118,23 +164,21 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.historyLoading = true;
     this.historyError = '';
 
-    this.http.get<AttendanceRecord[]>('/api/TimeKeeping/history')
-      .subscribe({
-        next: (data) => {
-          const records = Array.isArray(data) ? data : [];
-          this.syncAttendanceState(records);
-          this.historyLoading = false;
-        },
-        error: (err) => {
-          console.error('Failed to load attendance history:', err);
-          this.historyError = err?.error?.message ?? 'Không thể tải lịch sử chấm công.';
-          this.historyLoading = false;
-          // Vẫn cho phép chấm công dù lỗi lịch sử
-          if (!this.todayRecord) {
-            this.checkedIn = false;
-          }
+    this.timekeepingService.getHistory().subscribe({
+      next: (data) => {
+        const records = Array.isArray(data) ? data : [];
+        this.syncAttendanceState(records);
+        this.historyLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load attendance history:', err);
+        this.historyError = err?.error?.message ?? this.translate.instant('timekeeping.historyError');
+        this.historyLoading = false;
+        if (!this.todayRecord) {
+          this.checkedIn = false;
         }
-      });
+      }
+    });
   }
 
   checkIn(): void {
@@ -144,21 +188,22 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.message = '';
     this.isSuccess = false;
 
-    this.http.post<AttendanceResponse>('/api/TimeKeeping/check-in', {})
-      .subscribe({
-        next: (res) => {
-          this.message = res?.message ?? 'Chấm công vào thành công.';
-          this.isSuccess = true;
-          this.loading = false;
-          this.loadAttendanceHistory();
-        },
-        error: (err) => {
-          console.error('Check-in failed:', err);
-          this.message = err?.error?.message ?? 'Chấm công vào thất bại. Vui lòng thử lại.';
-          this.isSuccess = false;
-          this.loading = false;
-        }
-      });
+    this.timekeepingService.CheckIn().subscribe({
+      next: (res) => {
+        this.message = res?.message || res?.Message || this.translate.instant('timekeeping.checkInSuccess');
+        this.isSuccess = true;
+        this.loading = false;
+        this.toastr.success(this.message);
+        this.loadAttendanceHistory();
+      },
+      error: (err) => {
+        console.error('Check-in failed:', err);
+        this.message = err?.error?.message || err?.message || this.translate.instant('timekeeping.checkInFailed');
+        this.isSuccess = false;
+        this.loading = false;
+        this.toastr.error(this.message);
+      }
+    });
   }
 
   checkOut(): void {
@@ -168,31 +213,32 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.message = '';
     this.isSuccess = false;
 
-    this.http.post<AttendanceResponse>('/api/TimeKeeping/check-out', {})
-      .subscribe({
-        next: (res) => {
-          this.message = res?.message ?? 'Chấm công ra thành công.';
-          this.isSuccess = true;
-          this.loading = false;
-          this.loadAttendanceHistory();
-        },
-        error: (err) => {
-          console.error('Check-out failed:', err);
-          this.message = err?.error?.message ?? 'Chấm công ra thất bại. Vui lòng thử lại.';
-          this.isSuccess = false;
-          this.loading = false;
-        }
-      });
+    this.timekeepingService.CheckOut().subscribe({
+      next: (res) => {
+        this.message = res?.message || res?.Message || this.translate.instant('timekeeping.checkOutSuccess');
+        this.isSuccess = true;
+        this.loading = false;
+        this.toastr.success(this.message);
+        this.loadAttendanceHistory();
+      },
+      error: (err) => {
+        console.error('Check-out failed:', err);
+        this.message = err?.error?.message || err?.message || this.translate.instant('timekeeping.checkOutFailed');
+        this.isSuccess = false;
+        this.loading = false;
+        this.toastr.error(this.message);
+      }
+    });
   }
 
-  getTimekeepingWithEmployees(): void {
-    this.http.get<AttendanceRecord[]>('/api/TimeKeeping/timekeeping-with-employees')
-      .subscribe({
-        next: (data) => {
-          const records = Array.isArray(data) ? data : [];
-          this.syncAttendanceState(records);
-        },
-        error: (err) => console.error('Failed to load timekeeping with employees:', err)
-      });
+  getStatusText(status: string): string {
+    if (!status) return '';
+    if (status === 'Đang làm việc') return this.translate.instant('timekeeping.working');
+    if (status === 'Đã chấm công' || status === 'Đã hoàn thành') return this.translate.instant('timekeeping.completed');
+    if (status === 'Có mặt') return this.translate.instant('timekeeping.present');
+    if (status === 'Vắng mặt') return this.translate.instant('timekeeping.absent');
+    if (status === 'Đi muộn') return this.translate.instant('timekeeping.late');
+    if (status === 'Về sớm') return this.translate.instant('timekeeping.earlyLeave');
+    return status;
   }
 }

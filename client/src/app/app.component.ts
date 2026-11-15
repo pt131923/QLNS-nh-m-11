@@ -19,10 +19,10 @@ export class AppComponent implements OnInit, OnDestroy {
     private translate: TranslateService
   ) {
     // Set default language
-    this.translate.setDefaultLang('en');
+    this.translate.setDefaultLang('vi');
     
     // Load saved language from localStorage
-    const savedLanguage = localStorage.getItem('language') || 'en';
+    const savedLanguage = localStorage.getItem('language') || 'vi';
     this.translate.use(savedLanguage);
   }
 

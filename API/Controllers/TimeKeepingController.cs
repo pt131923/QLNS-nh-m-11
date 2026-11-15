@@ -17,6 +17,7 @@ namespace API.Controllers
         IMongoCollection<Employee> employees
     ) : ControllerBase
     {
+        [HttpGet("history")]
         public async Task<IActionResult> GetMyTimeEntries()
         {
             var employeeId = await ResolveEmployeeId();
@@ -87,8 +88,14 @@ namespace API.Controllers
 
         private async Task<string> ResolveEmployeeId()
         {
-            var userIdValue = User.FindFirst("userId")?.Value
-                ?? User.FindFirst("employeeId")?.Value;
+            var claimedEmpIdStr = User.FindFirst("employeeId")?.Value;
+            if (int.TryParse(claimedEmpIdStr, out var claimedEmpId) && claimedEmpId > 0)
+            {
+                var emp = await employees.Find(x => x.EmployeeId == claimedEmpId).FirstOrDefaultAsync();
+                if (emp != null) return emp.EmployeeId.ToString();
+            }
+
+            var userIdValue = User.FindFirst("userId")?.Value;
             var username = User.FindFirstValue(ClaimTypes.Name);
 
             UserDtoLike user = null;
@@ -98,7 +105,7 @@ namespace API.Controllers
                 var userDto = await userRepository.GetUserByIdAsync(userId);
                 if (userDto != null)
                 {
-                    user = new UserDtoLike(userDto.UserId, userDto.UserName, userDto.Email);
+                    user = new UserDtoLike(userDto.UserId, userDto.EmployeeId, userDto.UserName, userDto.Email);
                 }
             }
 
@@ -106,7 +113,7 @@ namespace API.Controllers
             {
                 var userDto = await userRepository.GetUserByNameAsync(username);
                 if (userDto != null)
-                    user = new UserDtoLike(userDto.UserId, userDto.UserName, userDto.Email);
+                    user = new UserDtoLike(userDto.UserId, userDto.EmployeeId, userDto.UserName, userDto.Email);
             }
 
             if (user == null)
@@ -114,7 +121,14 @@ namespace API.Controllers
 
             Employee employee = null;
 
-            if (!string.IsNullOrWhiteSpace(user.Email))
+            if (user.EmployeeId > 0)
+            {
+                employee = await employees
+                    .Find(x => x.EmployeeId == user.EmployeeId)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (employee == null && !string.IsNullOrWhiteSpace(user.Email))
             {
                 employee = await employees
                     .Find(x => x.EmployeeEmail == user.Email)
@@ -149,6 +163,6 @@ namespace API.Controllers
             });
         }
 
-        private sealed record UserDtoLike(int UserId, string UserName, string Email);
+        private sealed record UserDtoLike(int UserId, int EmployeeId, string UserName, string Email);
     }
 }

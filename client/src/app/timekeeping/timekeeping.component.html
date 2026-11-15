@@ -2,22 +2,22 @@
   <div class="container">
     <div class="mb-3">
       <button class="btn btn-secondary" [routerLink]="['/dashboard']">
-        <i class="bi bi-arrow-left-short me-1"></i> Back to Dashboard
+        <i class="bi bi-arrow-left-short me-1"></i> {{ 'common.backToDashboard' | translate }}
       </button>
     </div>
 
     <header class="page-header">
       <div class="header-icon">🕒</div>
       <div>
-        <h1>Chấm công nhân viên</h1>
-        <p>Theo dõi giờ làm việc và lịch sử chấm công</p>
+        <h1>{{ 'timekeeping.pageTitle' | translate }}</h1>
+        <p>{{ 'timekeeping.pageSubtitle' | translate }}</p>
       </div>
     </header>
 
     <section class="clock-panel">
       <div class="section-heading">
         <span class="heading-icon">◷</span>
-        <h2>Thời gian hiện tại</h2>
+        <h2>{{ 'timekeeping.currentTime' | translate }}</h2>
       </div>
       <div class="clock-time">
         {{ currentTime | date:'HH:mm:ss' }}
@@ -33,10 +33,10 @@
         <div>
           <div class="section-heading">
             <span class="heading-icon">▣</span>
-            <h2>Chấm công hôm nay</h2>
+            <h2>{{ 'timekeeping.todayAttendance' | translate }}</h2>
           </div>
           <div class="status-row">
-            <strong>Trạng thái:</strong>
+            <strong>{{ 'timekeeping.status' | translate }}:</strong>
             <span
               class="status-badge"
               [class.active]="checkedIn"
@@ -44,10 +44,10 @@
               <span class="status-dot"></span>
               {{
                 checkedIn
-                  ? 'Đang làm việc'
-                  : (todayRecord
-                      ? 'Đã kết thúc'
-                      : 'Chưa chấm công')
+                  ? ('timekeeping.working' | translate)
+                  : (isCheckedOut
+                      ? ('timekeeping.completed' | translate)
+                      : ('timekeeping.notCheckedIn' | translate))
               }}
             </span>
           </div>
@@ -57,13 +57,13 @@
           class="attendance-notice"
           *ngIf="!todayRecord && !historyLoading">
           <span class="notice-dot"></span>
-          <p>Hôm nay bạn chưa có bản ghi chấm công.</p>
+          <p>{{ 'timekeeping.noRecordToday' | translate }}</p>
           <span class="notice-icon">📅</span>
         </div>
       </div>
 
       <div *ngIf="historyLoading" class="history-loading">
-        Đang tải dữ liệu chấm công...
+        {{ 'timekeeping.loading' | translate }}
       </div>
 
       <div
@@ -76,7 +76,7 @@
           class="retry-btn"
           (click)="loadAttendanceHistory()"
           [disabled]="historyLoading">
-          Thử lại
+          {{ 'timekeeping.retry' | translate }}
         </button>
       </div>
 
@@ -85,30 +85,16 @@
           <div class="stat-icon">📅</div>
           <div class="time-info">
             <div class="time-item">
-              <span class="stat-label">Giờ vào</span>
+              <span class="stat-label">{{ 'timekeeping.checkInTime' | translate }}</span>
               <strong>
-                <ng-container *ngIf="todayRecord as record; else noCheckIn">
-                  {{
-                    record.checkInTime
-                      ? (record.checkInTime | date:'HH:mm:ss')
-                      : '--:--:--'
-                  }}
-                </ng-container>
-                <ng-template #noCheckIn>--:--:--</ng-template>
+                {{ formatTime(todayRecord?.checkInTime) }}
               </strong>
             </div>
             <div class="time-divider"></div>
             <div class="time-item">
-              <span class="stat-label">Giờ ra</span>
+              <span class="stat-label">{{ 'timekeeping.checkOutTime' | translate }}</span>
               <strong>
-                <ng-container *ngIf="todayRecord as record; else noCheckOut">
-                  {{
-                    record.checkOutTime
-                      ? (record.checkOutTime | date:'HH:mm:ss')
-                      : '--:--:--'
-                  }}
-                </ng-container>
-                <ng-template #noCheckOut>--:--:--</ng-template>
+                {{ formatTime(todayRecord?.checkOutTime) }}
               </strong>
             </div>
           </div>
@@ -117,17 +103,17 @@
         <div class="stat-card total-card">
           <div class="stat-icon">⌛</div>
           <div>
-            <span class="stat-label">Tổng giờ làm</span>
+            <span class="stat-label">{{ 'timekeeping.totalHours' | translate }}</span>
             <strong class="stat-value">
               <ng-container *ngIf="todayRecord as record; else noTodayRecord">
                 {{
-                  record.totalHoursWorked != null
-                    ? record.totalHoursWorked + ' giờ'
-                    : (checkedIn ? workDuration : '-- giờ')
+                  record.totalHours != null && record.totalHours > 0
+                    ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
+                    : (checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate)))
                 }}
               </ng-container>
               <ng-template #noTodayRecord>
-                {{ checkedIn ? workDuration : '-- giờ' }}
+                {{ checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate)) }}
               </ng-template>
             </strong>
           </div>
@@ -136,7 +122,7 @@
         <div class="stat-card duration-card">
           <div class="stat-icon">💼</div>
           <div class="duration-content">
-            <span class="stat-label">Thời gian làm việc hiện tại</span>
+            <span class="stat-label">{{ 'timekeeping.currentDuration' | translate }}</span>
             <strong class="duration-value">
               <span class="stopwatch-icon">◴</span>
               {{ checkedIn ? workDuration : '00:00:00' }}
@@ -153,7 +139,7 @@
           [disabled]="loading || historyLoading"
           (click)="checkIn()">
           <span>▶</span>
-          {{ loading ? 'Đang xử lý...' : 'Chấm công vào' }}
+          {{ loading ? ('timekeeping.processing' | translate) : ('timekeeping.checkIn' | translate) }}
         </button>
 
         <button
@@ -163,7 +149,7 @@
           [disabled]="loading"
           (click)="checkOut()">
           <span>■</span>
-          {{ loading ? 'Đang xử lý...' : 'Chấm công ra' }}
+          {{ loading ? ('timekeeping.processing' | translate) : ('timekeeping.checkOut' | translate) }}
         </button>
       </div>
 
@@ -181,26 +167,26 @@
     <section class="history-panel">
       <div class="section-heading history-heading">
         <span class="heading-icon history-icon">◴</span>
-        <h2>Lịch sử chấm công</h2>
+        <h2>{{ 'timekeeping.attendanceHistory' | translate }}</h2>
       </div>
 
       <div *ngIf="historyLoading" class="history-loading">
-        Đang tải lịch sử chấm công...
+        {{ 'timekeeping.historyLoading' | translate }}
       </div>
 
       <div
         *ngIf="historyError"
         class="message error"
         role="alert">
-        Không thể hiển thị đầy đủ lịch sử chấm công.
+        {{ 'timekeeping.historyError' | translate }}
       </div>
 
       <div
         *ngIf="!historyLoading && !historyError && timekeepingRecords.length === 0"
         class="empty-state">
         <div class="empty-icon">📋</div>
-        <h3>Chưa có dữ liệu chấm công</h3>
-        <p>Lịch sử chấm công của bạn sẽ hiển thị tại đây.</p>
+        <h3>{{ 'timekeeping.noHistory' | translate }}</h3>
+        <p>{{ 'timekeeping.noHistoryDesc' | translate }}</p>
       </div>
 
       <div
@@ -209,12 +195,12 @@
         <table class="attendance-table">
           <thead>
             <tr>
-              <th>STT</th>
-              <th>Ngày</th>
-              <th>Giờ vào</th>
-              <th>Giờ ra</th>
-              <th>Tổng giờ làm</th>
-              <th>Trạng thái</th>
+              <th>{{ 'timekeeping.stt' | translate }}</th>
+              <th>{{ 'timekeeping.date' | translate }}</th>
+              <th>{{ 'timekeeping.checkInTime' | translate }}</th>
+              <th>{{ 'timekeeping.checkOutTime' | translate }}</th>
+              <th>{{ 'timekeeping.totalHours' | translate }}</th>
+              <th>{{ 'timekeeping.status' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -222,20 +208,24 @@
               <td>{{ i + 1 }}</td>
               <td class="date-cell">{{ record.date | date:'dd/MM/yyyy' }}</td>
               <td>
-                {{ record.checkInTime ? (record.checkInTime | date:'HH:mm:ss') : '--:--:--' }}
+                {{ formatTime(record.checkInTime) }}
               </td>
               <td>
-                {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm:ss') : '--:--:--' }}
+                {{ formatTime(record.checkOutTime) }}
               </td>
               <td class="hours-cell">
-                {{ record.totalHoursWorked != null ? record.totalHoursWorked + ' giờ' : '--' }}
+                {{
+                  record.totalHours != null && record.totalHours > 0
+                    ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
+                    : (hasTime(record.totalHoursWorked) ? formatTime(record.totalHoursWorked) : '--')
+                }}
               </td>
               <td>
                 <span
                   class="record-status"
-                  [class.completed]="!!record.checkOutTime">
+                  [class.completed]="hasTime(record.checkOutTime)">
                   <span class="record-dot"></span>
-                  {{ record.status }}
+                  {{ getStatusText(record.status) }}
                 </span>
               </td>
             </tr>

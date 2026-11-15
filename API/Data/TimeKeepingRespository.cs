@@ -97,7 +97,7 @@ namespace API.Data
 
             record.CheckOut = checkOut;
             record.TotalHoursWorked = record.CheckOut - record.CheckIn;
-            record.TotalHours = (decimal)record.TotalHoursWorked.TotalHours;
+            record.TotalHours = Math.Round((decimal)record.TotalHoursWorked.TotalHours, 2);
             record.Status = "Đã chấm công";
             record.Note = "Chấm công ra";
 
