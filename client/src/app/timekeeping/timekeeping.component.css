@@ -518,6 +518,41 @@
   background: #16a34a;
 }
 
+.record-status.early {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.record-status.early .record-dot {
+  background: #f59e0b;
+}
+
+.badge-under-8h {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.badge-under-8h-small {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 /* Empty state */
 .empty-state {
   padding: 44px 20px;
@@ -693,4 +728,225 @@
   *::after {
     transition: none !important;
   }
+}
+
+/* =================================================== */
+/* TAB SWITCHER & HEADER STYLES                        */
+/* =================================================== */
+.back-btn {
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.tab-switcher {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 5px;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  gap: 6px;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 14.5px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.tab-btn:hover {
+  color: #1e293b;
+  background: rgba(241, 245, 249, 0.8);
+}
+
+.tab-btn.active {
+  background: #ffffff;
+  color: #4f46e5;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+.tab-badge {
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+
+.tab-dot-working {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  margin-left: 6px;
+  box-shadow: 0 0 0 2px #d1fae5;
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.bg-indigo {
+  background: linear-gradient(135deg, #6366f1, #4338ca) !important;
+}
+
+/* =================================================== */
+/* KPI SUMMARY CARDS                                   */
+/* =================================================== */
+.kpi-card {
+  display: flex;
+  align-items: center;
+  padding: 20px 22px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+}
+
+.kpi-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-right: 18px;
+  flex-shrink: 0;
+}
+
+.kpi-blue .kpi-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.kpi-purple .kpi-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.kpi-green .kpi-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.kpi-amber .kpi-icon {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.kpi-details {
+  flex: 1;
+}
+
+.kpi-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.kpi-value {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.kpi-value .unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.kpi-hint {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* =================================================== */
+/* FILTER PANEL & TABLE STYLES                         */
+/* =================================================== */
+.filter-panel {
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+}
+
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.dept-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.employee-attendance-table th {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+  padding: 14px 16px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.employee-attendance-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin-icon 1s linear infinite;
+}
+
+@keyframes spin-icon {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

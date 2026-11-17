@@ -98,8 +98,16 @@ namespace API.Data
             record.CheckOut = checkOut;
             record.TotalHoursWorked = record.CheckOut - record.CheckIn;
             record.TotalHours = Math.Round((decimal)record.TotalHoursWorked.TotalHours, 2);
-            record.Status = "Đã chấm công";
-            record.Note = "Chấm công ra";
+            if (record.TotalHours < 8)
+            {
+                record.Status = "Về sớm";
+                record.Note = $"Chấm công ra (chưa đủ 8 giờ: {record.TotalHours}h)";
+            }
+            else
+            {
+                record.Status = "Đã chấm công";
+                record.Note = "Chấm công ra";
+            }
 
             await _timeKeeping.ReplaceOneAsync(
                 x => x.TimeKeepingId == record.TimeKeepingId,
@@ -111,13 +119,17 @@ namespace API.Data
         public async Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployees()
         {
             var timeKeeping = await _timeKeeping
-                .Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero)
+                .Find(x => x.CheckIn != TimeSpan.Zero)
+                .SortByDescending(x => x.Date)
+                .ThenByDescending(x => x.TimeKeepingId)
                 .ToListAsync();
 
             if (timeKeeping.Count == 0)
             {
                 timeKeeping = await _legacyTimeKeeping
-                    .Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero)
+                    .Find(x => x.CheckIn != TimeSpan.Zero)
+                    .SortByDescending(x => x.Date)
+                    .ThenByDescending(x => x.TimeKeepingId)
                     .ToListAsync();
             }
 

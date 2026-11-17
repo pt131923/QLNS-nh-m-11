@@ -57,8 +57,15 @@ namespace API.Controllers
 
             try
             {
-                await timekeepingRepository.CheckOut(employeeId);
-                return Ok(new { message = "Chấm công ra thành công." });
+                var record = await timekeepingRepository.CheckOut(employeeId);
+                var isUnder8Hours = record != null && record.TotalHours < 8;
+                return Ok(new { 
+                    message = isUnder8Hours 
+                        ? $"Chấm công ra thành công. Cảnh báo: Thời gian làm việc chưa đủ 8 tiếng ({record?.TotalHours}h/8h)." 
+                        : "Chấm công ra thành công.",
+                    totalHours = record?.TotalHours ?? 0,
+                    isUnder8Hours = isUnder8Hours
+                });
             }
             catch (InvalidOperationException ex)
             {

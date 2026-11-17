@@ -1,248 +1,581 @@
 <div class="attendance-page">
-  <div class="container">
-    <div class="mb-3">
-      <button class="btn btn-secondary" [routerLink]="['/dashboard']">
+  <div class="container-fluid px-4 py-3">
+    <!-- Top Bar with Back button -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <button class="btn btn-secondary back-btn" [routerLink]="['/dashboard']">
         <i class="bi bi-arrow-left-short me-1"></i> {{ 'common.backToDashboard' | translate }}
       </button>
+
+      <!-- Tab Switcher Navigation -->
+      <div class="tab-switcher">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab === 'stats'"
+          (click)="setTab('stats')">
+          <i class="bi bi-bar-chart-line-fill me-2"></i>
+          {{ 'timekeeping.employeeStatsTab' | translate }}
+          <span class="tab-badge" *ngIf="allEmployeeRecords.length > 0">{{ allEmployeeRecords.length }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab === 'personal'"
+          (click)="setTab('personal')">
+          <i class="bi bi-clock-history me-2"></i>
+          {{ 'timekeeping.myAttendanceTab' | translate }}
+          <span class="tab-dot-working" *ngIf="checkedIn" title="Đang trong ca làm việc"></span>
+        </button>
+      </div>
     </div>
 
-    <header class="page-header">
-      <div class="header-icon">🕒</div>
-      <div>
-        <h1>{{ 'timekeeping.pageTitle' | translate }}</h1>
-        <p>{{ 'timekeeping.pageSubtitle' | translate }}</p>
-      </div>
-    </header>
-
-    <section class="clock-panel">
-      <div class="section-heading">
-        <span class="heading-icon">◷</span>
-        <h2>{{ 'timekeeping.currentTime' | translate }}</h2>
-      </div>
-      <div class="clock-time">
-        {{ currentTime | date:'HH:mm:ss' }}
-      </div>
-      <div class="clock-date">
-        <span>▦</span>
-        {{ currentTime | date:'EEEE, dd/MM/yyyy' }}
-      </div>
-    </section>
-
-    <section class="attendance-panel">
-      <div class="attendance-heading">
+    <!-- ============================================================== -->
+    <!-- TAB 1: EMPLOYEE WORK HOURS STATISTICS (THỐNG KÊ GIỜ LÀM NV)    -->
+    <!-- ============================================================== -->
+    <div *ngIf="activeTab === 'stats'" class="stats-tab-content">
+      <header class="page-header mb-4">
+        <div class="header-icon bg-indigo">📊</div>
         <div>
-          <div class="section-heading">
-            <span class="heading-icon">▣</span>
-            <h2>{{ 'timekeeping.todayAttendance' | translate }}</h2>
+          <h1>{{ 'timekeeping.statsTitle' | translate }}</h1>
+          <p>{{ 'timekeeping.statsSubtitle' | translate }}</p>
+        </div>
+      </header>
+
+      <!-- KPI Summary Cards -->
+      <div class="row g-3 mb-4">
+        <!-- Card 1: Tổng nhân viên chấm công -->
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-icon">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">{{ 'timekeeping.totalEmployees' | translate }}</span>
+              <h3 class="kpi-value">{{ totalStatsEmployees }}</h3>
+              <span class="kpi-hint">{{ filteredEmployeeRecords.length }} lượt chấm công</span>
+            </div>
           </div>
-          <div class="status-row">
-            <strong>{{ 'timekeeping.status' | translate }}:</strong>
-            <span
-              class="status-badge"
-              [class.active]="checkedIn"
-              [class.inactive]="!checkedIn">
-              <span class="status-dot"></span>
-              {{
-                checkedIn
-                  ? ('timekeeping.working' | translate)
-                  : (isCheckedOut
-                      ? ('timekeeping.completed' | translate)
-                      : ('timekeeping.notCheckedIn' | translate))
-              }}
-            </span>
+        </div>
+
+        <!-- Card 2: Tổng giờ làm việc tích lũy -->
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card kpi-purple">
+            <div class="kpi-icon">
+              <i class="bi bi-stopwatch-fill"></i>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">{{ 'timekeeping.totalHoursWorkedStat' | translate }}</span>
+              <h3 class="kpi-value">{{ totalStatsHours }} <small class="unit">{{ 'timekeeping.hoursUnit' | translate }}</small></h3>
+              <span class="kpi-hint">Tổng cộng theo bộ lọc</span>
+            </div>
           </div>
+        </div>
+
+        <!-- Card 3: Đạt chuẩn (>= 8h) -->
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card kpi-green">
+            <div class="kpi-icon">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">{{ 'timekeeping.standardEmployees' | translate }}</span>
+              <h3 class="kpi-value text-success">{{ totalStatsStandard }}</h3>
+              <span class="kpi-hint">Làm đủ tiêu chuẩn ≥ 8 giờ</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Cảnh báo Chưa đủ 8h / Về sớm -->
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card kpi-amber">
+            <div class="kpi-icon">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="kpi-details">
+              <span class="kpi-label">{{ 'timekeeping.under8hEmployees' | translate }}</span>
+              <h3 class="kpi-value text-danger">{{ totalStatsUnder8h }}</h3>
+              <span class="kpi-hint">
+                <span class="badge bg-primary text-white" *ngIf="totalStatsWorking > 0">{{ totalStatsWorking }} đang làm việc</span>
+                <span *ngIf="totalStatsWorking === 0">Cần lưu ý kiểm tra</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Toolbar Card -->
+      <div class="filter-panel card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <!-- Filter Date -->
+            <div class="col-12 col-md-3">
+              <label class="form-label fw-bold text-muted small">
+                <i class="bi bi-calendar3 me-1"></i> {{ 'timekeeping.filterByDate' | translate }}
+              </label>
+              <div class="input-group">
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="selectedDate">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="setTodayDate()"
+                  [title]="'timekeeping.today' | translate">
+                  {{ 'timekeeping.today' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-sm"
+                  (click)="clearDateFilter()"
+                  [title]="'timekeeping.allDates' | translate">
+                  {{ 'timekeeping.allDates' | translate }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Department -->
+            <div class="col-12 col-md-3">
+              <label class="form-label fw-bold text-muted small">
+                <i class="bi bi-building me-1"></i> {{ 'timekeeping.filterByDept' | translate }}
+              </label>
+              <select class="form-select" [(ngModel)]="selectedDepartment">
+                <option value="all">{{ 'timekeeping.allDepts' | translate }}</option>
+                <option *ngFor="let dept of departments" [value]="dept.name || dept.Name">
+                  {{ dept.name || dept.Name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Filter Status -->
+            <div class="col-12 col-md-2">
+              <label class="form-label fw-bold text-muted small">
+                <i class="bi bi-funnel me-1"></i> {{ 'timekeeping.filterStatus' | translate }}
+              </label>
+              <select class="form-select" [(ngModel)]="statusFilter">
+                <option value="all">{{ 'timekeeping.allStatus' | translate }}</option>
+                <option value="standard">{{ 'timekeeping.statusStandard' | translate }}</option>
+                <option value="under8h">{{ 'timekeeping.statusUnder8h' | translate }}</option>
+                <option value="working">{{ 'timekeeping.statusWorking' | translate }}</option>
+              </select>
+            </div>
+
+            <!-- Search input -->
+            <div class="col-12 col-md-2">
+              <label class="form-label fw-bold text-muted small">
+                <i class="bi bi-search me-1"></i> Tìm kiếm
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                [placeholder]="'timekeeping.searchPlaceholder' | translate"
+                [(ngModel)]="searchTerm">
+            </div>
+
+            <!-- Action buttons: Reset & Export -->
+            <div class="col-12 col-md-2 d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-outline-secondary flex-fill"
+                (click)="resetFilters()"
+                title="Đặt lại bộ lọc">
+                <i class="bi bi-arrow-counterclockwise"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-success flex-fill d-flex align-items-center justify-content-center gap-1"
+                (click)="exportToExcel()"
+                [title]="'timekeeping.exportExcel' | translate">
+                <i class="bi bi-file-earmark-excel-fill"></i>
+                <span>Excel</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee Attendance Data Table -->
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-table me-2 text-primary"></i>
+            Danh sách chấm công nhân viên
+            <span class="badge bg-primary ms-2">{{ filteredEmployeeRecords.length }} bản ghi</span>
+          </h5>
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+            (click)="loadEmployeeAttendance()"
+            [disabled]="employeeLoading">
+            <i class="bi bi-arrow-repeat" [class.spin]="employeeLoading"></i>
+            <span>Làm mới</span>
+          </button>
+        </div>
+
+        <div class="card-body p-0">
+          <div *ngIf="employeeLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">{{ 'timekeeping.loading' | translate }}</p>
+          </div>
+
+          <div *ngIf="employeeError" class="alert alert-danger m-3" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i> {{ employeeError }}
+          </div>
+
+          <div *ngIf="!employeeLoading && !employeeError && filteredEmployeeRecords.length === 0" class="empty-state py-5 text-center">
+            <div class="empty-icon fs-1 text-muted mb-2">📋</div>
+            <h5 class="text-dark">{{ 'timekeeping.noEmployeeData' | translate }}</h5>
+            <p class="text-muted small">Hãy thử thay đổi ngày hoặc bộ lọc tìm kiếm phía trên.</p>
+          </div>
+
+          <div class="table-responsive" *ngIf="!employeeLoading && !employeeError && filteredEmployeeRecords.length > 0">
+            <table class="table table-hover align-middle mb-0 employee-attendance-table">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 50px;">{{ 'timekeeping.stt' | translate }}</th>
+                  <th style="width: 90px;">{{ 'timekeeping.empCode' | translate }}</th>
+                  <th>{{ 'timekeeping.empName' | translate }}</th>
+                  <th>{{ 'timekeeping.dept' | translate }}</th>
+                  <th style="width: 120px;">{{ 'timekeeping.date' | translate }}</th>
+                  <th style="width: 110px;">{{ 'timekeeping.checkInTime' | translate }}</th>
+                  <th style="width: 110px;">{{ 'timekeeping.checkOutTime' | translate }}</th>
+                  <th style="width: 150px;">{{ 'timekeeping.totalHours' | translate }}</th>
+                  <th style="width: 140px;">Đánh giá</th>
+                  <th style="width: 130px;">{{ 'timekeeping.status' | translate }}</th>
+                  <th>{{ 'timekeeping.note' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let record of filteredEmployeeRecords; let i = index">
+                  <td class="text-muted fw-bold">{{ i + 1 }}</td>
+                  <td>
+                    <span class="badge bg-light text-dark border">#{{ record.employeeId }}</span>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-circle me-2">
+                        {{ record.employeeName.charAt(0).toUpperCase() }}
+                      </div>
+                      <div>
+                        <div class="fw-bold text-dark">{{ record.employeeName }}</div>
+                        <small class="text-muted" *ngIf="record.employeeEmail">{{ record.employeeEmail }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="dept-badge">
+                      <i class="bi bi-briefcase me-1 text-muted"></i>
+                      {{ record.departmentName }}
+                    </span>
+                  </td>
+                  <td class="date-cell">
+                    {{ formatDate(record.date) }}
+                  </td>
+                  <td class="fw-semibold">
+                    <span class="text-primary font-monospace">{{ formatTime(record.checkInTime) }}</span>
+                  </td>
+                  <td class="fw-semibold">
+                    <span class="text-secondary font-monospace">{{ formatTime(record.checkOutTime) }}</span>
+                  </td>
+                  <td>
+                    <strong class="font-monospace fs-6" [class.text-danger]="hasTime(record.checkOutTime) && record.totalHours < 8" [class.text-success]="record.totalHours >= 8">
+                      {{ record.totalHours }} {{ 'timekeeping.hoursUnit' | translate }}
+                    </strong>
+                  </td>
+                  <td>
+                    <!-- Đánh giá giờ làm việc -->
+                    <span
+                      class="badge bg-success text-white"
+                      *ngIf="record.totalHours >= 8">
+                      <i class="bi bi-check2-circle me-1"></i> Đủ 8h
+                    </span>
+                    <span
+                      class="badge bg-warning text-dark border border-warning"
+                      *ngIf="hasTime(record.checkOutTime) && record.totalHours < 8">
+                      <i class="bi bi-exclamation-triangle-fill me-1"></i> Chưa đủ 8h
+                    </span>
+                    <span
+                      class="badge bg-info text-white"
+                      *ngIf="hasTime(record.checkInTime) && !hasTime(record.checkOutTime)">
+                      <i class="bi bi-hourglass-split me-1"></i> Đang làm
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="record-status"
+                      [class.completed]="hasTime(record.checkOutTime) && record.status !== 'Về sớm'"
+                      [class.early]="record.status === 'Về sớm'">
+                      <span class="record-dot"></span>
+                      {{ getStatusText(record.status) }}
+                    </span>
+                  </td>
+                  <td class="text-muted small">
+                    {{ record.note || '--' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- TAB 2: PERSONAL ATTENDANCE (CHẤM CÔNG CÁ NHÂN CỦA USER ĐĂNG NHẬP) -->
+    <!-- ============================================================== -->
+    <div *ngIf="activeTab === 'personal'" class="personal-tab-content">
+      <header class="page-header mb-4">
+        <div class="header-icon">🕒</div>
+        <div>
+          <h1>{{ 'timekeeping.pageTitle' | translate }}</h1>
+          <p>{{ 'timekeeping.pageSubtitle' | translate }}</p>
+        </div>
+      </header>
+
+      <section class="clock-panel">
+        <div class="section-heading">
+          <span class="heading-icon">◷</span>
+          <h2>{{ 'timekeeping.currentTime' | translate }}</h2>
+        </div>
+        <div class="clock-time">
+          {{ currentTime | date:'HH:mm:ss' }}
+        </div>
+        <div class="clock-date">
+          <span>▦</span>
+          {{ currentTime | date:'EEEE, dd/MM/yyyy' }}
+        </div>
+      </section>
+
+      <section class="attendance-panel">
+        <div class="attendance-heading">
+          <div>
+            <div class="section-heading">
+              <span class="heading-icon">▣</span>
+              <h2>{{ 'timekeeping.todayAttendance' | translate }}</h2>
+            </div>
+            <div class="status-row">
+              <strong>{{ 'timekeeping.status' | translate }}:</strong>
+              <span
+                class="status-badge"
+                [class.active]="checkedIn"
+                [class.inactive]="!checkedIn">
+                <span class="status-dot"></span>
+                {{
+                  checkedIn
+                    ? ('timekeeping.working' | translate)
+                    : (isCheckedOut
+                        ? ('timekeeping.completed' | translate)
+                        : ('timekeeping.notCheckedIn' | translate))
+                }}
+              </span>
+            </div>
+          </div>
+
+          <div
+            class="attendance-notice"
+            *ngIf="!todayRecord && !historyLoading">
+            <span class="notice-dot"></span>
+            <p>{{ 'timekeeping.noRecordToday' | translate }}</p>
+            <span class="notice-icon">📅</span>
+          </div>
+        </div>
+
+        <div *ngIf="historyLoading" class="history-loading">
+          {{ 'timekeeping.loading' | translate }}
         </div>
 
         <div
-          class="attendance-notice"
-          *ngIf="!todayRecord && !historyLoading">
-          <span class="notice-dot"></span>
-          <p>{{ 'timekeeping.noRecordToday' | translate }}</p>
-          <span class="notice-icon">📅</span>
+          *ngIf="historyError"
+          class="message error"
+          role="alert">
+          {{ historyError }}
+          <button
+            type="button"
+            class="retry-btn"
+            (click)="loadAttendanceHistory()"
+            [disabled]="historyLoading">
+            {{ 'timekeeping.retry' | translate }}
+          </button>
         </div>
-      </div>
 
-      <div *ngIf="historyLoading" class="history-loading">
-        {{ 'timekeeping.loading' | translate }}
-      </div>
-
-      <div
-        *ngIf="historyError"
-        class="message error"
-        role="alert">
-        {{ historyError }}
-        <button
-          type="button"
-          class="retry-btn"
-          (click)="loadAttendanceHistory()"
-          [disabled]="historyLoading">
-          {{ 'timekeeping.retry' | translate }}
-        </button>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card time-card">
-          <div class="stat-icon">📅</div>
-          <div class="time-info">
-            <div class="time-item">
-              <span class="stat-label">{{ 'timekeeping.checkInTime' | translate }}</span>
-              <strong>
-                {{ formatTime(todayRecord?.checkInTime) }}
-              </strong>
-            </div>
-            <div class="time-divider"></div>
-            <div class="time-item">
-              <span class="stat-label">{{ 'timekeeping.checkOutTime' | translate }}</span>
-              <strong>
-                {{ formatTime(todayRecord?.checkOutTime) }}
-              </strong>
+        <div class="stats-grid">
+          <div class="stat-card time-card">
+            <div class="stat-icon">📅</div>
+            <div class="time-info">
+              <div class="time-item">
+                <span class="stat-label">{{ 'timekeeping.checkInTime' | translate }}</span>
+                <strong>
+                  {{ formatTime(todayRecord?.checkInTime) }}
+                </strong>
+              </div>
+              <div class="time-divider"></div>
+              <div class="time-item">
+                <span class="stat-label">{{ 'timekeeping.checkOutTime' | translate }}</span>
+                <strong>
+                  {{ formatTime(todayRecord?.checkOutTime) }}
+                </strong>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="stat-card total-card">
-          <div class="stat-icon">⌛</div>
-          <div>
-            <span class="stat-label">{{ 'timekeeping.totalHours' | translate }}</span>
-            <strong class="stat-value">
-              <ng-container *ngIf="todayRecord as record; else noTodayRecord">
-                {{
-                  record.totalHours != null && record.totalHours > 0
-                    ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
-                    : (isCheckedOut && hasTime(record.totalHoursWorked)
-                        ? formatTime(record.totalHoursWorked)
-                        : (checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate))))
-                }}
-              </ng-container>
-              <ng-template #noTodayRecord>
-                {{ checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate)) }}
-              </ng-template>
-            </strong>
+          <div class="stat-card total-card">
+            <div class="stat-icon">⌛</div>
+            <div>
+              <span class="stat-label">{{ 'timekeeping.totalHours' | translate }}</span>
+              <strong class="stat-value">
+                <ng-container *ngIf="todayRecord as record; else noTodayRecord">
+                  {{
+                    record.totalHours != null && record.totalHours > 0
+                      ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
+                      : (isCheckedOut && hasTime(record.totalHoursWorked)
+                          ? formatTime(record.totalHoursWorked)
+                          : (checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate))))
+                  }}
+                  <span class="badge-under-8h" *ngIf="isCheckedOut && record.totalHours != null && record.totalHours < 8">
+                    ⚠️ {{ 'timekeeping.under8Hours' | translate }}
+                  </span>
+                </ng-container>
+                <ng-template #noTodayRecord>
+                  {{ checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate)) }}
+                </ng-template>
+              </strong>
+            </div>
+          </div>
+
+          <div class="stat-card duration-card">
+            <div class="stat-icon">💼</div>
+            <div class="duration-content">
+              <span class="stat-label">{{ 'timekeeping.currentDuration' | translate }}</span>
+              <strong class="duration-value">
+                <span class="stopwatch-icon">◴</span>
+                {{ checkedIn ? workDuration : (isCheckedOut && todayRecord?.totalHoursWorked ? formatTime(todayRecord?.totalHoursWorked) : '00:00:00') }}
+              </strong>
+            </div>
           </div>
         </div>
 
-        <div class="stat-card duration-card">
-          <div class="stat-icon">💼</div>
-          <div class="duration-content">
-            <span class="stat-label">{{ 'timekeeping.currentDuration' | translate }}</span>
-            <strong class="duration-value">
-              <span class="stopwatch-icon">◴</span>
-              {{ checkedIn ? workDuration : (isCheckedOut && todayRecord?.totalHoursWorked ? formatTime(todayRecord?.totalHoursWorked) : '00:00:00') }}
-            </strong>
-          </div>
+        <div class="controls">
+          <button
+            type="button"
+            class="btn btn-primary"
+            *ngIf="!checkedIn && !isCheckedOut"
+            [disabled]="loading || historyLoading"
+            (click)="checkIn()">
+            <span>▶</span>
+            {{ loading ? ('timekeeping.processing' | translate) : ('timekeeping.checkIn' | translate) }}
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            *ngIf="checkedIn"
+            [disabled]="loading"
+            (click)="checkOut()">
+            <span>■</span>
+            {{ loading ? ('timekeeping.processing' | translate) : ('timekeeping.checkOut' | translate) }}
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-success"
+            *ngIf="isCheckedOut"
+            disabled>
+            <span>✔</span>
+            {{ 'timekeeping.completed' | translate }}
+          </button>
         </div>
-      </div>
 
-      <div class="controls">
-        <button
-          type="button"
-          class="btn btn-primary"
-          *ngIf="!checkedIn && !isCheckedOut"
-          [disabled]="loading || historyLoading"
-          (click)="checkIn()">
-          <span>▶</span>
-          {{ loading ? ('timekeeping.processing' | translate) : ('timekeeping.checkIn' | translate) }}
-        </button>
+        <div
+          *ngIf="message"
+          class="message"
+          [class.success]="isSuccess"
+          [class.error]="!isSuccess"
+          role="status"
+          aria-live="polite">
+          {{ message }}
+        </div>
+      </section>
 
-        <button
-          type="button"
-          class="btn btn-secondary"
-          *ngIf="checkedIn"
-          [disabled]="loading"
-          (click)="checkOut()">
-          <span>■</span>
-          {{ loading ? ('timekeeping.processing' | translate) : ('timekeeping.checkOut' | translate) }}
-        </button>
+      <!-- Personal Attendance History -->
+      <section class="history-panel">
+        <div class="section-heading history-heading">
+          <span class="heading-icon history-icon">◴</span>
+          <h2>{{ 'timekeeping.attendanceHistory' | translate }}</h2>
+        </div>
 
-        <button
-          type="button"
-          class="btn btn-success"
-          *ngIf="isCheckedOut"
-          disabled>
-          <span>✔</span>
-          {{ 'timekeeping.completed' | translate }}
-        </button>
-      </div>
+        <div *ngIf="historyLoading" class="history-loading">
+          {{ 'timekeeping.historyLoading' | translate }}
+        </div>
 
-      <div
-        *ngIf="message"
-        class="message"
-        [class.success]="isSuccess"
-        [class.error]="!isSuccess"
-        role="status"
-        aria-live="polite">
-        {{ message }}
-      </div>
-    </section>
+        <div
+          *ngIf="historyError"
+          class="message error"
+          role="alert">
+          {{ 'timekeeping.historyError' | translate }}
+        </div>
 
-    <section class="history-panel">
-      <div class="section-heading history-heading">
-        <span class="heading-icon history-icon">◴</span>
-        <h2>{{ 'timekeeping.attendanceHistory' | translate }}</h2>
-      </div>
+        <div
+          *ngIf="!historyLoading && !historyError && timekeepingRecords.length === 0"
+          class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h3>{{ 'timekeeping.noHistory' | translate }}</h3>
+          <p>{{ 'timekeeping.noHistoryDesc' | translate }}</p>
+        </div>
 
-      <div *ngIf="historyLoading" class="history-loading">
-        {{ 'timekeeping.historyLoading' | translate }}
-      </div>
-
-      <div
-        *ngIf="historyError"
-        class="message error"
-        role="alert">
-        {{ 'timekeeping.historyError' | translate }}
-      </div>
-
-      <div
-        *ngIf="!historyLoading && !historyError && timekeepingRecords.length === 0"
-        class="empty-state">
-        <div class="empty-icon">📋</div>
-        <h3>{{ 'timekeeping.noHistory' | translate }}</h3>
-        <p>{{ 'timekeeping.noHistoryDesc' | translate }}</p>
-      </div>
-
-      <div
-        *ngIf="!historyLoading && !historyError && timekeepingRecords.length > 0"
-        class="table-wrapper">
-        <table class="attendance-table">
-          <thead>
-            <tr>
-              <th>{{ 'timekeeping.stt' | translate }}</th>
-              <th>{{ 'timekeeping.date' | translate }}</th>
-              <th>{{ 'timekeeping.checkInTime' | translate }}</th>
-              <th>{{ 'timekeeping.checkOutTime' | translate }}</th>
-              <th>{{ 'timekeeping.totalHours' | translate }}</th>
-              <th>{{ 'timekeeping.status' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let record of timekeepingRecords; let i = index">
-              <td>{{ i + 1 }}</td>
-              <td class="date-cell">{{ record.date | date:'dd/MM/yyyy' }}</td>
-              <td>
-                {{ formatTime(record.checkInTime) }}
-              </td>
-              <td>
-                {{ formatTime(record.checkOutTime) }}
-              </td>
-              <td class="hours-cell">
-                {{
-                  record.totalHours != null && record.totalHours > 0
-                    ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
-                    : (hasTime(record.totalHoursWorked) ? formatTime(record.totalHoursWorked) : '--')
-                }}
-              </td>
-              <td>
-                <span
-                  class="record-status"
-                  [class.completed]="hasTime(record.checkOutTime)">
-                  <span class="record-dot"></span>
-                  {{ getStatusText(record.status) }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+        <div
+          *ngIf="!historyLoading && !historyError && timekeepingRecords.length > 0"
+          class="table-wrapper">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>{{ 'timekeeping.stt' | translate }}</th>
+                <th>{{ 'timekeeping.date' | translate }}</th>
+                <th>{{ 'timekeeping.checkInTime' | translate }}</th>
+                <th>{{ 'timekeeping.checkOutTime' | translate }}</th>
+                <th>{{ 'timekeeping.totalHours' | translate }}</th>
+                <th>{{ 'timekeeping.status' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let record of timekeepingRecords; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td class="date-cell">{{ formatDate(record.date) }}</td>
+                <td>
+                  {{ formatTime(record.checkInTime) }}
+                </td>
+                <td>
+                  {{ formatTime(record.checkOutTime) }}
+                </td>
+                <td class="hours-cell">
+                  {{
+                    record.totalHours != null && record.totalHours > 0
+                      ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
+                      : (hasTime(record.totalHoursWorked) ? formatTime(record.totalHoursWorked) : '--')
+                  }}
+                  <span
+                    class="badge-under-8h-small"
+                    *ngIf="hasTime(record.checkOutTime) && record.totalHours != null && record.totalHours < 8"
+                    [title]="'timekeeping.under8HoursWarning' | translate">
+                    ⚠️ &lt; 8h
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="record-status"
+                    [class.completed]="hasTime(record.checkOutTime) && record.status !== 'Về sớm'"
+                    [class.early]="record.status === 'Về sớm'">
+                    <span class="record-dot"></span>
+                    {{ getStatusText(record.status) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </div>
 </div>
