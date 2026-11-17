@@ -64,7 +64,9 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
   hasTime(val: any): boolean {
     if (!val) return false;
     const s = String(val).trim();
-    return s !== '' && s !== '00:00:00' && s !== '00:00';
+    if (s === '' || s === '--:--:--') return false;
+    if (/^00:00(:00(\.0+)?)?$/.test(s)) return false;
+    return true;
   }
 
   formatTime(val: any): string {
@@ -79,6 +81,13 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
           d.getSeconds().toString().padStart(2, '0')
         ].join(':');
       }
+    }
+    const match = /^(\d{1,2}):(\d{2})(:(\d{2}))?/.exec(s);
+    if (match) {
+      const h = match[1].padStart(2, '0');
+      const m = match[2];
+      const sec = match[4] ? match[4] : '00';
+      return `${h}:${m}:${sec}`;
     }
     return s.substring(0, 8);
   }
@@ -102,10 +111,15 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     const timeStr = String(record.checkInTime).trim();
     let startTime = NaN;
 
-    if (timeStr.includes(':')) {
+    if (timeStr.includes('T')) {
+      startTime = new Date(timeStr).getTime();
+    } else if (timeStr.includes(':')) {
       const parts = timeStr.split(':');
+      const hours = parseInt(parts[0], 10) || 0;
+      const minutes = parseInt(parts[1], 10) || 0;
+      const seconds = parseFloat(parts[2]) || 0;
       const start = new Date(this.currentTime);
-      start.setHours(Number(parts[0]) || 0, Number(parts[1]) || 0, Number(parts[2]) || 0, 0);
+      start.setHours(hours, minutes, Math.floor(seconds), 0);
       startTime = start.getTime();
     } else {
       startTime = new Date(timeStr).getTime();
@@ -130,7 +144,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     ].join(':');
   }
 
-  private isToday(dateValue: string): boolean {
+  private isToday(dateValue: any): boolean {
     if (!dateValue) return false;
 
     const today = new Date();
@@ -138,22 +152,70 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     const todayM = today.getMonth() + 1;
     const todayD = today.getDate();
 
-    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateValue);
-    if (m) {
-      return Number(m[1]) === todayY && Number(m[2]) === todayM && Number(m[3]) === todayD;
+    if (dateValue instanceof Date) {
+      return (
+        dateValue.getFullYear() === todayY &&
+        dateValue.getMonth() + 1 === todayM &&
+        dateValue.getDate() === todayD
+      );
     }
 
-    const d = new Date(dateValue);
+    const str = String(dateValue).trim();
+
+    const d = new Date(str);
     if (!isNaN(d.getTime())) {
-      return d.getFullYear() === todayY && (d.getMonth() + 1) === todayM && d.getDate() === todayD;
+      if (
+        d.getFullYear() === todayY &&
+        d.getMonth() + 1 === todayM &&
+        d.getDate() === todayD
+      ) {
+        return true;
+      }
+    }
+
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+    if (m) {
+      if (
+        Number(m[1]) === todayY &&
+        Number(m[2]) === todayM &&
+        Number(m[3]) === todayD
+      ) {
+        return true;
+      }
     }
 
     return false;
   }
 
+  private normalizeRecord(raw: any): AttendanceRecord {
+    if (!raw) return raw;
+    const rawDate = raw.date ?? raw.Date ?? '';
+    const rawCheckIn = raw.checkInTime ?? raw.CheckInTime ?? raw.checkIn ?? raw.CheckIn ?? null;
+    const rawCheckOut = raw.checkOutTime ?? raw.CheckOutTime ?? raw.checkOut ?? raw.CheckOut ?? null;
+    const rawTotalWorked = raw.totalHoursWorked ?? raw.TotalHoursWorked ?? null;
+    const rawTotalHours = raw.totalHours ?? raw.TotalHours ?? null;
+    const rawStatus = raw.status ?? raw.Status ?? '';
+    const rawNote = raw.note ?? raw.Note ?? '';
+    const id = raw.id ?? raw.timeKeepingId ?? raw.TimeKeepingId;
+
+    return {
+      id,
+      timeKeepingId: raw.timeKeepingId ?? raw.TimeKeepingId ?? id,
+      employeeId: raw.employeeId ?? raw.EmployeeId,
+      date: typeof rawDate === 'string' ? rawDate : (rawDate ? new Date(rawDate).toISOString() : ''),
+      checkInTime: rawCheckIn != null ? String(rawCheckIn) : null,
+      checkOutTime: rawCheckOut != null ? String(rawCheckOut) : null,
+      totalHoursWorked: rawTotalWorked,
+      totalHours: rawTotalHours != null ? Number(rawTotalHours) : null,
+      status: rawStatus,
+      note: rawNote
+    };
+  }
+
   private syncAttendanceState(records: AttendanceRecord[]): void {
     this.timekeepingRecords = records;
-    this.todayRecord = records.find(r => this.isToday(r.date)) ?? null;
+    this.todayRecord = records.find(r => this.isToday(r.date)) ??
+      (records.length > 0 && records[0].status === 'Đang làm việc' ? records[0] : null);
     this.checkedIn = this.isCheckedIn;
     this.updateWorkDuration();
   }
@@ -166,7 +228,8 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
 
     this.timekeepingService.getHistory().subscribe({
       next: (data) => {
-        const records = Array.isArray(data) ? data : [];
+        const rawList = Array.isArray(data) ? data : [];
+        const records = rawList.map(r => this.normalizeRecord(r));
         this.syncAttendanceState(records);
         this.historyLoading = false;
       },
@@ -192,6 +255,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.message = res?.message || res?.Message || this.translate.instant('timekeeping.checkInSuccess');
         this.isSuccess = true;
+        this.checkedIn = true;
         this.loading = false;
         this.toastr.success(this.message);
         this.loadAttendanceHistory();
@@ -202,6 +266,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
         this.isSuccess = false;
         this.loading = false;
         this.toastr.error(this.message);
+        this.loadAttendanceHistory();
       }
     });
   }
@@ -217,6 +282,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.message = res?.message || res?.Message || this.translate.instant('timekeeping.checkOutSuccess');
         this.isSuccess = true;
+        this.checkedIn = false;
         this.loading = false;
         this.toastr.success(this.message);
         this.loadAttendanceHistory();
@@ -227,6 +293,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
         this.isSuccess = false;
         this.loading = false;
         this.toastr.error(this.message);
+        this.loadAttendanceHistory();
       }
     });
   }

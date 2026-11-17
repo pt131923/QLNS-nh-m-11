@@ -378,6 +378,12 @@
   box-shadow: 0 7px 16px rgba(220, 38, 38, 0.15);
 }
 
+.btn-success {
+  color: white;
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 7px 16px rgba(16, 185, 129, 0.2);
+}
+
 .btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 22px rgba(79, 70, 229, 0.22);

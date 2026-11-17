@@ -109,7 +109,9 @@
                 {{
                   record.totalHours != null && record.totalHours > 0
                     ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
-                    : (checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate)))
+                    : (isCheckedOut && hasTime(record.totalHoursWorked)
+                        ? formatTime(record.totalHoursWorked)
+                        : (checkedIn ? workDuration : ('-- ' + ('timekeeping.hoursUnit' | translate))))
                 }}
               </ng-container>
               <ng-template #noTodayRecord>
@@ -125,7 +127,7 @@
             <span class="stat-label">{{ 'timekeeping.currentDuration' | translate }}</span>
             <strong class="duration-value">
               <span class="stopwatch-icon">◴</span>
-              {{ checkedIn ? workDuration : '00:00:00' }}
+              {{ checkedIn ? workDuration : (isCheckedOut && todayRecord?.totalHoursWorked ? formatTime(todayRecord?.totalHoursWorked) : '00:00:00') }}
             </strong>
           </div>
         </div>
@@ -135,7 +137,7 @@
         <button
           type="button"
           class="btn btn-primary"
-          *ngIf="!checkedIn"
+          *ngIf="!checkedIn && !isCheckedOut"
           [disabled]="loading || historyLoading"
           (click)="checkIn()">
           <span>▶</span>
@@ -150,6 +152,15 @@
           (click)="checkOut()">
           <span>■</span>
           {{ loading ? ('timekeeping.processing' | translate) : ('timekeeping.checkOut' | translate) }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-success"
+          *ngIf="isCheckedOut"
+          disabled>
+          <span>✔</span>
+          {{ 'timekeeping.completed' | translate }}
         </button>
       </div>
 
