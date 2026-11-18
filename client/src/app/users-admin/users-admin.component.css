@@ -1,3 +1,295 @@
-.table td, .table th {
-  vertical-align: middle;
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #172554;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.users-admin-page {
+  min-height: 100vh;
+  padding: 24px 0 48px;
+  background:
+    radial-gradient(ellipse at top right, #e0eaff 0%, transparent 45%),
+    linear-gradient(135deg, #f5f7ff 0%, #f8faff 55%, #eef2ff 100%);
+}
+
+.back-btn {
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 13.5px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  color: white;
+  font-size: 26px;
+  background: linear-gradient(145deg, #4f46e5, #7c3aed);
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.25);
+  flex-shrink: 0;
+}
+
+.page-title {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* =================================================== */
+/* KPI SUMMARY CARDS                                   */
+/* =================================================== */
+.kpi-card {
+  display: flex;
+  align-items: center;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.kpi-blue .kpi-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.kpi-purple .kpi-icon {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.kpi-green .kpi-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.kpi-amber .kpi-icon {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.kpi-details {
+  flex: 1;
+}
+
+.kpi-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.kpi-value {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.kpi-hint {
+  display: block;
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* =================================================== */
+/* CREATE USER & FILTER CARDS                          */
+/* =================================================== */
+.create-user-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.filter-card {
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  background: #ffffff;
+}
+
+/* =================================================== */
+/* TABLE & USER STYLES                                 */
+/* =================================================== */
+.user-table th {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+  padding: 14px 16px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.user-table td {
+  padding: 14px 16px;
+  font-size: 13.5px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #64748b, #475569);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.avatar-admin {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+}
+
+.avatar-manager {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+/* Role Select Styling */
+.role-select {
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 12.5px;
+  padding: 4px 8px;
+}
+
+.role-admin {
+  color: #b91c1c;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.role-manager {
+  color: #1d4ed8;
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.role-user {
+  color: #047857;
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+/* Status Select Styling */
+.status-select {
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 12.5px;
+  padding: 4px 8px;
+}
+
+.status-active {
+  color: #15803d;
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.status-inactive {
+  color: #b91c1c;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin-icon 1s linear infinite;
+}
+
+@keyframes spin-icon {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =================================================== */
+/* MODAL BACKDROP STYLES                               */
+/* =================================================== */
+.modal-backdrop-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: scaleUp 0.2s ease-out;
+}
+
+.modal-header-custom {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-body-custom {
+  padding: 24px;
+}
+
+.modal-footer-custom {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }

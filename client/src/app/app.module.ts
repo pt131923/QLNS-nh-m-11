@@ -42,6 +42,7 @@ import { ContactHistoryComponent } from './history/contact-history/contact-histo
 import { JobDetailComponent } from './recruitment/job-detail/job-detail.component';
 import { CourseDetailComponent } from './training/course-detail/course-detail.component';
 import { HistoryComponent } from './history/history.component';
+import { UsersAdminComponent } from './users-admin/users-admin.component';
 import { AuthInterceptor } from './_interceptors/auth.interceptor';
 
 // Factory function cho TranslateLoader
@@ -83,6 +84,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     JobDetailComponent,
     CourseDetailComponent,
     HistoryComponent,
+    UsersAdminComponent,
   ],
   imports: [
     UserModule,

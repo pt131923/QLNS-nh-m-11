@@ -17,6 +17,8 @@ namespace API.DTOs
         // FE dùng trực tiếp để hiển thị (có thể là /assets/... hoặc http://host/uploads/...)
         public string AvatarUrl { get; set; }
 
+        public bool IsActive { get; set; } = true;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Gán giá trị mặc định
     }
 }

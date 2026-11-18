@@ -19,6 +19,7 @@ namespace API.Entities
         public string Address { get; set; }
 
         // Thêm các trường quan trọng khác (Tuỳ chọn)
+        public bool IsActive { get; set; } = true;
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Gán giá trị mặc định

@@ -23,8 +23,7 @@ namespace API.Controllers
                 .ToListAsync();
             return Ok(list);
         }
-        
-        // GET: api/ContactHistory/search?keyword=abc&page=1&pageSize=10
+
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string keyword, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -115,7 +114,6 @@ namespace API.Controllers
             var result = await _history.DeleteOneAsync(x => x.Id == id);
             if (result.DeletedCount == 0)
                 return NotFound("Không tìm thấy bản ghi lịch sử");
-
             return Ok("Xóa thành công");
         }
     }

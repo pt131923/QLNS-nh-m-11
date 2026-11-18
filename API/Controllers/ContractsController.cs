@@ -104,7 +104,6 @@ public class ContractsController(IContractRepository _contractRepository, IMappe
         _contractRepository.Add(contract);
         await _contractRepository.SaveAllAsync();
 
-        // Trả về contract vừa tạo
         return CreatedAtRoute("GetContractById", new { id = contract.ContractId }, contract);
     }
 
@@ -155,7 +154,7 @@ public class ContractsController(IContractRepository _contractRepository, IMappe
     public async Task<ActionResult<IEnumerable<ContractWithEmployeeDto>>> GetContractsWithEmployees()
     {
         var contracts = await _contractRepository.GetContractAsync();
-        var dtos = contracts.Select(c => _mapper.Map<ContractWithEmployeeDto>(c)).ToList();
+        var dtos = contracts.Select(_mapper.Map<ContractWithEmployeeDto>).ToList();
         return Ok(dtos);
     }
 }

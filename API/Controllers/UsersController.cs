@@ -15,11 +15,37 @@ using MongoDB.Driver;
 
 namespace API.Controllers
 {
-    // ✅ Tách DTO ra ngoài Controller
     public class UpdatePasswordDto
     {
         public string Password { get; set; }
         public string NewPassword { get; set; }
+    }
+
+    public class CreateUserRequestDto
+    {
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Address { get; set; }
+        public string Role { get; set; } = "user";
+        public int? EmployeeId { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    public class UpdateRoleRequestDto
+    {
+        public string Role { get; set; }
+    }
+
+    public class UpdateStatusRequestDto
+    {
+        public bool IsActive { get; set; }
+    }
+
+    public class UpdateEmployeeLinkRequestDto
+    {
+        public int? EmployeeId { get; set; }
     }
 
     [ApiController]
@@ -37,9 +63,6 @@ namespace API.Controllers
             _env = env;
         }
 
-        // ------------------------------------------------------------
-        // GET CURRENT USER (LẤY TỪ JWT TOKEN)
-        // ------------------------------------------------------------
         [Authorize]
         [HttpGet("me")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
@@ -67,9 +90,6 @@ namespace API.Controllers
             return $"{Request.Scheme}://{Request.Host}/uploads/avatars/{image}";
         }
 
-        // ------------------------------------------------------------
-        // UPLOAD AVATAR (CURRENT USER)
-        // ------------------------------------------------------------
         [Authorize]
 [HttpPost("me/avatar")]
 [RequestSizeLimit(10_000_000)]
@@ -114,9 +134,7 @@ public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
     return Ok(new { AvatarUrl = avatarUrl, Image = fileName });
 }
 
-        // ------------------------------------------------------------
-        // UPDATE PASSWORD
-        // ------------------------------------------------------------
+
         [Authorize]
         [HttpPut("{id}/password")]
         public async Task<ActionResult> UpdatePassword(int id, [FromForm] UpdatePasswordDto dto)
@@ -158,19 +176,60 @@ public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
             return computed.SequenceEqual(hash);
         }
 
-        // ------------------------------------------------------------
-        // GET ALL USERS
-        // ------------------------------------------------------------
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        public async Task<ActionResult> GetUsers([FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string q)
         {
-            var users = await _userRepository.GetUsersAsync();
-            return Ok(users);
+            var usersCol = _db.GetCollection<User>("Users");
+            var filter = Builders<User>.Filter.Empty;
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim();
+                var regex = new MongoDB.Bson.BsonRegularExpression(term, "i");
+                filter = Builders<User>.Filter.Or(
+                    Builders<User>.Filter.Regex(u => u.UserName, regex),
+                    Builders<User>.Filter.Regex(u => u.Email, regex),
+                    Builders<User>.Filter.Regex(u => u.PhoneNumber, regex),
+                    Builders<User>.Filter.Regex(u => u.Role, regex)
+                );
+            }
+
+            var total = await usersCol.CountDocumentsAsync(filter);
+            var query = usersCol.Find(filter).SortBy(u => u.UserId);
+
+            List<User> list;
+            if (page.HasValue && pageSize.HasValue && page.Value > 0 && pageSize.Value > 0)
+            {
+                list = await query.Skip((page.Value - 1) * pageSize.Value).Limit(pageSize.Value).ToListAsync();
+            }
+            else
+            {
+                list = await query.ToListAsync();
+            }
+
+            var dtos = list.Select(u => new UserDto
+            {
+                UserId = u.UserId,
+                EmployeeId = u.EmployeeId,
+                UserName = u.UserName,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                Address = u.Address,
+                Role = u.Role ?? "user",
+                Image = u.Image ?? "default.png",
+                AvatarUrl = BuildAvatarUrl(u.Image),
+                IsActive = u.IsActive,
+                CreatedAt = u.CreatedAt
+            }).ToList();
+
+            if (page.HasValue && pageSize.HasValue)
+            {
+                return Ok(new { items = dtos, total, page = page.Value, pageSize = pageSize.Value });
+            }
+
+            return Ok(dtos);
         }
 
-        // ------------------------------------------------------------
-        // GET BY ID
-        // ------------------------------------------------------------
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
@@ -184,9 +243,6 @@ public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
             return Ok(user);
         }
 
-        // ------------------------------------------------------------
-        // GET BY NAME
-        // ------------------------------------------------------------
         [HttpGet("by-name/{userName}")]
         public async Task<ActionResult<UserDto>> GetUserByName(string userName)
         {
@@ -200,63 +256,129 @@ public async Task<ActionResult> UploadMyAvatar([FromForm] FileDto dto)
             return Ok(user);
         }
 
-        // ------------------------------------------------------------
-        // CREATE
-        // ------------------------------------------------------------
         [HttpPost]
-        public async Task<ActionResult> AddUser([FromForm] UserDto userDto)
+        public async Task<ActionResult> AddUser([FromBody] CreateUserRequestDto dto)
         {
-            if (userDto == null || string.IsNullOrWhiteSpace(userDto.UserName))
-                return BadRequest("User name cannot be empty.");
-            
-            if (await _userRepository.UserExistsAsync(userDto.UserName))
-                return BadRequest($"User '{userDto.UserName}' already exists.");
-            
-            var success = await _userRepository.AddUserAsync(userDto);
-            if (!success)
-                return BadRequest("Failed to create user.");
-            
-            await _userRepository.SaveChangesAsync();
-            return Ok("User created successfully.");
+            if (dto == null || string.IsNullOrWhiteSpace(dto.UserName))
+                return BadRequest(new { message = "Username cannot be empty." });
+
+            var usersCol = _db.GetCollection<User>("Users");
+            var existing = await usersCol.Find(u => u.UserName == dto.UserName.Trim()).FirstOrDefaultAsync();
+            if (existing != null)
+                return BadRequest(new { message = $"User '{dto.UserName}' already exists." });
+
+            var lastUser = await usersCol.Find(_ => true)
+                .SortByDescending(u => u.UserId)
+                .FirstOrDefaultAsync();
+            var newId = (lastUser?.UserId ?? 0) + 1;
+
+            byte[] passwordHash = null;
+            byte[] passwordSalt = null;
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+            {
+                using var hmac = new System.Security.Cryptography.HMACSHA512();
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(dto.Password));
+            }
+
+            var newUser = new User
+            {
+                UserId = newId,
+                UserName = dto.UserName.Trim(),
+                Email = dto.Email?.Trim() ?? string.Empty,
+                PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty,
+                Address = dto.Address?.Trim() ?? string.Empty,
+                Role = string.IsNullOrWhiteSpace(dto.Role) ? "user" : dto.Role.Trim().ToLowerInvariant(),
+                EmployeeId = dto.EmployeeId ?? 0,
+                IsActive = dto.IsActive,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                Image = "default.png",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await usersCol.InsertOneAsync(newUser);
+            return Ok(new { message = "User created successfully.", userId = newId });
         }
 
-        // ------------------------------------------------------------
-        // UPDATE
-        // ------------------------------------------------------------
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateUser(int id, [FromForm] UserDto userDto)
+        public async Task<ActionResult> UpdateUser(int id, [FromBody] UserDto userDto)
         {
-            if (id != userDto.UserId)
-                return BadRequest("Route ID and body ID do not match.");
-            
-            var success = await _userRepository.UpdateUserAsync(userDto);
-            if (!success)
-                return NotFound($"User with ID {userDto.UserId} not found.");
-            
-            await _userRepository.SaveChangesAsync();
-            return Ok("User updated successfully.");
+            if (id <= 0) return BadRequest(new { message = "Invalid user ID." });
+            if (userDto == null) return BadRequest(new { message = "Data is required." });
+
+            var usersCol = _db.GetCollection<User>("Users");
+            var updateDef = Builders<User>.Update
+                .Set(u => u.UserName, userDto.UserName)
+                .Set(u => u.Email, userDto.Email)
+                .Set(u => u.PhoneNumber, userDto.PhoneNumber)
+                .Set(u => u.Address, userDto.Address)
+                .Set(u => u.Role, string.IsNullOrWhiteSpace(userDto.Role) ? "user" : userDto.Role.Trim().ToLowerInvariant())
+                .Set(u => u.EmployeeId, userDto.EmployeeId)
+                .Set(u => u.IsActive, userDto.IsActive);
+
+            var result = await usersCol.UpdateOneAsync(u => u.UserId == id, updateDef);
+            if (result.MatchedCount == 0)
+                return NotFound(new { message = $"User with ID {id} not found." });
+
+            return Ok(new { message = "User updated successfully." });
         }
 
-        // ------------------------------------------------------------
-        // DELETE
-        // ------------------------------------------------------------
+        [HttpPut("{id}/role")]
+        public async Task<ActionResult> UpdateRole(int id, [FromBody] UpdateRoleRequestDto dto)
+        {
+            if (id <= 0) return BadRequest(new { message = "Invalid user ID." });
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Role))
+                return BadRequest(new { message = "Role is required." });
+
+            var usersCol = _db.GetCollection<User>("Users");
+            var update = Builders<User>.Update.Set(u => u.Role, dto.Role.Trim().ToLowerInvariant());
+            var result = await usersCol.UpdateOneAsync(u => u.UserId == id, update);
+
+            if (result.MatchedCount == 0) return NotFound(new { message = $"User with ID {id} not found." });
+            return Ok(new { message = "Role updated successfully." });
+        }
+
+        [HttpPut("{id}/status")]
+        public async Task<ActionResult> UpdateStatus(int id, [FromBody] UpdateStatusRequestDto dto)
+        {
+            if (id <= 0) return BadRequest(new { message = "Invalid user ID." });
+
+            var usersCol = _db.GetCollection<User>("Users");
+            var update = Builders<User>.Update.Set(u => u.IsActive, dto.IsActive);
+            var result = await usersCol.UpdateOneAsync(u => u.UserId == id, update);
+
+            if (result.MatchedCount == 0) return NotFound(new { message = $"User with ID {id} not found." });
+            return Ok(new { message = "Status updated successfully." });
+        }
+
+        [HttpPut("{id}/employee-link")]
+        public async Task<ActionResult> UpdateEmployeeLink(int id, [FromBody] UpdateEmployeeLinkRequestDto dto)
+        {
+            if (id <= 0) return BadRequest(new { message = "Invalid user ID." });
+
+            var usersCol = _db.GetCollection<User>("Users");
+            var update = Builders<User>.Update.Set(u => u.EmployeeId, dto?.EmployeeId ?? 0);
+            var result = await usersCol.UpdateOneAsync(u => u.UserId == id, update);
+
+            if (result.MatchedCount == 0) return NotFound(new { message = $"User with ID {id} not found." });
+            return Ok(new { message = "Employee link updated successfully." });
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUser(int id)
         {
             if (id <= 0)
-                return BadRequest("Invalid user ID.");
-            
-            var success = await _userRepository.DeleteUserAsync(id);
-            if (!success)
-                return NotFound($"User with ID {id} not found.");
-            
-            await _userRepository.SaveChangesAsync();
-            return Ok("User deleted successfully.");
+                return BadRequest(new { message = "Invalid user ID." });
+
+            var usersCol = _db.GetCollection<User>("Users");
+            var result = await usersCol.DeleteOneAsync(u => u.UserId == id);
+            if (result.DeletedCount == 0)
+                return NotFound(new { message = $"User with ID {id} not found." });
+
+            return Ok(new { message = "User deleted successfully." });
         }
 
-        // ------------------------------------------------------------
-        // UPLOAD AVATAR (PUBLIC)
-        // ------------------------------------------------------------
         [HttpPost("upload-avatar")]
         public async Task<IActionResult> UploadAvatar([FromForm] IFormFile file)
         {

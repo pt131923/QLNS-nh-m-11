@@ -37,56 +37,63 @@ import { RecruitmentComponent } from './recruitment/recruitment.component';
 import { BenefitsComponent } from './benefits/benefits.component';
 import { LeaveComponent } from './leave/leave.component';
 import { ContactHistoryComponent } from './history/contact-history/contact-history.component';
+import { UsersAdminComponent } from './users-admin/users-admin.component';
 
 const routes: Routes = [
-
-  // Public
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  // 🔄 Public routes — không cần đăng nhập
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
 
-  // Protected
-  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
-  { path: 'overview', component: DashboardComponent, canActivate: [AuthGuard] },
+  // 🔄 Protected routes — cần đăng nhập (AuthGuard áp dụng cho tất cả con)
+  {
+    path: '',
+    canActivate: [AuthGuard],
+    children: [
+      // Dashboard
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'overview', component: DashboardComponent },
 
-  // Employee
-  { path: 'employees', component: EmployeeListComponent, canActivate: [AuthGuard] },
-  { path: 'employee-add', component: EmployeeAddComponent, canActivate: [AuthGuard] },
-  { path: 'employee-edit/:id', component: EmployeeEditComponent, canActivate: [AuthGuard] },
-  { path: 'employee/:id', component: EmployeeDetailComponent, canActivate: [AuthGuard] },
+      // 👥 Employees
+      { path: 'employees', component: EmployeeListComponent },
+      { path: 'employee-add', component: EmployeeAddComponent },
+      { path: 'employee-edit/:id', component: EmployeeEditComponent },
+      { path: 'employee/:id', component: EmployeeDetailComponent },
 
-  // Department
-  { path: 'departments', component: DepartmentListComponent, canActivate: [AuthGuard] },
-  { path: 'department-add', component: DepartmentAddComponent, canActivate: [AuthGuard] },
-  { path: 'department-edit/:id', component: DepartmentEditComponent, canActivate: [AuthGuard] },
-  { path: 'department/:id', component: DepartmentDetailComponent, canActivate: [AuthGuard] },
+      // 🏢 Departments
+      { path: 'departments', component: DepartmentListComponent },
+      { path: 'department-add', component: DepartmentAddComponent },
+      { path: 'department-edit/:id', component: DepartmentEditComponent },
+      { path: 'department/:id', component: DepartmentDetailComponent },
 
-  // Contract
-  { path: 'contracts', component: ContractListComponent, canActivate: [AuthGuard] },
-  { path: 'contract-add', component: ContractAddComponent, canActivate: [AuthGuard] },
-  { path: 'contract-edit/:id', component: ContractEditComponent, canActivate: [AuthGuard] },
-  { path: 'contract/:id', component: ContractDetailComponent, canActivate: [AuthGuard] },
+      // 📝 Contracts
+      { path: 'contracts', component: ContractListComponent },
+      { path: 'contract-add', component: ContractAddComponent },
+      { path: 'contract-edit/:id', component: ContractEditComponent },
+      { path: 'contract/:id', component: ContractDetailComponent },
 
-  // Salary
-  { path: 'salaries', component: SalaryListComponent, canActivate: [AuthGuard] },
-  { path: 'salary-add', component: SalaryAddComponent, canActivate: [AuthGuard] },
-  { path: 'salary-edit/:id', component: SalaryEditComponent, canActivate: [AuthGuard] },
+      // 💰 Salary
+      { path: 'salaries', component: SalaryListComponent },
+      { path: 'salary-add', component: SalaryAddComponent },
+      { path: 'salary-edit/:id', component: SalaryEditComponent },
 
-  // Other
-  { path: 'settings', component: SettingComponent, canActivate: [AuthGuard] },
-  { path: 'contact', component: ContactComponent, canActivate: [AuthGuard] },
-  { path: 'help', component: HelpComponent, canActivate: [AuthGuard] },
-  { path: 'contact-history', component: ContactHistoryComponent, canActivate: [AuthGuard] },
-  { path: 'timekeeping', component: TimekeepingComponent, canActivate: [AuthGuard] },
-  { path: 'trainings', component: TrainingComponent, canActivate: [AuthGuard] },
-  { path: 'recruitments', component: RecruitmentComponent, canActivate: [AuthGuard] },
-  { path: 'benefits', component: BenefitsComponent, canActivate: [AuthGuard] },
-  { path: 'leaves', component: LeaveComponent, canActivate: [AuthGuard] },
+      // 📋 Other features
+      { path: 'settings', component: SettingComponent },
+      { path: 'contact', component: ContactComponent },
+      { path: 'help', component: HelpComponent },
+      { path: 'contact-history', component: ContactHistoryComponent },
+      { path: 'timekeeping', component: TimekeepingComponent },
+      { path: 'trainings', component: TrainingComponent },
+      { path: 'recruitments', component: RecruitmentComponent },
+      { path: 'benefits', component: BenefitsComponent },
+      { path: 'leaves', component: LeaveComponent },
+      { path: 'users', component: UsersAdminComponent },
+      { path: 'users-admin', component: UsersAdminComponent },
+    ]
+  },
 
-  // Not Found
   { path: '**', redirectTo: '/dashboard' }
 ];
-
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
