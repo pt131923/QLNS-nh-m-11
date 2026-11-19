@@ -1,53 +1,54 @@
 <div class="login-container">
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-    <h2>{{ 'login.title' }}</h2>
+    <h2>Đăng nhập</h2>
 
+    <!-- Username -->
     <div class="form-group">
-      <label for="username">{{ 'login.username'}}</label>
+      <label for="username">Username</label>
       <input
         type="text"
         id="username"
         formControlName="username"
         class="form-control"
-        [class.invalid]="submitted && loginForm.controls['username'].invalid"
       />
-      <div class="error" *ngIf="submitted && loginForm.controls['username'].invalid">
-        {{ 'login.username_required'  }}
+      <div class="error" *ngIf="submitted && loginForm.get('username')?.invalid">
+        Vui lòng nhập tên đăng nhập
       </div>
     </div>
 
+    <!-- Mật khẩu -->
     <div class="form-group">
-      <label for="password">{{ 'login.password'}}</label>
+      <label for="password">Password</label>
       <input
         type="password"
         id="password"
         formControlName="password"
         class="form-control"
-        [class.invalid]="submitted && loginForm.controls['password'].invalid"
       />
-      <div class="error" *ngIf="submitted && loginForm.controls['password'].invalid">
-        {{ 'login.password_required'}}
+      <div class="error" *ngIf="submitted && loginForm.get('password')?.invalid">
+        Vui lòng nhập mật khẩu
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="rememberMe">
+    <!-- Nhớ đăng nhập -->
+    <div class="form-group checkbox-group">
+      <label for="rememberMe" class="checkbox-label">
         <input
           type="checkbox"
           id="rememberMe"
           formControlName="rememberMe"
         />
-        {{ 'login.remember }}
+        Remember Me
       </label>
     </div>
 
+    <!-- Thông báo -->
     <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
     <div class="success" *ngIf="successMessage">{{ successMessage }}</div>
 
+    <!-- Nút đăng nhập -->
     <button type="submit" class="btn btn-primary" [disabled]="loading">
-      {{ loading ? ('common.loading') : ('dashboard.login') }}
+      {{ loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
     </button>
-
-    <p class="login-hint">Demo: admin / admin123</p>
   </form>
 </div>
