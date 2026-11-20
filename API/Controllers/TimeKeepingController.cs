@@ -73,6 +73,27 @@ namespace API.Controllers
             }
         }
 
+        [HttpPost("reset")]
+        public async Task<IActionResult> ResetToday()
+        {
+            var employeeId = await ResolveEmployeeId();
+            if (employeeId == null)
+                return MissingEmployeeResult();
+
+            try
+            {
+                var record = await timekeepingRepository.ResetToday(employeeId);
+                return Ok(new { 
+                    message = "Đã đặt lại nút chấm công. Ghi nhận cảnh báo thiếu dữ liệu của hôm nay.",
+                    record = record
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpGet("timekeeping-with-employees")]
         public async Task<IActionResult> GetTimekeepingWithEmployees()
         {

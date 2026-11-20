@@ -443,7 +443,16 @@
     "dept": "Department",
     "noEmployeeData": "No attendance records found matching filters.",
     "allDates": "All Dates",
-    "today": "Today"
+    "today": "Today",
+    "resetButton": "Reset Attendance",
+    "resetConfirm": "⚠️ Are you sure you want to reset today's attendance state?\n\nIf you did not check out, the button will be reset and missing check-out data will be flagged for that day.",
+    "resetSuccess": "Attendance button reset successfully. The record has been marked with missing check-out data.",
+    "missingDataTitle": "Missing Attendance Data Warning",
+    "missingDataDesc": "On {{date}}, you checked in at {{time}} but did not check out. The system has automatically reset the attendance button and flagged missing data for that day.",
+    "missingCheckOut": "Missing Check-out",
+    "missingDataStatus": "Forgot Check-out",
+    "missingDataNotice": "Missing Check-out Data",
+    "filterMissingCheckOut": "Forgot check-out / Missing data"
   },
   "recruitment": {
     "title": "Recruitment Management System",

@@ -15,5 +15,7 @@ namespace API.Interfaces
         Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployeesByDate(DateTime date);
         Task<TimeKeeping> CheckIn(string employeeId);
         Task<TimeKeeping> CheckOut(string employeeId);
+        Task<TimeKeeping> ResetToday(string employeeId);
+        Task AutoResetIncompleteRecords(int? employeeId = null);
     }
 }

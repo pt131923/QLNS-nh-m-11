@@ -158,6 +158,7 @@
                 <option value="standard">{{ 'timekeeping.statusStandard' | translate }}</option>
                 <option value="under8h">{{ 'timekeeping.statusUnder8h' | translate }}</option>
                 <option value="working">{{ 'timekeeping.statusWorking' | translate }}</option>
+                <option value="missing">{{ 'timekeeping.filterMissingCheckOut' | translate }}</option>
               </select>
             </div>
 
@@ -278,36 +279,47 @@
                     <span class="text-primary font-monospace">{{ formatTime(record.checkInTime) }}</span>
                   </td>
                   <td class="fw-semibold">
-                    <span class="text-secondary font-monospace">{{ formatTime(record.checkOutTime) }}</span>
+                    <span class="text-danger font-monospace fw-bold" *ngIf="record.status === 'Quên chấm công ra' || (!hasTime(record.checkOutTime) && !isToday(record.date))">
+                      --:--:-- (Thiếu)
+                    </span>
+                    <span class="text-secondary font-monospace" *ngIf="record.status !== 'Quên chấm công ra' && (hasTime(record.checkOutTime) || isToday(record.date))">
+                      {{ formatTime(record.checkOutTime) }}
+                    </span>
                   </td>
                   <td>
-                    <strong class="font-monospace fs-6" [class.text-danger]="hasTime(record.checkOutTime) && record.totalHours < 8" [class.text-success]="record.totalHours >= 8">
+                    <strong class="font-monospace fs-6" [class.text-danger]="record.status === 'Quên chấm công ra' || (hasTime(record.checkOutTime) && record.totalHours < 8)" [class.text-success]="record.totalHours >= 8">
                       {{ record.totalHours }} {{ 'timekeeping.hoursUnit' | translate }}
                     </strong>
                   </td>
                   <td>
                     <!-- Đánh giá giờ làm việc -->
                     <span
+                      class="badge bg-danger text-white"
+                      *ngIf="record.status === 'Quên chấm công ra' || (!hasTime(record.checkOutTime) && !isToday(record.date))">
+                      <i class="bi bi-exclamation-octagon-fill me-1"></i> Quên check-out
+                    </span>
+                    <span
                       class="badge bg-success text-white"
-                      *ngIf="record.totalHours >= 8">
+                      *ngIf="record.status !== 'Quên chấm công ra' && record.totalHours >= 8">
                       <i class="bi bi-check2-circle me-1"></i> Đủ 8h
                     </span>
                     <span
                       class="badge bg-warning text-dark border border-warning"
-                      *ngIf="hasTime(record.checkOutTime) && record.totalHours < 8">
+                      *ngIf="record.status !== 'Quên chấm công ra' && hasTime(record.checkOutTime) && record.totalHours < 8">
                       <i class="bi bi-exclamation-triangle-fill me-1"></i> Chưa đủ 8h
                     </span>
                     <span
                       class="badge bg-info text-white"
-                      *ngIf="hasTime(record.checkInTime) && !hasTime(record.checkOutTime)">
+                      *ngIf="record.status !== 'Quên chấm công ra' && isToday(record.date) && hasTime(record.checkInTime) && !hasTime(record.checkOutTime)">
                       <i class="bi bi-hourglass-split me-1"></i> Đang làm
                     </span>
                   </td>
                   <td>
                     <span
                       class="record-status"
-                      [class.completed]="hasTime(record.checkOutTime) && record.status !== 'Về sớm'"
-                      [class.early]="record.status === 'Về sớm'">
+                      [class.completed]="hasTime(record.checkOutTime) && record.status !== 'Về sớm' && record.status !== 'Quên chấm công ra'"
+                      [class.early]="record.status === 'Về sớm'"
+                      [class.missing]="record.status === 'Quên chấm công ra' || (!hasTime(record.checkOutTime) && !isToday(record.date))">
                       <span class="record-dot"></span>
                       {{ getStatusText(record.status) }}
                     </span>
@@ -350,6 +362,26 @@
       </section>
 
       <section class="attendance-panel">
+        <!-- Cảnh báo thiếu dữ liệu nếu ngày hôm trước quên checkout -->
+        <div
+          class="alert alert-warning border border-warning d-flex align-items-center shadow-sm mb-4 missing-checkout-alert"
+          *ngIf="latestMissingRecord as missing">
+          <div class="fs-2 me-3 text-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h5 class="alert-heading mb-1 fw-bold text-dark">
+              {{ 'timekeeping.missingDataTitle' | translate }}
+            </h5>
+            <p class="mb-0 text-muted">
+              {{ 'timekeeping.missingDataDesc' | translate:{ date: formatDate(missing.date), time: formatTime(missing.checkInTime) } }}
+            </p>
+          </div>
+          <span class="badge bg-danger text-white px-3 py-2 ms-3">
+            <i class="bi bi-clock-history me-1"></i> {{ 'timekeeping.missingCheckOut' | translate }}
+          </span>
+        </div>
+
         <div class="attendance-heading">
           <div>
             <div class="section-heading">
@@ -368,7 +400,9 @@
                     ? ('timekeeping.working' | translate)
                     : (isCheckedOut
                         ? ('timekeeping.completed' | translate)
-                        : ('timekeeping.notCheckedIn' | translate))
+                        : (isTodayReset
+                            ? ('timekeeping.missingDataStatus' | translate)
+                            : ('timekeeping.notCheckedIn' | translate)))
                 }}
               </span>
             </div>
@@ -480,6 +514,17 @@
 
           <button
             type="button"
+            class="btn btn-reset"
+            *ngIf="checkedIn"
+            [disabled]="loading"
+            (click)="resetAttendance()"
+            [title]="'timekeeping.resetButton' | translate">
+            <span>↺</span>
+            {{ 'timekeeping.resetButton' | translate }}
+          </button>
+
+          <button
+            type="button"
             class="btn btn-success"
             *ngIf="isCheckedOut"
             disabled>
@@ -547,24 +592,40 @@
                   {{ formatTime(record.checkInTime) }}
                 </td>
                 <td>
-                  {{ formatTime(record.checkOutTime) }}
+                  <span class="text-danger fw-bold" *ngIf="record.status === 'Quên chấm công ra' || (!hasTime(record.checkOutTime) && !isToday(record.date))">
+                    --:--:-- (Thiếu)
+                  </span>
+                  <span *ngIf="record.status !== 'Quên chấm công ra' && (hasTime(record.checkOutTime) || isToday(record.date))">
+                    {{ formatTime(record.checkOutTime) }}
+                  </span>
                 </td>
                 <td class="hours-cell">
-                  {{
-                    record.totalHours != null && record.totalHours > 0
-                      ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
-                      : (hasTime(record.totalHoursWorked) ? formatTime(record.totalHoursWorked) : '--')
-                  }}
-                  <span
-                    class="badge-under-8h-small"
-                    *ngIf="hasTime(record.checkOutTime) && record.totalHours != null && record.totalHours < 8"
-                    [title]="'timekeeping.under8HoursWarning' | translate">
-                    ⚠️ &lt; 8h
+                  <span class="text-danger" *ngIf="record.status === 'Quên chấm công ra'">
+                    0 {{ 'timekeeping.hoursUnit' | translate }}
                   </span>
+                  <ng-container *ngIf="record.status !== 'Quên chấm công ra'">
+                    {{
+                      record.totalHours != null && record.totalHours > 0
+                        ? record.totalHours + ' ' + ('timekeeping.hoursUnit' | translate)
+                        : (hasTime(record.totalHoursWorked) ? formatTime(record.totalHoursWorked) : '--')
+                    }}
+                    <span
+                      class="badge-under-8h-small"
+                      *ngIf="hasTime(record.checkOutTime) && record.totalHours != null && record.totalHours < 8"
+                      [title]="'timekeeping.under8HoursWarning' | translate">
+                      ⚠️ &lt; 8h
+                    </span>
+                  </ng-container>
                 </td>
                 <td>
                   <span
+                    class="badge bg-danger text-white py-2 px-2"
+                    *ngIf="record.status === 'Quên chấm công ra' || (!hasTime(record.checkOutTime) && !isToday(record.date))">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Quên check-out
+                  </span>
+                  <span
                     class="record-status"
+                    *ngIf="record.status !== 'Quên chấm công ra' && (hasTime(record.checkOutTime) || isToday(record.date))"
                     [class.completed]="hasTime(record.checkOutTime) && record.status !== 'Về sớm'"
                     [class.early]="record.status === 'Về sớm'">
                     <span class="record-dot"></span>

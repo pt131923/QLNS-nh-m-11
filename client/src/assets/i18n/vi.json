@@ -444,7 +444,16 @@
     "dept": "Phòng ban",
     "noEmployeeData": "Không tìm thấy dữ liệu chấm công phù hợp với bộ lọc.",
     "allDates": "Tất cả ngày",
-    "today": "Hôm nay"
+    "today": "Hôm nay",
+    "resetButton": "Đặt lại chấm công",
+    "resetConfirm": "⚠️ Bạn có chắc chắn muốn đặt lại (reset) trạng thái chấm công của hôm nay không?\n\nNếu bạn không check-out, nút chấm công sẽ tự động reset về ban đầu và ghi nhận cảnh báo thiếu dữ liệu của hôm đó.",
+    "resetSuccess": "Đã đặt lại nút chấm công thành công. Bản ghi được ghi nhận thiếu dữ liệu check-out.",
+    "missingDataTitle": "Cảnh báo thiếu dữ liệu chấm công",
+    "missingDataDesc": "Ngày {{date}} bạn đã chấm công vào lúc {{time}} nhưng không chấm công ra (Check-out). Hệ thống đã tự động đặt lại nút chấm công và ghi nhận thiếu dữ liệu của hôm đó.",
+    "missingCheckOut": "Thiếu Check-out",
+    "missingDataStatus": "Quên chấm công ra",
+    "missingDataNotice": "Thiếu dữ liệu ra",
+    "filterMissingCheckOut": "Quên check-out / Thiếu dữ liệu"
   },
   "recruitment": {
     "backToDashboard": "Quay lại Bảng điều khiển",

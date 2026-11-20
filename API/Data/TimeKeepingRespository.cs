@@ -27,12 +27,14 @@ namespace API.Data
         public async Task<TimeKeeping> CheckIn(string employeeId)
         {
             var id = ParseEmployeeId(employeeId);
+            await AutoResetIncompleteRecords(id);
+
             var now = DateTime.Now;
             var record = await FindTodayRecord(id, now);
 
             if (record != null)
             {
-                if (HasTime(record.CheckIn) && !HasTime(record.CheckOut))
+                if (HasTime(record.CheckIn) && !HasTime(record.CheckOut) && record.Status != "Quên chấm công ra")
                     throw new InvalidOperationException("Bạn đã chấm công vào và chưa chấm công ra.");
 
                 if (HasTime(record.CheckIn) && HasTime(record.CheckOut))
@@ -116,8 +118,104 @@ namespace API.Data
             return record;
         }
 
+        public async Task<TimeKeeping> ResetToday(string employeeId)
+        {
+            var id = ParseEmployeeId(employeeId);
+            var now = DateTime.Now;
+            var record = await FindTodayRecord(id, now);
+
+            if (record != null)
+            {
+                record.Status = "Quên chấm công ra";
+                record.Note = "Đã đặt lại chấm công (thiếu dữ liệu check-out)";
+                record.CheckOut = TimeSpan.Zero;
+                record.TotalHoursWorked = TimeSpan.Zero;
+                record.TotalHours = 0;
+
+                await _timeKeeping.ReplaceOneAsync(
+                    x => x.TimeKeepingId == record.TimeKeepingId,
+                    record);
+
+                return record;
+            }
+
+            // Nếu hôm nay chưa có bản ghi, tạo bản ghi đặt lại
+            record = new TimeKeeping
+            {
+                TimeKeepingId = await _idGenerator.NextAsync("TimeKeepings"),
+                EmployeeId = id,
+                Date = DateTime.SpecifyKind(now.Date, DateTimeKind.Local),
+                CheckIn = TimeSpan.Zero,
+                CheckOut = TimeSpan.Zero,
+                TotalHoursWorked = TimeSpan.Zero,
+                TotalHours = 0,
+                Status = "Quên chấm công ra",
+                Note = "Đã đặt lại chấm công (thiếu dữ liệu check-out)"
+            };
+
+            var employee = await _employees
+                .Find(x => x.EmployeeId == id)
+                .FirstOrDefaultAsync();
+
+            if (employee != null)
+            {
+                record.DepartmentId = employee.DepartmentId;
+                record.Employee = null;
+            }
+
+            await _timeKeeping.InsertOneAsync(record);
+            return record;
+        }
+
+        public async Task AutoResetIncompleteRecords(int? employeeId = null)
+        {
+            try
+            {
+                var today = DateTime.Today;
+
+                var filterBuilder = Builders<TimeKeeping>.Filter;
+                var filter = filterBuilder.Gt(x => x.CheckIn, TimeSpan.Zero) &
+                             filterBuilder.Eq(x => x.CheckOut, TimeSpan.Zero) &
+                             filterBuilder.Ne(x => x.Status, "Quên chấm công ra");
+
+                if (employeeId.HasValue && employeeId.Value > 0)
+                {
+                    filter = filter & filterBuilder.Eq(x => x.EmployeeId, employeeId.Value);
+                }
+
+                var unclosedRecords = await _timeKeeping.Find(filter).ToListAsync();
+
+                foreach (var record in unclosedRecords)
+                {
+                    var recordDate = record.Date.Kind == DateTimeKind.Utc 
+                        ? record.Date.ToLocalTime().Date 
+                        : record.Date.Date;
+
+                    if (recordDate < today)
+                    {
+                        record.Status = "Quên chấm công ra";
+                        record.Note = string.IsNullOrWhiteSpace(record.Note) || record.Note == "Chấm công vào"
+                            ? "Thiếu dữ liệu chấm công ra (quên check-out)"
+                            : record.Note + " (Thiếu dữ liệu chấm công ra)";
+                        record.TotalHours = 0;
+                        record.TotalHoursWorked = TimeSpan.Zero;
+
+                        await _timeKeeping.ReplaceOneAsync(
+                            x => x.TimeKeepingId == record.TimeKeepingId,
+                            record);
+                    }
+                }
+            }
+            catch
+            {
+                // Không ngắt luồng xử lý chính nếu có lỗi quét bản ghi cũ
+            }
+        }
+
         public async Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployees()
         {
+            await AutoResetIncompleteRecords();
+
             var timeKeeping = await _timeKeeping
                 .Find(x => x.CheckIn != TimeSpan.Zero)
                 .SortByDescending(x => x.Date)
@@ -138,6 +236,8 @@ namespace API.Data
 
         public async Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingWithEmployeesByDate(DateTime date)
         {
+            await AutoResetIncompleteRecords();
+
             var start = date.Date;
             var end = start.AddDays(1);
             var timeKeeping = await _timeKeeping
@@ -156,6 +256,8 @@ namespace API.Data
 
         public async Task<List<TimeKeepingWithEmployeeDto>> GetTimekeepingHistory()
         {
+            await AutoResetIncompleteRecords();
+
             var timeKeeping = await _timeKeeping
                 .Find(x => x.CheckIn != TimeSpan.Zero && x.CheckOut != TimeSpan.Zero)
                 .ToListAsync();
@@ -173,6 +275,8 @@ namespace API.Data
         public async Task<List<TimeKeepingDto>> GetTimeEntriesForUser(string employeeId)
         {
             var id = ParseEmployeeId(employeeId);
+            await AutoResetIncompleteRecords(id);
+
             var timeKeeping = await _timeKeeping
                 .Find(x => x.EmployeeId == id)
                 .SortByDescending(x => x.Date)

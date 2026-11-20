@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TimekeepingService } from '../_services/timekeeping.service';
 import { DepartmentService } from '../_services/department.service';
+import { AuthService } from '../_services/auth.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
@@ -42,7 +43,11 @@ export interface EmployeeAttendanceRecord {
 export class TimekeepingComponent implements OnInit, OnDestroy {
 
   // Active Tab: 'stats' (Thống kê giờ làm nhân viên) hoặc 'personal' (Chấm công cá nhân)
-  activeTab: 'stats' | 'personal' = 'stats';
+  activeTab: 'stats' | 'personal' = 'personal';
+
+  // Role-based access
+  isAdmin = false;
+  currentUser: any = null;
 
   // Personal Timekeeping state
   message = '';
@@ -69,15 +74,20 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
 
   private timerId?: ReturnType<typeof setInterval>;
+  private hasWarnedMissingData = false;
 
   constructor(
     private timekeepingService: TimekeepingService,
     private departmentService: DepartmentService,
+    private authService: AuthService,
     public translate: TranslateService,
     private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
+    // Load user role
+    this.loadCurrentUser();
+
     // Set default date to today YYYY-MM-DD
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -89,8 +99,26 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     this.timerId = setInterval(() => this.updateClock(), 1000);
 
     this.loadAttendanceHistory();
-    this.loadEmployeeAttendance();
     this.loadDepartments();
+  }
+
+  private loadCurrentUser(): void {
+    const saved = localStorage.getItem('user');
+    if (saved) {
+      try {
+        this.currentUser = JSON.parse(saved);
+        const role = (this.currentUser?.role || '').toLowerCase();
+        this.isAdmin = role === 'admin' || role === 'manager';
+      } catch {
+        this.isAdmin = false;
+      }
+    }
+    // Admin mặc định mở tab thống kê, user thường mở tab cá nhân
+    this.activeTab = this.isAdmin ? 'stats' : 'personal';
+    // Chỉ admin mới load dữ liệu tất cả nhân viên
+    if (this.isAdmin) {
+      this.loadEmployeeAttendance();
+    }
   }
 
   ngOnDestroy(): void {
@@ -185,6 +213,8 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
         if (r.totalHours < 8 || !this.hasTime(r.checkOutTime)) return false;
       } else if (this.statusFilter === 'working') {
         if (!this.hasTime(r.checkInTime) || this.hasTime(r.checkOutTime)) return false;
+      } else if (this.statusFilter === 'missing') {
+        if (r.status !== 'Quên chấm công ra' && (this.hasTime(r.checkOutTime) || this.isToday(r.date))) return false;
       }
 
       // Search term
@@ -333,11 +363,41 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
   }
 
   get isCheckedIn(): boolean {
-    return !!(this.todayRecord && this.hasTime(this.todayRecord.checkInTime) && !this.hasTime(this.todayRecord.checkOutTime));
+    return !!(
+      this.todayRecord &&
+      this.hasTime(this.todayRecord.checkInTime) &&
+      !this.hasTime(this.todayRecord.checkOutTime) &&
+      this.todayRecord.status !== 'Quên chấm công ra'
+    );
   }
 
   get isCheckedOut(): boolean {
-    return !!(this.todayRecord && this.hasTime(this.todayRecord.checkInTime) && this.hasTime(this.todayRecord.checkOutTime));
+    return !!(
+      this.todayRecord &&
+      this.hasTime(this.todayRecord.checkInTime) &&
+      this.hasTime(this.todayRecord.checkOutTime)
+    );
+  }
+
+  get isTodayReset(): boolean {
+    return !!(
+      this.todayRecord &&
+      this.todayRecord.status === 'Quên chấm công ra' &&
+      !this.hasTime(this.todayRecord.checkOutTime)
+    );
+  }
+
+  get missingCheckOutRecords(): AttendanceRecord[] {
+    return this.timekeepingRecords.filter(r =>
+      !this.isToday(r.date) &&
+      this.hasTime(r.checkInTime) &&
+      (!this.hasTime(r.checkOutTime) || r.status === 'Quên chấm công ra')
+    );
+  }
+
+  get latestMissingRecord(): AttendanceRecord | null {
+    const list = this.missingCheckOutRecords;
+    return list.length > 0 ? list[0] : null;
   }
 
   private updateWorkDuration(): void {
@@ -402,7 +462,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  private isToday(dateValue: any): boolean {
+  isToday(dateValue: any): boolean {
     if (!dateValue) return false;
 
     const today = new Date();
@@ -472,10 +532,33 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
 
   private syncAttendanceState(records: AttendanceRecord[]): void {
     this.timekeepingRecords = records;
-    this.todayRecord = records.find(r => this.isToday(r.date)) ??
-      (records.length > 0 && records[0].status === 'Đang làm việc' ? records[0] : null);
+    // Nút chấm công tự động reset nếu không checkout ngày hôm trước:
+    // CHỈ lấy bản ghi thuộc ngày hôm nay (isToday). Tuyệt đối không fallback sang ngày cũ!
+    this.todayRecord = records.find(r => this.isToday(r.date)) ?? null;
     this.checkedIn = this.isCheckedIn;
     this.updateWorkDuration();
+
+    // Tự động kiểm tra và cảnh báo nếu có ngày trước đó quên checkout / thiếu dữ liệu
+    this.checkMissingCheckOutAlert();
+  }
+
+  private checkMissingCheckOutAlert(): void {
+    if (this.hasWarnedMissingData) return;
+    const latest = this.latestMissingRecord;
+    if (latest) {
+      this.hasWarnedMissingData = true;
+      const dateFormatted = this.formatDate(latest.date);
+      const isVi = (this.translate.currentLang || this.translate.defaultLang) !== 'en';
+      const warnTitle = isVi ? 'Cảnh báo thiếu dữ liệu chấm công' : 'Missing Attendance Data Warning';
+      const warnMsg = isVi
+        ? `⚠️ Bạn chưa chấm công ra vào ngày ${dateFormatted}. Nút chấm công đã được tự động đặt lại.`
+        : `⚠️ You forgot to check out on ${dateFormatted}. Attendance button has been automatically reset.`;
+      this.toastr.warning(warnMsg, warnTitle, {
+        timeOut: 8000,
+        progressBar: true,
+        closeButton: true
+      });
+    }
   }
 
   loadAttendanceHistory(): void {
@@ -608,6 +691,40 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     });
   }
 
+  resetAttendance(): void {
+    if (this.loading) return;
+
+    const isVi = (this.translate.currentLang || this.translate.defaultLang) !== 'en';
+    const confirmMsg = this.translate.instant('timekeeping.resetConfirm') ||
+      (isVi
+        ? '⚠️ Bạn có chắc chắn muốn đặt lại (reset) trạng thái chấm công của hôm nay không?\n\nNếu bạn không check-out, nút chấm công sẽ tự động reset về ban đầu và ghi nhận cảnh báo thiếu dữ liệu của hôm đó.'
+        : '⚠️ Are you sure you want to reset today attendance? If you did not check out, the attendance button will reset and today record will be flagged with missing data.');
+
+    if (!confirm(confirmMsg)) {
+      return;
+    }
+
+    this.loading = true;
+    this.message = '';
+
+    this.timekeepingService.ResetToday().subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        this.checkedIn = false;
+        const msg = res?.message || this.translate.instant('timekeeping.resetSuccess');
+        this.toastr.warning(msg, this.translate.instant('timekeeping.warning') || 'Cảnh báo chấm công');
+        this.loadAttendanceHistory();
+        this.loadEmployeeAttendance();
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Reset attendance failed:', err);
+        const errMsg = err?.error?.message || err?.message || 'Không thể đặt lại chấm công.';
+        this.toastr.error(errMsg);
+      }
+    });
+  }
+
   getStatusText(status: string): string {
     if (!status) return '';
     if (status === 'Đang làm việc') return this.translate.instant('timekeeping.working');
@@ -616,6 +733,7 @@ export class TimekeepingComponent implements OnInit, OnDestroy {
     if (status === 'Vắng mặt') return this.translate.instant('timekeeping.absent');
     if (status === 'Đi muộn') return this.translate.instant('timekeeping.late');
     if (status === 'Về sớm') return this.translate.instant('timekeeping.earlyLeave');
+    if (status === 'Quên chấm công ra') return this.translate.instant('timekeeping.missingDataStatus') || 'Quên chấm công ra';
     return status;
   }
 }

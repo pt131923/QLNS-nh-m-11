@@ -36,6 +36,10 @@ export class TimekeepingService {
     return this.http.post<{ message?: string; Message?: string }>(`${this.baseUrl}/check-out`, {});
   }
 
+  ResetToday(): Observable<{ message?: string; Message?: string; record?: any }> {
+    return this.http.post<{ message?: string; Message?: string; record?: any }>(`${this.baseUrl}/reset`, {});
+  }
+
   getTimekeepingWithEmployeesByDate(date: Date): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/timekeeping-with-employees-by-date?date=${date}`);
   }

@@ -384,6 +384,27 @@
   box-shadow: 0 7px 16px rgba(16, 185, 129, 0.2);
 }
 
+.btn-reset {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.08);
+}
+
+.btn-reset:hover:not(:disabled) {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #b91c1c;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.16);
+}
+
+.missing-checkout-alert {
+  border-radius: 14px;
+  background: #fffbeb !important;
+  border: 1.5px solid #fde68a !important;
+  padding: 16px 20px;
+}
+
 .btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 22px rgba(79, 70, 229, 0.22);
@@ -525,6 +546,16 @@
 
 .record-status.early .record-dot {
   background: #f59e0b;
+}
+
+.record-status.missing {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.record-status.missing .record-dot {
+  background: #dc2626;
 }
 
 .badge-under-8h {
